@@ -10,9 +10,10 @@
             
             <div class="d-flex align-items-center mb-4">
                 <i class="bi bi-person-circle fs-1 me-3 text-secondary"></i>
-                <h1 class="fw-bold mb-0">Configuración de Perfil</h1>
+                <h1 class="fw-bold mb-0">Mi Cuenta</h1>
             </div>
 
+            {{-- Mensajes de Éxito/Error --}}
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     {{ session('success') }}
@@ -22,52 +23,47 @@
 
             @if(isset($user))
             
-                <div class="card shadow-sm p-4">
-                    <h4 class="mb-4 text-primary">Datos de Identificación</h4>
+                {{-- 1. SECCIÓN DE DATOS DEL USUARIO (Estáticos) --}}
+                <div class="card shadow-sm p-4 mb-4">
+                    <h4 class="mb-4 text-primary">Datos del Usuario</h4>
 
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Nombre Completo</label>
+                    {{-- Nombre (Estático) --}}
+                    <div class="mb-3 border-bottom pb-3">
+                        <label class="form-label text-muted small">Nombre Completo</label>
                         <p class="form-control-static fw-bold fs-5">{{ $user->name ?? 'N/A' }}</p>
-                        {{-- Campo oculto para asegurar que el controlador reciba el valor del nombre --}}
-                        <input type="hidden" name="name" value="{{ $user->name ?? '' }}">
                     </div>
                     
-                    <div class="mb-4">
-                        <label class="form-label">Correo Electrónico</label>
+                    {{-- Correo Electrónico (Estático) --}}
+                    <div class="mb-3 border-bottom pb-3">
+                        <label class="form-label text-muted small">Correo Electrónico</label>
                         <p class="form-control-static fw-bold fs-5">{{ $user->email ?? 'N/A' }}</p>
-                        {{-- Campo oculto para asegurar que el controlador reciba el valor del email --}}
-                        <input type="hidden" name="email" value="{{ $user->email ?? '' }}">
                     </div>
 
-                    <div class="mb-4">
-                        <label class="form-label">Rol del Sistema</label>
-                        <p class="form-control-static fw-bold text-info">{{ ucfirst($user->role ?? 'N/A') }}</p>
+                    {{-- Rol (Estático) --}}
+                    <div class="mb-0">
+                        <label class="form-label text-muted small">Rol del Sistema</label>
+                        <p class="form-control-static fw-bold text-info fs-5">{{ ucfirst($user->role ?? 'N/A') }}</p>
                     </div>
-
-                    <h4 class="mb-3 text-primary">Cambiar Contraseña</h4>
+                </div>
+                
+                {{-- 2. BOTONES DE ACCIÓN --}}
+                <div class="d-grid gap-3">
                     
-                    <form method="POST" action="{{ route('perfil.update') }}">
+                    {{-- Botón de Configuración de Perfil (Para campos editables o contraseña) --}}
+                    <a href="{{ route('perfil.update') }}" class="btn btn-warning btn-lg text-white py-3 fw-bold">
+                        <i class="bi bi-gear me-2"></i> Configuración de Perfil
+                    </a>
+                    
+                    {{-- Botón de Cerrar Sesión --}}
+                    {{-- DEBE SER UN FORMULARIO POST POR SEGURIDAD --}}
+                    <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Nueva Contraseña</label>
-                            <input type="password" class="form-control" id="password" name="password" placeholder="Dejar vacío si no desea cambiar">
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="password_confirmation" class="form-label">Confirmar Nueva Contraseña</label>
-                            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation">
-                        </div>
-                        
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-success btn-lg py-3">
-                                <i class="bi bi-save me-2"></i>Guardar Cambios
-                            </button>
-                        </div>
+                        <button type="submit" class="btn btn-outline-danger btn-lg w-100 py-3 fw-bold">
+                            <i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión
+                        </button>
                     </form>
                 </div>
-            
+
             @else
                 <div class="alert alert-warning text-center">
                     No se pudo cargar la información del usuario. Por favor, verifica tu autenticación.
