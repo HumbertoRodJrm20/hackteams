@@ -17,6 +17,7 @@ return new class extends Migration
             $table->integer('expiration');
         });
 
+        // Opcional: Si usas la caché de bloqueos atómicos
         Schema::create('cache_locks', function (Blueprint $table) {
             $table->string('key')->primary();
             $table->string('owner');
