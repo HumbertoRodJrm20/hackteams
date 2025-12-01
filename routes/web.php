@@ -9,7 +9,10 @@ use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\EquipoController;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\AvanceController;
-use App\Http\Controllers\ProgresoController; // <--- ¡AÑADIDO!
+use App\Http\Controllers\ProgresoController;
+// ---> AÑADIR EL NUEVO CONTROLADOR DE CONSTANCIAS
+use App\Http\Controllers\ConstanciaController; 
+
 
 // ----------------------------------------------------
 // 1. AUTENTICACIÓN (Rutas sin protección de sesión)
@@ -25,7 +28,7 @@ Route::get('/login', function () {
     return view('Login');
 })->name('login');
 Route::post('/login/auth', [LoginController::class, 'authenticate'])->name('login.auth');
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout'); // Corregida la definición de Logout
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout'); 
 
 // REGISTRO
 Route::get('/register', function () {
@@ -60,7 +63,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/perfil/configuracion', function () {
         return view('ConfiguracionPerfil');
     })->name('perfil.configuracion');
-
+    
+    // RUTAS DE EVENTOS (Detalles - visible para todos)
+    Route::get('/eventos/{evento}', [EventoController::class, 'show'])->name('eventos.show');
+    Route::post('/eventos/{evento}/join', [EventoController::class, 'join'])->name('eventos.join');
+    Route::post('/eventos/{evento}/leave', [EventoController::class, 'leave'])->name('eventos.leave');
 });
 
 // RUTAS SOLO PARA PARTICIPANTES
@@ -83,14 +90,18 @@ Route::middleware(['auth', 'participante'])->group(function () {
     // PROGRESO
     Route::get('/progreso', [ProgresoController::class, 'index'])->name('progreso.index');
 
-    // CONSTANCIAS
-    Route::get('/const', function () {
-        return view('Constancia');
-    })->name('constancia.index');
-
     // AVANCES
     Route::post('/avances/store', [AvanceController::class, 'store'])->name('avances.store');
 
+
+    // CONSTANCIAS (Rutas del Participante)
+    // 1. Vista principal de constancias (donde se ven la lista)
+    Route::get('/constancias', [ConstanciaController::class, 'index'])->name('constancias.index');
+    
+    // 2. Ruta para descargar el archivo PDF (utiliza el modelo Constancia)
+    Route::get('/constancias/{constancia}/descargar', [ConstanciaController::class, 'downloadCertificate'])->name('constancias.descargar');
+
+    // Nota: Eliminé la ruta temporal Route::get('/const', ...)
 });
 
 // RUTAS SOLO PARA JUECES
@@ -116,11 +127,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     // Eliminar Evento (solo Admins)
     Route::delete('/eventos/{evento}', [EventoController::class, 'destroy'])->name('eventos.destroy');
-});
-
-// RUTAS DE EVENTOS (Detalles - visible para todos)
-Route::middleware(['auth'])->group(function () {
-    Route::get('/eventos/{evento}', [EventoController::class, 'show'])->name('eventos.show');
-    Route::post('/eventos/{evento}/join', [EventoController::class, 'join'])->name('eventos.join');
-    Route::post('/eventos/{evento}/leave', [EventoController::class, 'leave'])->name('eventos.leave');
+    
+    // CONSTANCIAS (Rutas del Administrador)
+    // 1. Vista de Gestión (Admin ve la lista de participantes de un evento finalizado)
+    Route::get('/admin/eventos/{evento}/constancias', [ConstanciaController::class, 'manageCertificates'])->name('constancias.gestion');
+    
+    // 2. Generar y Guardar Constancia PDF (Recibe participante y evento IDs)
+    Route::post('/admin/participante/{participante}/evento/{evento}/generar-constancia', [ConstanciaController::class, 'generateCertificate'])->name('constancias.generar');
 });
