@@ -23,4 +23,16 @@ class Proyecto extends Model
     {
         return $this->belongsTo(Evento::class, 'evento_id');
     }
+
+    // Relación con avances (1:N)
+    public function avances()
+    {
+        return $this->hasMany(Avance::class, 'proyecto_id');
+    }
+
+    // Relación con calificaciones (1:N)
+    public function calificaciones()
+    {
+        return $this->hasMany(Calificacion::class, 'proyecto_id');
+    }
 }
