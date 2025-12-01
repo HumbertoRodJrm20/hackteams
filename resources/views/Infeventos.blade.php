@@ -1,131 +1,161 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Detalles del Evento - Hackatec</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        .navbar-top {
-            background-color: #343a40; 
-        }
-        .header-section {
-            padding-bottom: 20px;
-            border-bottom: 2px solid #e9ecef;
-        }
-        .content-card {
-            background-color: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-        .action-icon {
-            cursor: pointer;
-            font-size: 1.5rem;
-            color: #6c757d;
-            transition: color 0.2s;
-        }
-        .action-icon:hover {
-            color: #007bff;
-        }
-    </style>
-</head>
-<body>
+@extends('Layout.app')
 
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-top sticky-top">
-        <div class="container-fluid container">
-            <a class="navbar-brand d-flex align-items-center" href="#">
-                <img src="URL_LOGO_HACKTEAMS" alt="HackTeams" style="max-height: 30px;" class="me-2">
-                Innovatec
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="bi bi-calendar-event me-1"></i>Eventos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="bi bi-people-fill me-1"></i>Equipos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="bi bi-graph-up me-1"></i>Progreso</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="bi bi-patch-check-fill me-1"></i>Constancias</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#"><i class="bi bi-person-circle me-1"></i>Perfil</a>
-                    </li>
-                </ul>
+@section('nav_eventos', 'active')
+@section('title', 'Detalles: ' . $evento->nombre)
+
+@section('content')
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            {{-- Mensajes --}}
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            @if(session('info'))
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    {{ session('info') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            {{-- Encabezado --}}
+            <div class="d-flex align-items-center mb-4">
+                <i class="bi bi-calendar-event fs-1 me-3 text-primary"></i>
+                <h1 class="fw-bold mb-0">{{ $evento->nombre }}</h1>
             </div>
-        </div>
-    </nav>
 
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-10 col-xl-8">
-                
-                <div class="header-section text-center mb-4">
-                    <img src="URL_LOGO_HACKTEAMS" alt="HackTeams Logo" style="max-height: 40px;" class="mb-3">
-                    <h1 class="display-4 fw-bold">Información del Evento</h1>
+            {{-- Tarjeta del evento --}}
+            <div class="card shadow-sm p-4 mb-4">
+                <h4 class="mb-3 text-primary">Información del Evento</h4>
+
+                {{-- Descripción --}}
+                <div class="mb-4">
+                    <label class="form-label text-muted small">Descripción</label>
+                    <p class="fs-5">{{ $evento->descripcion }}</p>
                 </div>
 
-                <div class="content-card">
-                    
-                    <h2 class="fw-bold mb-3 text-primary">Hackatec</h2>
-                    
-                    <p class="lead text-muted">
-                        Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
-                    </p>
-                    
-                    <p>
-                        Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.
-                    </p>
-                    
-                    <p>
-                        Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea voluptate velit esse quam nihil molestiae consequatur.
-                    </p>
-
-                    <hr class="my-4">
-
-                    <div class="mb-4">
-                        <div style="height: 350px; background-color: #e9ecef; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #6c757d;">
-                            [Imagen/Video o Recurso del Evento]
-                        </div>
+                {{-- Fechas --}}
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small">Fecha de Inicio</label>
+                        <p class="fs-5 fw-bold">
+                            <i class="bi bi-calendar me-2"></i>
+                            {{ \Carbon\Carbon::parse($evento->fecha_inicio)->isoFormat('D [de] MMMM [de] YYYY') }}
+                        </p>
                     </div>
-                    
-                    <div class="d-flex justify-content-end gap-4 mb-4">
-                        <i class="bi bi-heart action-icon" title="Me Gusta / Favorito"></i>
-                        <i class="bi bi-list-task action-icon" title="Añadir a lista / Tareas"></i>
-                        <i class="bi bi-share action-icon" title="Compartir"></i>
-                    </div>
-
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <a href="{{ url('/eventos/hackatec/editar') }}" class="btn btn-info btn-lg w-100 py-3">
-                                <i class="bi bi-pencil-square me-2"></i>Editar
-                            </a>
-                        </div>
-                        <div class="col-md-6">
-                            <a href="{{ url('/eventos/hackatec/equipos') }}" class="btn btn-primary btn-lg w-100 py-3" style="background-color: #28a745; border-color: #28a745;">
-                                <i class="bi bi-people me-2"></i>Gestionar equipos
-                            </a>
-                        </div>
+                    <div class="col-md-6">
+                        <label class="form-label text-muted small">Fecha de Fin</label>
+                        <p class="fs-5 fw-bold">
+                            <i class="bi bi-calendar me-2"></i>
+                            {{ \Carbon\Carbon::parse($evento->fecha_fin)->isoFormat('D [de] MMMM [de] YYYY') }}
+                        </p>
                     </div>
                 </div>
 
+                {{-- Estado --}}
+                <div class="mb-4">
+                    <label class="form-label text-muted small">Estado</label>
+                    @php
+                        $badgeClass = match($evento->estado) {
+                            'activo' => 'bg-danger',
+                            'proximo' => 'bg-info',
+                            'finalizado' => 'bg-secondary',
+                            default => 'bg-warning',
+                        };
+                    @endphp
+                    <p>
+                        <span class="badge {{ $badgeClass }} fs-6">
+                            {{ ucfirst($evento->estado) }}
+                        </span>
+                    </p>
+                </div>
+
+                {{-- Participantes registrados --}}
+                <div class="mb-4">
+                    <label class="form-label text-muted small">Participantes</label>
+                    <p class="fs-5">
+                        <i class="bi bi-people-fill me-2"></i>
+                        {{ $evento->participantes ? $evento->participantes()->count() : 0 }} participante(s) registrado(s)
+                    </p>
+                </div>
+
+                <hr class="my-4">
+
+                {{-- Botones de acción --}}
+                @auth
+                    @if(Auth::user()->hasRole('Participante'))
+                        @php
+                            $esUnido = $evento->hasParticipante(Auth::id());
+                            $eventoFinalizado = $evento->estado === 'finalizado';
+                        @endphp
+
+                        @if($esUnido)
+                            {{-- Usuario ya está unido al evento --}}
+                            <div class="alert alert-success mb-4">
+                                <i class="bi bi-check-circle me-2"></i>
+                                Te encuentras registrado en este evento
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                @if(!$eventoFinalizado)
+                                    <a href="{{ route('equipos.registrar') }}" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-plus-circle me-2"></i>Crear o Unirse a un Equipo
+                                    </a>
+                                @endif
+                                <form action="{{ route('eventos.leave', $evento->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="btn btn-outline-danger w-100" onclick="return confirm('¿Deseas abandonar este evento?');">
+                                        <i class="bi bi-box-arrow-left me-2"></i>Abandonar Evento
+                                    </button>
+                                </form>
+                            </div>
+                        @else
+                            {{-- Usuario NO está unido al evento --}}
+                            @if($eventoFinalizado)
+                                <div class="alert alert-warning mb-4">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>
+                                    Este evento ha finalizado. No puedes unirte en este momento.
+                                </div>
+                            @else
+                                <div class="d-grid">
+                                    <form action="{{ route('eventos.join', $evento->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-success btn-lg">
+                                            <i class="bi bi-plus-circle me-2"></i>Unirse al Evento
+                                        </button>
+                                    </form>
+                                </div>
+                            @endif
+                        @endif
+                    @elseif(Auth::user()->hasRole('Admin'))
+                        {{-- Admin puede editar --}}
+                        <div class="d-grid gap-2">
+                            <a href="{{ route('eventos.crear') }}" class="btn btn-warning btn-lg text-white">
+                                <i class="bi bi-pencil-square me-2"></i>Editar Evento
+                            </a>
+                            <form action="{{ route('eventos.destroy', $evento->id) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-outline-danger w-100" onclick="return confirm('¿Deseas eliminar este evento? Esta acción es irreversible.');">
+                                    <i class="bi bi-trash me-2"></i>Eliminar Evento
+                                </button>
+                            </form>
+                        </div>
+                    @endif
+                @else
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <a href="{{ route('login') }}">Inicia sesión</a> para unirte a este evento
+                    </div>
+                @endauth
             </div>
+
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-</body>
-</html>
+</div>
+@endsection
