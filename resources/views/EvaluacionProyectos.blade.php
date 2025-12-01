@@ -45,9 +45,12 @@
 
         <div class="row justify-content-center">
             <div class="col-lg-8 col-xl-7">
-                
-                <div class="card mb-5">
-                    <div class="card-body p-4">
+               
+
+                <div class="card">
+                <div class="card-body p-4">
+
+                    <form action="{{ route('proyectos.seguimiento') }}" method="GET">
                         
                         <div class="row mb-3">
                             <div class="col-6">
@@ -57,80 +60,38 @@
                                 <h6 class="fw-bold text-muted">Calificación obtenida</h6>
                             </div>
                         </div>
-
-                        <ul class="list-group list-group-flush mb-4">
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span>Innovación</span>
-                                <span class="badge bg-light text-dark border">95 puntos</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span>Diseño</span>
-                                <span class="badge bg-light text-dark border">80 puntos</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span>Funcionalidad</span>
-                                <span class="badge bg-light text-dark border">90 puntos</span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span>Trabajo en equipo</span>
-                                <span class="badge bg-light text-dark border">85 puntos</span>
-                            </li>
-                        </ul>
                         
+                        @php
+                            $criterios = ['Innovación', 'Diseño', 'Funcionalidad', 'Trabajo en equipo'];
+                        @endphp
+
+                        @foreach ($criterios as $criterio)
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-6">
+                                    <label for="{{ Str::slug($criterio) }}" class="col-form-label">{{ $criterio }}</label>
+                                </div>
+                                <div class="col-6">
+
+                                    <select class="form-select" id="{{ Str::slug($criterio) }}" name="puntaje[{{ Str::slug($criterio) }}]" required>
+                                        <option value="" selected>Puntaje</option>
+                                        @for ($i = 100; $i >= 0; $i--)
+                                            <option value="{{ $i }}">{{ $i }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                            </div>
+                        @endforeach
+                        
+                        <hr class="my-4">
+
                         <div class="d-grid">
-                            <button type="button" class="btn btn-custom-guardar btn-lg">
-                                Guardar Calificación (Actualizar/Editar)
+                            <button type="submit" class="btn btn-custom-guardar btn-lg">
+                                Guardar Calificación (y ver seguimiento)
                             </button>
                         </div>
-                    </div>
+                    </form>
                 </div>
-
-                <div class="card">
-                    <div class="card-body p-4">
-                        
-                        <form action="{{ url('/guardar-calificacion') }}" method="POST">
-                            @csrf 
-                            
-                            <div class="row mb-3">
-                                <div class="col-6">
-                                    <h6 class="fw-bold text-muted">Nombre del equipo</h6>
-                                </div>
-                                <div class="col-6 text-end">
-                                    <h6 class="fw-bold text-muted">Calificación obtenida</h6>
-                                </div>
-                            </div>
-                            
-                            @php
-                                $criterios = ['Innovación', 'Diseño', 'Funcionalidad', 'Trabajo en equipo'];
-                            @endphp
-
-                            @foreach ($criterios as $criterio)
-                                <div class="row mb-3 align-items-center">
-                                    <div class="col-6">
-                                        <label for="{{ Str::slug($criterio) }}" class="col-form-label">{{ $criterio }}</label>
-                                    </div>
-                                    <div class="col-6">
-
-                                        <select class="form-select" id="{{ Str::slug($criterio) }}" name="puntaje[{{ Str::slug($criterio) }}]" required>
-                                            <option value="" selected>Puntaje</option>
-                                            @for ($i = 100; $i >= 0; $i--)
-                                                <option value="{{ $i }}">{{ $i }}</option>
-                                            @endfor
-                                        </select>
-                                    </div>
-                                </div>
-                            @endforeach
-                            
-                            <hr class="my-4">
-
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-custom-guardar btn-lg">
-                                    Guardar Calificación
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+            </div>
 
             </div>
         </div>
