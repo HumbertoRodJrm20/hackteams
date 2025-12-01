@@ -52,7 +52,6 @@ Route::middleware(['auth'])->group(function () {
 
     // EVENTOS (Visible para todos)
     Route::get('/eventos', [EventoController::class, 'index'])->name('eventos.index');
-    Route::get('/eventos/{evento}', [EventoController::class, 'show'])->name('eventos.show');
 
     // PERFIL (Visible para todos)
     Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
@@ -70,6 +69,10 @@ Route::middleware(['auth', 'participante'])->group(function () {
     Route::get('/equipos', [EquipoController::class, 'index'])->name('equipos.index');
     Route::get('/equipos/registrar', [EquipoController::class, 'create'])->name('equipos.registrar');
     Route::post('/equipos/store', [EquipoController::class, 'store'])->name('equipos.store');
+    Route::get('/equipos/{equipo}', [EquipoController::class, 'show'])->name('equipos.show');
+    Route::post('/equipos/{equipo}/invite', [EquipoController::class, 'invite'])->name('equipos.invite');
+    Route::delete('/equipos/{equipo}/members/{participante}', [EquipoController::class, 'removeMember'])->name('equipos.removeMember');
+    Route::put('/equipos/{equipo}/members/{participante}/role', [EquipoController::class, 'updateMemberRole'])->name('equipos.updateMemberRole');
 
     // PROYECTOS
     Route::get('/proyectos/registrar', [ProyectoController::class, 'create'])->name('proyectos.registrar');
@@ -102,10 +105,17 @@ Route::middleware(['auth', 'juez'])->group(function () {
 // ----------------------------------------------------
 
 Route::middleware(['auth', 'admin'])->group(function () {
-    // Crear Evento (solo Admins)
+    // Crear Evento (solo Admins) - DEBE IR ANTES DE /eventos/{evento}
     Route::get('/eventos/crear', [EventoController::class, 'create'])->name('eventos.crear');
     Route::post('/eventos', [EventoController::class, 'store'])->name('eventos.store');
 
     // Eliminar Evento (solo Admins)
     Route::delete('/eventos/{evento}', [EventoController::class, 'destroy'])->name('eventos.destroy');
+});
+
+// RUTAS DE EVENTOS (Detalles - visible para todos)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/eventos/{evento}', [EventoController::class, 'show'])->name('eventos.show');
+    Route::post('/eventos/{evento}/join', [EventoController::class, 'join'])->name('eventos.join');
+    Route::post('/eventos/{evento}/leave', [EventoController::class, 'leave'])->name('eventos.leave');
 });

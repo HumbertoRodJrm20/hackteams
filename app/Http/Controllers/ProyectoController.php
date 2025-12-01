@@ -17,14 +17,17 @@ class ProyectoController extends Controller
     public function create()
     {
         $user = Auth::user();
+        $participante = $user->participante;
 
         // 1. Verificar si el usuario es un participante
-        if (!$user->esParticipante()) {
+        if (!$participante) {
             return redirect()->route('dashboard')->with('error', 'Solo los participantes pueden registrar proyectos.');
         }
 
-        // 2. Obtener el equipo del participante
-        $equipo = $user->participante->equipos->first();
+        // 2. Obtener el primer equipo del participante
+        $equipo = Equipo::whereHas('participantes', function ($query) use ($participante) {
+            $query->where('participantes.user_id', $participante->user_id);
+        })->first();
 
         if (!$equipo) {
             return redirect()->route('equipos.index')->with('error', 'Debes estar en un equipo para registrar un proyecto.');
@@ -68,16 +71,20 @@ class ProyectoController extends Controller
         ]);
 
         $user = Auth::user();
-        $equipo = $user->participante->equipos->first();
+        $participante = $user->participante;
 
-        if (!$equipo) {
-            return redirect()->back()->with('error', 'Error: No se encontró el equipo asociado.');
+        if (!$participante) {
+            return redirect()->back()->with('error', 'Solo los participantes pueden registrar proyectos.');
         }
 
-        // Verificar si el equipo ya tiene un proyecto registrado para ese evento (opcional)
-        // if (Proyecto::where('equipo_id', $equipo->id)->where('evento_id', $validatedData['evento_id'])->exists()) {
-        //     return redirect()->back()->with('error', 'Este equipo ya tiene un proyecto registrado para este evento.');
-        // }
+        // Obtener el equipo del participante
+        $equipo = Equipo::whereHas('participantes', function ($query) use ($participante) {
+            $query->where('participantes.user_id', $participante->user_id);
+        })->first();
+
+        if (!$equipo) {
+            return redirect()->back()->with('error', 'Debes estar en un equipo para registrar un proyecto.');
+        }
 
         try {
             Proyecto::create([
@@ -86,10 +93,11 @@ class ProyectoController extends Controller
                 'titulo' => $validatedData['titulo'],
                 'resumen' => $validatedData['resumen'],
                 'link_repositorio' => $validatedData['link_repositorio'],
-                'estado' => 'en_desarrollo' // Estado inicial
+                'estado' => 'pendiente' // Estado inicial
             ]);
 
-            return redirect()->route('equipos.index')->with('success', '¡El proyecto se registró con éxito!');
+            return redirect()->route('equipos.show', $equipo->id)
+                ->with('success', '¡El proyecto "' . $validatedData['titulo'] . '" se registró con éxito!');
 
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->with('error', 'Error al guardar el proyecto: ' . $e->getMessage());
