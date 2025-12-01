@@ -55,5 +55,20 @@ class UsersSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+        // Crear registro de Juez
+        $juezUserId = DB::table('users')->insertGetId([
+            'name' => 'Angel Zarate',
+            'email' => 'angelz@test.com',
+            'password' => Hash::make('password'), // Contraseña: 'password'
+            'email_verified_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        // Asignar Rol Juez
+        DB::table('user_rol')->insert([
+            'user_id' => $juezUserId,
+            'rol_id' => DB::table('roles')->where('nombre', 'Juez')->first()->id
+        ]);
+        
     }
 }
