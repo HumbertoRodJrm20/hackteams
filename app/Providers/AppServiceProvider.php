@@ -20,11 +20,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // 🚨 REGISTRA EL ALIAS DEL MIDDLEWARE AQUÍ
-        Route::aliasMiddleware('admin', AdminMiddleware::class); 
-
-        // 🚨 REGISTRA LOS ALIAS DEL MIDDLEWARE AQUÍ
-        Route::aliasMiddleware('admin', AdminMiddleware::class);
-        Route::aliasMiddleware('estudiante', EstudianteMiddleware::class);
+        // 🛑 REGISTRO DE ALIAS DE MIDDLEWARE PERSONALIZADO
+        // Usamos la fachada Route para registrar los alias
+        Route::aliasMiddleware('admin', \App\Http\Middleware\AdminMiddleware::class);
+        Route::aliasMiddleware('participante', \App\Http\Middleware\EstudianteMiddleware::class);
+        
+        // NOTA: Si tienes un 'JuezMiddleware', también lo registrarías aquí:
+        // Route::aliasMiddleware('juez', \App\Http\Middleware\JuezMiddleware::class);
     }
 }

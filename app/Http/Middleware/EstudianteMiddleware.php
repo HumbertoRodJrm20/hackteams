@@ -11,13 +11,13 @@ class EstudianteMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        // Verifica si el usuario está autenticado Y si su rol es 'estudiante'
-        if (Auth::check() && Auth::user()->role === 'estudiante') {
+        // 🛑 CORRECCIÓN: Usamos hasRole('Participante') en lugar de ->role === 'estudiante'
+        if (Auth::check() && Auth::user()->hasRole('Participante')) { 
             return $next($request);
         }
 
-        // Si no es estudiante (es admin o juez), lo redirige con un error
+        // Si no es Participante, lo redirige con un error
         return redirect()->route('eventos.index')
-            ->with('error', 'Acceso denegado. Solo los estudiantes pueden realizar esta acción.');
+            ->with('error', 'Acceso denegado. Solo los participantes (estudiantes) pueden realizar esta acción.');
     }
 }
