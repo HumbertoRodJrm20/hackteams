@@ -49,11 +49,22 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {
         return redirect()->route('eventos.index');
     })->name('dashboard');
-    
-    // EVENTOS
+
+    // EVENTOS (Visible para todos)
     Route::get('/eventos', [EventoController::class, 'index'])->name('eventos.index');
-    // RUTA DE DETALLE DE EVENTO (Para Infeventos.blade.php)
-    Route::get('/eventos/{evento}', [EventoController::class, 'show'])->name('eventos.show'); // <--- ¡AÑADIDA!
+    Route::get('/eventos/{evento}', [EventoController::class, 'show'])->name('eventos.show');
+
+    // PERFIL (Visible para todos)
+    Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
+    Route::post('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
+    Route::get('/perfil/configuracion', function () {
+        return view('ConfiguracionPerfil');
+    })->name('perfil.configuracion');
+
+});
+
+// RUTAS SOLO PARA PARTICIPANTES
+Route::middleware(['auth', 'participante'])->group(function () {
 
     // EQUIPOS
     Route::get('/equipos', [EquipoController::class, 'index'])->name('equipos.index');
@@ -65,20 +76,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/proyectos/store', [ProyectoController::class, 'store'])->name('proyectos.store');
     Route::get('/proyectos/{id}', [ProyectoController::class, 'show'])->name('proyectos.show');
 
-    // EVALUACIÓN (JUECES)
-    Route::get('/evaluacion', function () {
-        return view('EvaluacionProyectos');
-    })->name('proyectos.evaluacion');
-    
-    // PROGRESO (Ruta faltante que causaba el error 500)
-    Route::get('/progreso', [ProgresoController::class, 'index'])->name('progreso.index'); // <--- ¡AÑADIDA Y SOLUCIONADA!
-
-    // PERFIL
-    Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
-    Route::post('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
-    Route::get('/perfil/configuracion', function () {
-        return view('ConfiguracionPerfil');
-    })->name('perfil.configuracion'); // Usé 'configuracion' en lugar de 'update' para la vista GET
+    // PROGRESO
+    Route::get('/progreso', [ProgresoController::class, 'index'])->name('progreso.index');
 
     // CONSTANCIAS
     Route::get('/const', function () {
@@ -90,22 +89,23 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
+// RUTAS SOLO PARA JUECES
+Route::middleware(['auth', 'juez'])->group(function () {
+    // EVALUACIÓN (JUECES)
+    Route::get('/evaluacion', function () {
+        return view('EvaluacionProyectos');
+    })->name('proyectos.evaluacion');
+});
+
 // ----------------------------------------------------
 // 3. RUTAS DE ADMINISTRACIÓN (Requieren el middleware 'admin')
 // ----------------------------------------------------
 
 Route::middleware(['auth', 'admin'])->group(function () {
-    // Crear Evento
+    // Crear Evento (solo Admins)
     Route::get('/eventos/crear', [EventoController::class, 'create'])->name('eventos.crear');
     Route::post('/eventos', [EventoController::class, 'store'])->name('eventos.store');
-    
-    // ... (Aquí irían las rutas de CRUD de Roles, Carreras, etc.)
-});
 
-Route::controller(EventoController::class)->group(function () {
-    Route::get('/eventos', 'index')->name('eventos.index');
-    Route::get('/eventos/crear', 'create')->name('eventos.create'); // Muestra formulario
-    Route::post('/eventos', 'store')->name('eventos.store'); // Guarda formulario
-    Route::get('/eventos/{evento}', 'show')->name('eventos.show'); // Detalle de un evento (Leer Más)
-    Route::delete('/eventos/{evento}', 'destroy')->name('eventos.destroy'); // Eliminar
+    // Eliminar Evento (solo Admins)
+    Route::delete('/eventos/{evento}', [EventoController::class, 'destroy'])->name('eventos.destroy');
 });

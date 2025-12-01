@@ -9,10 +9,10 @@
         <h1 class="fw-bold text-primary"><i class="bi bi-calendar-event me-2"></i>Catálogo de Eventos</h1>
         
         {{-- Botón de Creación visible solo para administradores --}}
-        @auth 
+        @auth
             {{-- Asumiendo el helper hasRole('Admin') --}}
             @if(auth()->user()->hasRole('Admin'))
-                <a href="{{ route('eventos.create') }}" class="btn btn-success btn-lg">
+                <a href="{{ route('eventos.crear') }}" class="btn btn-success btn-lg">
                     <i class="bi bi-plus-circle me-2"></i>Crear Nuevo Evento
                 </a>
             @endif

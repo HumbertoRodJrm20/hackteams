@@ -31,17 +31,16 @@
     <hr>
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        
-        @php
-            $equipos = [
-                ['nombre' => 'Equipo Alpha', 'proyecto' => 'Nuevo sitio web', 'miembros' => 4, 'evento' => 'Hackatec 2025'],
-                ['nombre' => 'The Coders', 'proyecto' => 'App de inventario', 'miembros' => 5, 'evento' => 'Innovatec Challenge'],
-                ['nombre' => 'Design Masters', 'proyecto' => 'Branding y UX', 'miembros' => 3, 'evento' => 'Hackatec 2025'],
-                ['nombre' => 'Data Wizards', 'proyecto' => 'Análisis de clima', 'miembros' => 4, 'evento' => 'Innovatec Challenge'],
-            ];
-        @endphp
 
-        @foreach ($equipos as $equipo)
+        @if($equipos->isEmpty())
+            <div class="col-12">
+                <div class="alert alert-info" role="alert">
+                    <i class="bi bi-info-circle me-2"></i>
+                    No hay equipos registrados aún. <a href="{{ route('equipos.registrar') }}">Crea uno ahora</a>
+                </div>
+            </div>
+        @else
+            @foreach ($equipos as $equipo)
         <div class="col">
             <div class="card card-equipo h-100 shadow-sm">
                 <div class="card-body">
@@ -75,8 +74,8 @@
                 </div>
             </div>
         </div>
-        @endforeach
-        
+            @endforeach
+        @endif
     </div>
 </div>
 @endsection

@@ -39,21 +39,67 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    
+
+                    {{-- Eventos: visible para todos --}}
                     <li class="nav-item">
                         <a class="nav-link @yield('nav_eventos')" href="{{ route('eventos.index') }}"><i class="bi bi-calendar-event me-1"></i>Eventos</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link @yield('nav_equipos')" href="{{ route('equipos.index') }}"><i class="bi bi-people-fill me-1"></i>Equipos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link @yield('nav_progreso')" href="{{ route('progreso.index') }}"><i class="bi bi-graph-up me-1"></i>Progreso</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link @yield('nav_constancias')" href="{{ route('constancia.index') }}"><i class="bi bi-patch-check-fill me-1"></i>Constancias</a>
-                    </li>
+
+                    {{-- Equipos: visible solo para Participantes --}}
+                    @if(Auth::user() && Auth::user()->hasRole('Participante'))
+                        <li class="nav-item">
+                            <a class="nav-link @yield('nav_equipos')" href="{{ route('equipos.index') }}"><i class="bi bi-people-fill me-1"></i>Equipos</a>
+                        </li>
+                    @endif
+
+                    {{-- Progreso: visible solo para Participantes --}}
+                    @if(Auth::user() && Auth::user()->hasRole('Participante'))
+                        <li class="nav-item">
+                            <a class="nav-link @yield('nav_progreso')" href="{{ route('progreso.index') }}"><i class="bi bi-graph-up me-1"></i>Progreso</a>
+                        </li>
+                    @endif
+
+                    {{-- Evaluación: visible solo para Jueces --}}
+                    @if(Auth::user() && Auth::user()->hasRole('Juez'))
+                        <li class="nav-item">
+                            <a class="nav-link @yield('nav_evaluacion')" href="{{ route('proyectos.evaluacion') }}"><i class="bi bi-star-fill me-1"></i>Evaluación</a>
+                        </li>
+                    @endif
+
+                    {{-- Constancias: visible para Participantes --}}
+                    @if(Auth::user() && Auth::user()->hasRole('Participante'))
+                        <li class="nav-item">
+                            <a class="nav-link @yield('nav_constancias')" href="{{ route('constancia.index') }}"><i class="bi bi-patch-check-fill me-1"></i>Constancias</a>
+                        </li>
+                    @endif
+
+                    {{-- Administración: visible solo para Admins --}}
+                    @if(Auth::user() && Auth::user()->hasRole('Admin'))
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-gear-fill me-1"></i>Administración
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="adminDropdown">
+                                <li><a class="dropdown-item" href="{{ route('eventos.crear') }}"><i class="bi bi-plus-circle me-2"></i>Crear Evento</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ route('eventos.index') }}"><i class="bi bi-list-check me-2"></i>Ver Eventos</a></li>
+                            </ul>
+                        </li>
+                    @endif
+
+                    {{-- Perfil: visible para todos --}}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('perfil.index') }}"><i class="bi bi-person-circle me-1"></i>Perfil</a>
+                    </li>
+
+                    {{-- Logout --}}
+                    <li class="nav-item">
+                        <form action="{{ route('logout') }}" method="POST" class="d-inline">
+                            @csrf
+                            <button type="submit" class="nav-link" style="background: none; border: none; cursor: pointer;">
+                                <i class="bi bi-box-arrow-right me-1"></i>Salir
+                            </button>
+                        </form>
                     </li>
                 </ul>
             </div>
