@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth; // Añadir para la verificación de autenticación
+use Illuminate\Support\Facades\Auth; 
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\EventoController;
@@ -9,13 +9,14 @@ use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\EquipoController;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\AvanceController;
+use App\Http\Controllers\ProgresoController; // <--- ¡AÑADIDO!
+
 // ----------------------------------------------------
 // 1. AUTENTICACIÓN (Rutas sin protección de sesión)
 // ----------------------------------------------------
 
-// Redirige la raíz al login
 Route::get('/', function () {
-    // Si el usuario ya está logueado, lo manda a eventos, si no, a login
+    // Redirige la raíz al login o a eventos si está logueado
     return Auth::check() ? redirect()->route('eventos.index') : redirect()->route('login');
 });
 
@@ -23,20 +24,14 @@ Route::get('/', function () {
 Route::get('/login', function () {
     return view('Login');
 })->name('login');
-// Procesa el login
-Route::post('/login/auth', [LoginController::class, 'authenticate'])
-    ->name('login.auth');
-// Simulación de logout (si se implementa en LoginController)
-// Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::post('/login/auth', [LoginController::class, 'authenticate'])->name('login.auth');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout'); // Corregida la definición de Logout
 
 // REGISTRO
-// Muestra la vista de registro (corregida la duplicación)
 Route::get('/register', function () {
-    return view('Registrar'); // Asumiendo que tu vista es 'Register.blade.php'
+    return view('Register'); // Usar 'Register' si esa es la vista Blade
 })->name('register');
-// Procesa el formulario y guarda los datos
-Route::post('/register', [RegisterController::class, 'store'])
-    ->name('register.create');
+Route::post('/register', [RegisterController::class, 'store'])->name('register.create');
 
 // Recuperación de Contraseña (vista temporal)
 Route::get('/forgot-password', function () {
@@ -48,48 +43,42 @@ Route::get('/forgot-password', function () {
 // 2. RUTAS DE APLICACIÓN (Generalmente requieren Auth middleware)
 // ----------------------------------------------------
 
-// Agrupamos todas las rutas que requieren inicio de sesión
-
 Route::middleware(['auth'])->group(function () {
 
-    // ... EVENTOS
-    Route::get('/eventos', function () {
-        return view('Eventos');
-    })->name('eventos.index');
-    // ... (otras rutas de Eventos)
+    // DASHBOARD (Suele ser una redirección o el índice de eventos)
+    Route::get('/dashboard', function () {
+        return redirect()->route('eventos.index');
+    })->name('dashboard');
+    
+    // EVENTOS
+    Route::get('/eventos', [EventoController::class, 'index'])->name('eventos.index');
+    // RUTA DE DETALLE DE EVENTO (Para Infeventos.blade.php)
+    Route::get('/eventos/{evento}', [EventoController::class, 'show'])->name('eventos.show'); // <--- ¡AÑADIDA!
 
-    // EQUIPOS (VISUALIZACIÓN: accesible para todos los logueados)
+    // EQUIPOS
     Route::get('/equipos', [EquipoController::class, 'index'])->name('equipos.index');
     Route::get('/equipos/registrar', [EquipoController::class, 'create'])->name('equipos.registrar');
-    // Ruta para procesar la creación del equipo
     Route::post('/equipos/store', [EquipoController::class, 'store'])->name('equipos.store');
 
-
-// PROYECTOS
+    // PROYECTOS
     Route::get('/proyectos/registrar', [ProyectoController::class, 'create'])->name('proyectos.registrar');
     Route::post('/proyectos/store', [ProyectoController::class, 'store'])->name('proyectos.store');
-// Detalle del Proyecto (la 'id' es el parámetro)
-    Route::get('/proyectos/{id}', [ProyectoController::class, 'show'])->name('proyectos.show'); // <--- ¡AÑADE ESTA LÍNEA!
-// ...
-    // Muestra el formulario para registrar un proyecto
-    Route::get('/proyectos/registrar', [ProyectoController::class, 'create'])->name('proyectos.registrar');
-    // Procesa el formulario y guarda el proyecto
-    Route::post('/proyectos/store', [ProyectoController::class, 'store'])->name('proyectos.store');
-    // FIN DEL BLOQUE DE PROYECTOS
+    Route::get('/proyectos/{id}', [ProyectoController::class, 'show'])->name('proyectos.show');
 
-    // EVALUACIÓN y PROGRESO
+    // EVALUACIÓN (JUECES)
     Route::get('/evaluacion', function () {
         return view('EvaluacionProyectos');
     })->name('proyectos.evaluacion');
-    // ... (otras rutas como PERFIL, CONSTANCIAS, PROGRESO)
+    
+    // PROGRESO (Ruta faltante que causaba el error 500)
+    Route::get('/progreso', [ProgresoController::class, 'index'])->name('progreso.index'); // <--- ¡AÑADIDA Y SOLUCIONADA!
 
     // PERFIL
-    // Muestra el perfil (CORREGIDO: Llama al método index del controlador)
-    Route::get('/perfil', [PerfilController::class, 'index'])
-        ->name('perfil.index');
-    // Actualiza los datos del perfil
-    Route::post('/perfil', [PerfilController::class, 'update'])
-        ->name('perfil.update');
+    Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
+    Route::post('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
+    Route::get('/perfil/configuracion', function () {
+        return view('ConfiguracionPerfil');
+    })->name('perfil.configuracion'); // Usé 'configuracion' en lugar de 'update' para la vista GET
 
     // CONSTANCIAS
     Route::get('/const', function () {
@@ -97,57 +86,26 @@ Route::middleware(['auth'])->group(function () {
     })->name('constancia.index');
 
     // AVANCES
-    Route::post('/avances/store', [AvanceController::class, 'store'])->name('avances.store'); // <--- ¡AÑADE ESTA LÍNEA!
+    Route::post('/avances/store', [AvanceController::class, 'store'])->name('avances.store');
 
 });
 
 // ----------------------------------------------------
-// RUTAS DE PRUEBA Y ERRORES (Eliminadas)
+// 3. RUTAS DE ADMINISTRACIÓN (Requieren el middleware 'admin')
 // ----------------------------------------------------
-// Se eliminó la ruta /a que apuntaba a Layout.app
-
-Route::post('/logout', [LoginController::class, 'logout'])
-    ->name('logout');
-
-// RUTA TEMPORAL: El botón de configuración ahora apunta a esta ruta
-// Deberás crear una vista 'ConfiguracionPerfil.blade.php' para esta ruta
-Route::get('/perfil/configuracion', function () {
-    return view('ConfiguracionPerfil');
-})->name('perfil.update');
 
 Route::middleware(['auth', 'admin'])->group(function () {
     // Crear Evento
-    Route::get('/eventos/crear', function () {
-        return view('CrearEvento');
-    })->name('eventos.crear');
-
-    // Procesa el formulario (POST)
-    Route::post('/eventos', [EventoController::class, 'store'])
-        ->name('eventos.store');
-
-    // ...
+    Route::get('/eventos/crear', [EventoController::class, 'create'])->name('eventos.crear');
+    Route::post('/eventos', [EventoController::class, 'store'])->name('eventos.store');
+    
+    // ... (Aquí irían las rutas de CRUD de Roles, Carreras, etc.)
 });
 
-Route::middleware(['auth'])->group(function () {
-
-    // EQUIPOS (VISUALIZACIÓN: accesible para todos los logueados)
-    Route::get('/equipos', function () {
-        return view('ListaEquipos');
-    })->name('equipos.index');
-
-    // ----------------------------------------------------
-    // CREACIÓN DE EQUIPOS (SOLO ESTUDIANTES)
-    // ----------------------------------------------------
-    Route::middleware(['estudiante'])->group(function () {
-        // Muestra el formulario para registrar equipo
-        Route::get('/equipos/registrar', function () {
-            return view('RegistrarEquipo');
-        })->name('equipos.registrar');
-
-        // Procesa el formulario y crea el equipo
-        // (Deberás crear este controlador EquipoController@store)
-        // Route::post('/equipos', [EquipoController::class, 'store'])->name('equipos.store');
-    });
-
-    // ... resto de rutas (perfil, progreso, etc.)
+Route::controller(EventoController::class)->group(function () {
+    Route::get('/eventos', 'index')->name('eventos.index');
+    Route::get('/eventos/crear', 'create')->name('eventos.create'); // Muestra formulario
+    Route::post('/eventos', 'store')->name('eventos.store'); // Guarda formulario
+    Route::get('/eventos/{evento}', 'show')->name('eventos.show'); // Detalle de un evento (Leer Más)
+    Route::delete('/eventos/{evento}', 'destroy')->name('eventos.destroy'); // Eliminar
 });
