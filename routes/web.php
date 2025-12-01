@@ -29,7 +29,7 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout'); // C
 
 // REGISTRO
 Route::get('/register', function () {
-    return view('Register'); // Usar 'Register' si esa es la vista Blade
+    return view('Registrar');
 })->name('register');
 Route::post('/register', [RegisterController::class, 'store'])->name('register.create');
 
