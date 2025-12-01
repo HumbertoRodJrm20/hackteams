@@ -42,7 +42,11 @@
                     {{-- Rol (Estático) --}}
                     <div class="mb-0">
                         <label class="form-label text-muted small">Rol del Sistema</label>
-                        <p class="form-control-static fw-bold text-info fs-5">{{ ucfirst($user->role ?? 'N/A') }}</p>
+                        @php
+                            $roles = $user->roles()->pluck('nombre')->toArray();
+                            $rolesText = !empty($roles) ? implode(', ', $roles) : 'Sin rol asignado';
+                        @endphp
+                        <p class="form-control-static fw-bold text-info fs-5">{{ $rolesText }}</p>
                     </div>
                 </div>
                 
@@ -50,7 +54,7 @@
                 <div class="d-grid gap-3">
                     
                     {{-- Botón de Configuración de Perfil (Para campos editables o contraseña) --}}
-                    <a href="{{ route('perfil.update') }}" class="btn btn-warning btn-lg text-white py-3 fw-bold">
+                    <a href="{{ route('perfil.configuracion') }}" class="btn btn-warning btn-lg text-white py-3 fw-bold">
                         <i class="bi bi-gear me-2"></i> Configuración de Perfil
                     </a>
                     
