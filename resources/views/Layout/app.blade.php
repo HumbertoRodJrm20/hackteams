@@ -75,15 +75,8 @@
 
                     {{-- Administración: visible solo para Admins --}}
                     @if(Auth::user() && Auth::user()->hasRole('Admin'))
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-gear-fill me-1"></i>Administración
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="adminDropdown">
-                                <li><a class="dropdown-item" href="{{ route('eventos.crear') }}"><i class="bi bi-plus-circle me-2"></i>Crear Evento</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ route('eventos.index') }}"><i class="bi bi-list-check me-2"></i>Ver Eventos</a></li>
-                            </ul>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('eventos.crear') }}"><i class="bi bi-plus-circle me-1"></i>Crear Evento</a>
                         </li>
                     @endif
 
