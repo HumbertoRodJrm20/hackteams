@@ -22,9 +22,11 @@ class Participante extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
-    // Si usas carreras, necesitarás este modelo:
-    // public function carrera()
-    // {
-    //     return $this->belongsTo(Carrera::class);
-    // }
+
+    // Relación con eventos (N:M)
+    public function eventos()
+    {
+        return $this->belongsToMany(Evento::class, 'evento_participante', 'participante_id', 'evento_id')
+            ->withTimestamps();
+    }
 }
