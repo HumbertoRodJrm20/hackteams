@@ -9,7 +9,6 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
@@ -45,4 +44,23 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function roles()
+    {
+        // 🛑 CRUCIAL: El segundo parámetro es el nombre de la tabla pivote.
+        return $this->belongsToMany(Rol::class, 'user_rol');
+    }
+
+    public function participante()
+    {
+        return $this->hasOne(Participante::class, 'user_id');
+    }
+    
+    // Función de ayuda para vistas/middleware
+    public function hasRole($role)
+    {
+        return $this->roles()->where('nombre', $role)->exists();
+    }
+
+    
 }
