@@ -39,6 +39,7 @@ Route::get('/forgot-password', function () {
 })->name('password.request');
 
 
+
 // ----------------------------------------------------
 // 2. RUTAS DE APLICACIÓN (Generalmente requieren Auth middleware)
 // ----------------------------------------------------
@@ -98,6 +99,10 @@ Route::middleware(['auth', 'juez'])->group(function () {
     Route::get('/evaluacion', function () {
         return view('EvaluacionProyectos');
     })->name('proyectos.evaluacion');
+
+    Route::get('/seguimiento-proyectos', function () {
+        return view('juez.seguimientoProyectos');
+    })->name('proyectos.seguimiento');
 });
 
 // ----------------------------------------------------
