@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Evento;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 
 class EventoController extends Controller
 {
@@ -65,5 +66,56 @@ class EventoController extends Controller
         $evento->delete();
 
         return redirect()->route('eventos.index')->with('success', 'El evento "' . $nombre . '" ha sido eliminado exitosamente.');
+    }
+
+    /**
+     * Permite que un participante se una a un evento.
+     */
+    public function join(Evento $evento)
+    {
+        $user = Auth::user();
+        $participante = $user->participante;
+
+        if (!$participante) {
+            return redirect()->route('eventos.show', $evento->id)
+                ->with('error', 'Debes estar registrado como participante para unirte a un evento.');
+        }
+
+        // Validar estado del evento
+        if ($evento->estado === 'finalizado') {
+            return redirect()->route('eventos.show', $evento->id)
+                ->with('error', 'No puedes unirte a un evento que ya ha finalizado.');
+        }
+
+        // Verificar si ya está unido
+        if ($evento->hasParticipante($user->id)) {
+            return redirect()->route('eventos.show', $evento->id)
+                ->with('info', 'Ya estás registrado en este evento.');
+        }
+
+        // Agregar participante al evento
+        $evento->participantes()->attach($participante->user_id);
+
+        return redirect()->route('eventos.show', $evento->id)
+            ->with('success', 'Te has unido exitosamente al evento "' . $evento->nombre . '".');
+    }
+
+    /**
+     * Permite que un participante abandone un evento.
+     */
+    public function leave(Evento $evento)
+    {
+        $user = Auth::user();
+        $participante = $user->participante;
+
+        if (!$participante) {
+            return redirect()->route('eventos.index')
+                ->with('error', 'Error al abandonar el evento.');
+        }
+
+        $evento->participantes()->detach($participante->user_id);
+
+        return redirect()->route('eventos.index')
+            ->with('success', 'Te has salido del evento "' . $evento->nombre . '".');
     }
 }
