@@ -10,7 +10,7 @@ use App\Models\Constancia;
 use App\Models\Evento;
 use App\Models\Participante;
 use App\Models\Equipo; // Lo necesitas para la lógica de ganador
-use PDF; // Asegúrate de haber instalado DomPDF: composer require barryvdh/laravel-dompdf
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ConstanciaController extends Controller
 {
@@ -23,46 +23,53 @@ class ConstanciaController extends Controller
      */
     public function index()
     {
-        // Obtener el participante asociado al usuario logueado
+        // 1. Inicializar $constancias antes de los bloques if/else
+        $constancias = collect(); 
+
         $participante = Auth::user()->participante;
         
-        // Si no es un participante (ej. Juez, Admin), cargará una lista vacía
-        if (!$participante) {
-            $constancias = collect();
-        } else {
+        // La variable que contiene la COPIA (la colección) debe ser plural: $constancias
+        if ($participante) {
             // Cargar todas las constancias generadas para este participante, incluyendo el evento asociado
-            $constancias = Constancia::where('participante_id', $participante->id)
+            $constancias = Constancia::where('participante_id', $participante->user_id) // 🚨 CORREGIDO: Usamos user_id si es primary key
                                      ->with('evento')
                                      ->get();
         }
-        
-        // La vista de constancias está en Layout/Constancia.blade.php
-        return view('Layout.Constancia', compact('constancias'));
+
+        // 🚨 ENVIAMOS LA COLECCIÓN PLURAL $constancias
+        return view('Constancia', compact('constancias'));
     }
+
+public function generarPDF($id)
+{
+    // Cargar la constancia REAL
+    $constancia = Constancia::with(['participante.user', 'evento'])
+        ->findOrFail($id);
+
+    $participante = $constancia->participante;
+    $evento = $constancia->evento;
+    $tipo = $constancia->tipo_constancia;
+
+    // Generar PDF
+    $pdf = Pdf::loadView('pdf.constancia-estilo', compact('participante', 'evento', 'tipo'))
+              ->setPaper('a4', 'landscape');
+
+    return $pdf->download("constancia-$participante->user_id.pdf");
+}
 
     /**
      * Permite al usuario descargar la constancia generada (el PDF).
      */
     public function downloadCertificate(Constancia $constancia)
-    {
-        // REGLA DE SEGURIDAD CRÍTICA:
-        // Asegúrate de que el usuario logueado es el dueño de la constancia (o un admin).
-        $esAdmin = Auth::user()->hasRole('admin'); // Debes tener un helper o método para verificar roles
-        $esDueño = Auth::user()->participante && $constancia->participante_id === Auth::user()->participante->id;
+{
+    $ruta = storage_path('app/public/' . $constancia->ruta_archivo);
 
-        if (!$esAdmin && !$esDueño) {
-            // Aborta si no tiene permisos
-            abort(403, 'No tienes permiso para descargar este documento.');
-        }
-
-        // Descargar el archivo desde la ruta almacenada
-        // 'public/' se refiere al disco configurado en filesystems.php (storage/app/public)
-        if (Storage::exists("public/{$constancia->ruta_archivo}")) {
-            return Storage::download("public/{$constancia->ruta_archivo}");
-        }
-
-        return back()->with('error', 'El archivo de constancia no fue encontrado.');
+    if (!file_exists($ruta)) {
+        return abort(404, "El archivo no existe.");
     }
+
+    return response()->download($ruta);
+}
 
 
     // ====================================================================
@@ -83,7 +90,7 @@ class ConstanciaController extends Controller
         $constanciasGeneradas = Constancia::where('evento_id', $evento->id)
                                           ->pluck('ruta_archivo', 'participante_id'); // [participante_id => ruta]
 
-        return view('admin.constancias.gestion', compact('evento', 'participantes', 'constanciasGeneradas'));
+        return view('admin.constancia.gestion', compact('evento', 'participantes', 'constanciasGeneradas'));
     }
 
     /**
@@ -116,7 +123,7 @@ class ConstanciaController extends Controller
         $eventNameSlug = Str::slug($evento->nombre);
 
         $fileName = "constancia-{$participanteNameSlug}-{$eventNameSlug}-{$tipo}.pdf";
-        $path = "constancias/{$fileName}";
+        $path = "constancia/{$fileName}";
 
         // Guarda el archivo en storage/app/public/constancias/
         Storage::put("public/{$path}", $pdf->output());

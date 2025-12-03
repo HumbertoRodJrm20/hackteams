@@ -96,12 +96,14 @@ Route::middleware(['auth', 'participante'])->group(function () {
 
     // CONSTANCIAS (Rutas del Participante)
     // 1. Vista principal de constancias (donde se ven la lista)
-    Route::get('/constancias', [ConstanciaController::class, 'index'])->name('constancias.index');
-    
-    // 2. Ruta para descargar el archivo PDF (utiliza el modelo Constancia)
-    Route::get('/constancias/{constancia}/descargar', [ConstanciaController::class, 'downloadCertificate'])->name('constancias.descargar');
+Route::get('/constancia', [ConstanciaController::class, 'index'])->name('constancia.index');
 
-    // Nota: Eliminé la ruta temporal Route::get('/const', ...)
+    // 2. Ruta para descargar el archivo PDF (utiliza el modelo Constancia)
+// Fragmento de routes/web.php
+Route::get('/constancias/{constancia}/descargar', [ConstanciaController::class, 'downloadCertificate'])->name('constancias.descargar');
+
+Route::get('/constancias/{id}/generar', [ConstanciaController::class, 'generarPDF'])->name('constancias.generar');
+
 });
 
 // RUTAS SOLO PARA JUECES
@@ -130,8 +132,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     
     // CONSTANCIAS (Rutas del Administrador)
     // 1. Vista de Gestión (Admin ve la lista de participantes de un evento finalizado)
-    Route::get('/admin/eventos/{evento}/constancias', [ConstanciaController::class, 'manageCertificates'])->name('constancias.gestion');
+    Route::get('/admin/eventos/{evento}/constancia', [ConstanciaController::class, 'manageCertificates'])->name('constancia.gestion');
     
     // 2. Generar y Guardar Constancia PDF (Recibe participante y evento IDs)
-    Route::post('/admin/participante/{participante}/evento/{evento}/generar-constancia', [ConstanciaController::class, 'generateCertificate'])->name('constancias.generar');
+    Route::post('/admin/participante/{participante}/evento/{evento}/generar-constancia', [ConstanciaController::class, 'generateCertificate'])->name('constancia.generar');
 });
