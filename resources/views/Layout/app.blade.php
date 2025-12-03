@@ -69,7 +69,7 @@
                     {{-- Constancias: visible para Participantes --}}
                     @if(Auth::user() && Auth::user()->hasRole('Participante'))
                         <li class="nav-item">
-                            <a class="nav-link @yield('nav_constancias')" href="{{ route('constancia.index') }}"><i class="bi bi-patch-check-fill me-1"></i>Constancias</a>
+                            <a class="nav-link @yield('nav_constancia')" href="{{ route('constancia.index') }}"><i class="bi bi-patch-check-fill me-1"></i>Constancias</a>
                         </li>
                     @endif
 
