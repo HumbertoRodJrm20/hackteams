@@ -35,4 +35,44 @@ class Proyecto extends Model
     {
         return $this->hasMany(Calificacion::class, 'proyecto_id');
     }
+
+    // Relación con jueces (N:M) - Jueces asignados para evaluar este proyecto
+    public function jueces()
+    {
+        return $this->belongsToMany(User::class, 'proyecto_juez', 'proyecto_id', 'juez_user_id')
+            ->withTimestamps()
+            ->withPivot('asignado_en');
+    }
+
+    /**
+     * Calcula el promedio de calificaciones del proyecto
+     */
+    public function obtenerPromedio()
+    {
+        return $this->calificaciones()->avg('puntuacion') ?? 0;
+    }
+
+    /**
+     * Obtiene el puesto del proyecto basado en el promedio de calificaciones
+     * Dentro de su evento
+     */
+    public function obtenerPuesto()
+    {
+        $promedio = $this->obtenerPromedio();
+
+        // Contar cuántos proyectos del mismo evento tienen promedio mayor
+        $puestosArriba = Proyecto::where('evento_id', $this->evento_id)
+            ->where('id', '!=', $this->id)
+            ->with('calificaciones')
+            ->get()
+            ->filter(function ($p) {
+                return $p->obtenerPromedio() > 0;
+            })
+            ->filter(function ($p) use ($promedio) {
+                return $p->obtenerPromedio() > $promedio;
+            })
+            ->count();
+
+        return $puestosArriba + 1;
+    }
 }
