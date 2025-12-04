@@ -28,6 +28,7 @@ class UserController extends Controller
 
     /**
      * Almacena un nuevo usuario en la base de datos.
+     * IMPORTANTE: Un usuario puede tener SOLO UN rol en este sistema.
      */
     public function store(Request $request)
     {
@@ -44,8 +45,15 @@ class UserController extends Controller
             'password' => bcrypt($validatedData['password']),
         ]);
 
-        // Asignar rol al usuario
+        // Asignar UN ÚNICO rol al usuario
         $usuario->roles()->attach($validatedData['rol_id']);
+
+        // Si es Participante, crear registro en tabla participantes
+        if ($validatedData['rol_id'] == Rol::where('nombre', 'Participante')->first()?->id) {
+            \App\Models\Participante::create([
+                'user_id' => $usuario->id,
+            ]);
+        }
 
         return redirect()->route('admin.usuarios.index')
             ->with('success', '¡El usuario "' . $usuario->nombre . '" ha sido creado con éxito!');
@@ -63,6 +71,7 @@ class UserController extends Controller
 
     /**
      * Actualiza los datos de un usuario.
+     * IMPORTANTE: Usa sync() para asegurar que solo tiene UN rol, no múltiples.
      */
     public function update(Request $request, User $usuario)
     {
@@ -82,8 +91,19 @@ class UserController extends Controller
 
         $usuario->save();
 
-        // Actualizar rol del usuario
+        // Reemplazar rol del usuario (sync elimina roles anteriores y asigna solo uno)
         $usuario->roles()->sync([$validatedData['rol_id']]);
+
+        // Si es Participante, asegurar que existe registro en tabla participantes
+        $rolParticipante = Rol::where('nombre', 'Participante')->first();
+        if ($validatedData['rol_id'] == $rolParticipante?->id) {
+            \App\Models\Participante::firstOrCreate([
+                'user_id' => $usuario->id,
+            ]);
+        } else {
+            // Si NO es Participante, eliminar registro de participante si existe
+            \App\Models\Participante::where('user_id', $usuario->id)->delete();
+        }
 
         return redirect()->route('admin.usuarios.index')
             ->with('success', '¡El usuario "' . $usuario->nombre . '" ha sido actualizado con éxito!');
