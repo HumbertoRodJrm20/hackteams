@@ -4,8 +4,12 @@
 @section('title', 'Eventos y Concursos Disponibles')
 
 @section('content')
-<div class="container-fluid py-5" style="min-height: 100vh;">
+<div class="eventos-container py-5 container-fluid" style="min-height: 100vh;">
     <style>
+        .eventos-container {
+            transition: background 0.3s ease;
+        }
+
         [data-theme="light"] .eventos-container {
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         }
@@ -96,7 +100,7 @@
         }
     </style>
 
-    <div class="container eventos-container" style="padding-top: 2rem; padding-bottom: 2rem;">
+    <div class="container" style="padding-top: 2rem; padding-bottom: 2rem;">
         {{-- Header --}}
         <div class="d-flex justify-content-between align-items-center mb-5">
             <div>
