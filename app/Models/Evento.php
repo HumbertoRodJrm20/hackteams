@@ -25,6 +25,12 @@ class Evento extends Model
         return $this->hasMany(Proyecto::class, 'evento_id');
     }
 
+    // Relación con criterios de evaluación (1:N)
+    public function criterios()
+    {
+        return $this->hasMany(CriterioEvaluacion::class, 'evento_id');
+    }
+
     // Verificar si un usuario está unido al evento
     public function hasParticipante($userId)
     {

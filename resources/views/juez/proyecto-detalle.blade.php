@@ -147,11 +147,11 @@
                 </div>
             </div>
 
-            {{-- Formulario de Calificación --}}
+            {{-- Formulario de Calificación por Criterios --}}
             <div class="card shadow-sm">
                 <div class="card-header bg-light">
                     <h5 class="mb-0">
-                        <i class="bi bi-star-fill me-2"></i>Tu Calificación
+                        <i class="bi bi-star-fill me-2"></i>Criterios de Evaluación
                     </h5>
                 </div>
                 <div class="card-body">
@@ -162,93 +162,63 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('juez.proyectos.calificar', $proyecto->id) }}">
-                        @csrf
-
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Puntuación (0-100)</label>
-                            <div class="d-flex gap-2 align-items-center">
-                                <input
-                                    type="range"
-                                    class="form-range"
-                                    id="puntuacion"
-                                    name="puntuacion"
-                                    min="0"
-                                    max="100"
-                                    step="1"
-                                    value="{{ $miCalificacion?->puntuacion ?? 0 }}"
-                                    style="flex: 1;"
-                                >
-                                <input
-                                    type="number"
-                                    class="form-control"
-                                    id="puntuacion_number"
-                                    min="0"
-                                    max="100"
-                                    step="0.1"
-                                    value="{{ $miCalificacion?->puntuacion ?? 0 }}"
-                                    style="width: 80px;"
-                                    readonly
-                                >
-                            </div>
-                            @error('puntuacion')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-
-                            <script>
-                                document.getElementById('puntuacion').addEventListener('input', function() {
-                                    document.getElementById('puntuacion_number').value = this.value;
-                                });
-                            </script>
+                    @if($criterios->isEmpty())
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>No hay criterios de evaluación definidos para este evento.
                         </div>
+                    @else
+                        @foreach($criterios as $criterio)
+                            <form method="POST" action="{{ route('juez.proyectos.calificar', $proyecto->id) }}" class="mb-4 pb-4 border-bottom">
+                                @csrf
+                                <input type="hidden" name="criterio_id" value="{{ $criterio->id }}">
 
-                        {{-- Vista previa de estrellas --}}
-                        <div class="mb-3">
-                            <small class="text-muted">Visualización</small>
-                            <div id="stars-preview">
-                                @php
-                                    $score = $miCalificacion?->puntuacion ?? 0;
-                                    $fullStars = (int)($score / 20);
-                                    $hasHalf = ($score % 20) >= 10;
-                                @endphp
-                            </div>
-                        </div>
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h6 class="fw-bold mb-1">{{ $criterio->nombre }}</h6>
+                                        <small class="text-muted">Ponderación: {{ $criterio->ponderacion }}%</small>
+                                    </div>
+                                    @if($misCalificaciones->has($criterio->id))
+                                        <span class="badge bg-success">
+                                            {{ number_format($misCalificaciones[$criterio->id]->puntuacion, 0) }}/100
+                                        </span>
+                                    @endif
+                                </div>
 
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-check-circle me-1"></i>
-                            {{ $miCalificacion ? 'Actualizar Calificación' : 'Guardar Calificación' }}
-                        </button>
-                    </form>
+                                <div class="d-flex gap-2 align-items-center mb-2">
+                                    <input
+                                        type="range"
+                                        class="form-range criterio-range"
+                                        data-criterio-id="{{ $criterio->id }}"
+                                        min="0"
+                                        max="100"
+                                        step="1"
+                                        value="{{ $misCalificaciones[$criterio->id]->puntuacion ?? 0 }}"
+                                        style="flex: 1;"
+                                    >
+                                    <input
+                                        type="number"
+                                        class="form-control criterio-number"
+                                        data-criterio-id="{{ $criterio->id }}"
+                                        min="0"
+                                        max="100"
+                                        step="0.1"
+                                        value="{{ $misCalificaciones[$criterio->id]->puntuacion ?? 0 }}"
+                                        style="width: 80px;"
+                                        readonly
+                                    >
+                                </div>
 
-                    <script>
-                        function updateStars(value) {
-                            const fullStars = Math.floor(value / 20);
-                            const hasHalf = (value % 20) >= 10;
-                            let html = '';
+                                <div class="mb-2">
+                                    <div class="criterio-stars" data-criterio-id="{{ $criterio->id }}"></div>
+                                </div>
 
-                            for (let i = 0; i < fullStars; i++) {
-                                html += '<i class="bi bi-star-fill text-warning"></i>';
-                            }
-
-                            if (hasHalf && fullStars < 5) {
-                                html += '<i class="bi bi-star-half text-warning"></i>';
-                            }
-
-                            for (let i = fullStars + (hasHalf ? 1 : 0); i < 5; i++) {
-                                html += '<i class="bi bi-star text-muted"></i>';
-                            }
-
-                            document.getElementById('stars-preview').innerHTML = html;
-                        }
-
-                        document.getElementById('puntuacion').addEventListener('input', function() {
-                            document.getElementById('puntuacion_number').value = this.value;
-                            updateStars(this.value);
-                        });
-
-                        // Inicializar
-                        updateStars(document.getElementById('puntuacion').value);
-                    </script>
+                                <button type="submit" class="btn btn-sm btn-primary w-100">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    Guardar
+                                </button>
+                            </form>
+                        @endforeach
+                    @endif
                 </div>
             </div>
 
@@ -277,4 +247,47 @@
         </div>
     </div>
 </div>
+
+<script>
+    // Manejar cambios en los rangos de criterios
+    document.querySelectorAll('.criterio-range').forEach(range => {
+        range.addEventListener('input', function() {
+            const criterioId = this.dataset.criterioId;
+            const numberInput = document.querySelector(`.criterio-number[data-criterio-id="${criterioId}"]`);
+            const starsDiv = document.querySelector(`.criterio-stars[data-criterio-id="${criterioId}"]`);
+
+            numberInput.value = this.value;
+            updateStars(this.value, starsDiv);
+        });
+    });
+
+    function updateStars(value, starsDiv) {
+        const fullStars = Math.floor(value / 20);
+        const hasHalf = (value % 20) >= 10;
+        let html = '';
+
+        for (let i = 0; i < fullStars; i++) {
+            html += '<i class="bi bi-star-fill text-warning"></i>';
+        }
+
+        if (hasHalf && fullStars < 5) {
+            html += '<i class="bi bi-star-half text-warning"></i>';
+        }
+
+        for (let i = fullStars + (hasHalf ? 1 : 0); i < 5; i++) {
+            html += '<i class="bi bi-star text-muted"></i>';
+        }
+
+        starsDiv.innerHTML = html;
+    }
+
+    // Inicializar estrellas para todos los criterios
+    document.querySelectorAll('.criterio-stars').forEach(starsDiv => {
+        const criterioId = starsDiv.dataset.criterioId;
+        const rangeInput = document.querySelector(`.criterio-range[data-criterio-id="${criterioId}"]`);
+        if (rangeInput) {
+            updateStars(rangeInput.value, starsDiv);
+        }
+    });
+</script>
 @endsection
