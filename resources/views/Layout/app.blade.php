@@ -382,6 +382,8 @@
                                 <li><a class="dropdown-item" href="{{ route('eventos.crear') }}"><i class="bi bi-calendar-plus me-2"></i>Crear Evento</a></li>
                                 <li><a class="dropdown-item" href="{{ route('admin.usuarios.index') }}"><i class="bi bi-person-fill me-2"></i>Gestionar Usuarios</a></li>
                                 <li><a class="dropdown-item" href="{{ route('admin.equipos.index') }}"><i class="bi bi-people-fill me-2"></i>Gestionar Equipos</a></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.proyectos.index') }}"><i class="bi bi-pencil-square me-2"></i>Proyectos y Jueces</a></li>
+                                <li><a class="dropdown-item" href="{{ route('admin.rankings') }}"><i class="bi bi-trophy me-2"></i>Rankings</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{{ route('eventos.index') }}"><i class="bi bi-list-check me-2"></i>Ver Eventos</a></li>
                             </ul>
