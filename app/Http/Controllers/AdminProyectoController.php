@@ -123,4 +123,28 @@ class AdminProyectoController extends Controller
 
         return view('admin.proyectos.rankings', compact('eventosConRankings'));
     }
+
+    /**
+     * Muestra las calificaciones detalladas de un proyecto (todas las calificaciones de todos los jueces)
+     */
+    public function verCalificaciones(Proyecto $proyecto)
+    {
+        $proyecto->load('equipo', 'evento', 'calificaciones.juez', 'jueces');
+
+        // Obtener todas las calificaciones
+        $calificaciones = $proyecto->calificaciones()->with('juez')->get();
+
+        // Calcular estadísticas
+        $promedio = $proyecto->obtenerPromedio();
+        $puesto = $proyecto->obtenerPuesto();
+        $cantidadJueces = $calificaciones->count();
+
+        return view('admin.proyectos.ver-calificaciones', compact(
+            'proyecto',
+            'calificaciones',
+            'promedio',
+            'puesto',
+            'cantidadJueces'
+        ));
+    }
 }

@@ -94,6 +94,9 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-check-circle me-1"></i>Guardar Asignación
                             </button>
+                            <a href="{{ route('admin.proyectos.ver-calificaciones', $proyecto->id) }}" class="btn btn-outline-info">
+                                <i class="bi bi-eye me-1"></i>Ver Calificaciones
+                            </a>
                             <a href="{{ route('admin.proyectos.index') }}" class="btn btn-outline-secondary">
                                 Volver
                             </a>
