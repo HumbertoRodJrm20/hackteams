@@ -12,7 +12,9 @@ use App\Http\Controllers\AvanceController;
 use App\Http\Controllers\ProgresoController;
 use App\Http\Controllers\ConstanciaController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\AdminEquipoController; 
+use App\Http\Controllers\AdminEquipoController;
+use App\Http\Controllers\AdminProyectoController;
+use App\Http\Controllers\JuezProyectoController;
 
 // ----------------------------------------------------
 // 1. AUTENTICACIÓN (Rutas sin protección de sesión)
@@ -97,15 +99,22 @@ Route::middleware(['auth', 'participante'])->group(function () {
 
 // RUTAS SOLO PARA JUECES
 Route::middleware(['auth', 'juez'])->group(function () {
-    // EVALUACIÓN (JUECES)
+    // PROYECTOS ASIGNADOS PARA CALIFICAR
+    Route::get('/juez/proyectos', [JuezProyectoController::class, 'index'])->name('juez.proyectos.index');
+    Route::get('/juez/proyectos/{proyecto}', [JuezProyectoController::class, 'show'])->name('juez.proyectos.show');
+    Route::post('/juez/proyectos/{proyecto}/calificar', [JuezProyectoController::class, 'guardarCalificacion'])->name('juez.proyectos.calificar');
+    Route::get('/juez/mis-calificaciones', [JuezProyectoController::class, 'misCalificaciones'])->name('juez.mis-calificaciones');
+
+    // EVALUACIÓN (JUECES) - LEGACY
     Route::get('/evaluacion', function () {
-        return view('EvaluacionProyectos');
+        return redirect()->route('juez.proyectos.index');
     })->name('proyectos.evaluacion');
 
     Route::get('/seguimiento-proyectos', function () {
-        return view('juez.seguimientoProyectos');
+        return redirect()->route('juez.mis-calificaciones');
     })->name('proyectos.seguimiento');
 
+    // CONSTANCIAS
     Route::get('/juez/constancias', [ConstanciaController::class, 'indexJuez'])
         ->name('constancia.juez.index');
 
@@ -143,6 +152,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::put('/admin/equipos/{equipo}', [AdminEquipoController::class, 'update'])->name('admin.equipos.update');
     Route::delete('/admin/equipos/{equipo}', [AdminEquipoController::class, 'destroy'])->name('admin.equipos.destroy');
     Route::delete('/admin/equipos/{equipo}/participantes/{participanteId}', [AdminEquipoController::class, 'removeParticipant'])->name('admin.equipos.removeParticipant');
+
+    // GESTIÓN DE PROYECTOS Y ASIGNACIÓN A JUECES (ADMIN)
+    Route::get('/admin/proyectos', [AdminProyectoController::class, 'index'])->name('admin.proyectos.index');
+    Route::get('/admin/proyectos/{proyecto}/asignar-jueces', [AdminProyectoController::class, 'asignarJueces'])->name('admin.proyectos.asignar-jueces');
+    Route::post('/admin/proyectos/{proyecto}/asignacion', [AdminProyectoController::class, 'guardarAsignacion'])->name('admin.proyectos.guardar-asignacion');
+    Route::delete('/admin/proyectos/{proyecto}/jueces/{juez}', [AdminProyectoController::class, 'eliminarAsignacion'])->name('admin.proyectos.eliminar-asignacion');
+    Route::get('/admin/rankings', [AdminProyectoController::class, 'rankings'])->name('admin.rankings');
 
     // CONSTANCIAS (Rutas del Administrador)
     // 1. Vista de Gestión (Admin ve la lista de participantes de un evento finalizado)

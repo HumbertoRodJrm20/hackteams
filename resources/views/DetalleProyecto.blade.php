@@ -140,8 +140,30 @@
                         <div class="card-body text-center" style="padding: 2rem;">
                             @if ($proyecto->calificaciones->isNotEmpty())
                                 @php
-                                    $promedio = $proyecto->calificaciones->avg('puntuacion');
+                                    $promedio = $proyecto->obtenerPromedio();
+                                    $puesto = $proyecto->obtenerPuesto();
                                 @endphp
+                                {{-- Puesto Badge --}}
+                                <div class="mb-3">
+                                    @if($puesto == 1)
+                                        <div class="badge bg-warning text-dark" style="font-size: 1rem; padding: 0.75rem 1.5rem;">
+                                            <i class="bi bi-trophy-fill me-1"></i>1º Lugar
+                                        </div>
+                                    @elseif($puesto == 2)
+                                        <div class="badge bg-secondary" style="font-size: 1rem; padding: 0.75rem 1.5rem;">
+                                            <i class="bi bi-award me-1"></i>2º Lugar
+                                        </div>
+                                    @elseif($puesto == 3)
+                                        <div class="badge" style="background-color: #CD7F32; color: white; font-size: 1rem; padding: 0.75rem 1.5rem;">
+                                            <i class="bi bi-award-fill me-1"></i>3º Lugar
+                                        </div>
+                                    @else
+                                        <div class="badge bg-light text-dark" style="font-size: 1rem; padding: 0.75rem 1.5rem;">
+                                            {{ $puesto }}º Lugar
+                                        </div>
+                                    @endif
+                                </div>
+
                                 <p style="color: #7f8c8d; margin-bottom: 0.5rem;">Puntuación Promedio</p>
                                 <h2 class="fw-bold" style="color: #27ae60; font-size: 3rem; margin: 0.5rem 0;">
                                     {{ number_format($promedio ?? 0, 1) }}
