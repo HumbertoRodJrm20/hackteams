@@ -124,7 +124,7 @@
                                             <td>{{ $proyecto['equipo'] }}</td>
                                             <td>
                                                 <div class="d-flex align-items-center gap-2">
-                                                    <strong style="color: #667eea;">{{ number_format($proyecto['promedio'], 1) }}</strong>
+                                                    <strong class="ranking-promedio">{{ number_format($proyecto['promedio'], 1) }}</strong>
                                                     <small>/100</small>
                                                 </div>
                                             </td>
@@ -159,6 +159,14 @@
 
     [data-theme="dark"] .shadow-xl {
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    [data-theme="light"] .ranking-promedio {
+        color: #667eea;
+    }
+
+    [data-theme="dark"] .ranking-promedio {
+        color: #a9a8ff;
     }
 
     @media (max-width: 768px) {
