@@ -27,6 +27,98 @@
         [data-theme="dark"] .proyecto-text-secondary {
             color: #a0a0a0;
         }
+
+        [data-theme="light"] .proyecto-description-text {
+            color: #2c3e50;
+        }
+
+        [data-theme="dark"] .proyecto-description-text {
+            color: #e0e0e0;
+        }
+
+        [data-theme="light"] .proyecto-avance-label {
+            color: #2c3e50;
+        }
+
+        [data-theme="dark"] .proyecto-avance-label {
+            color: #e0e0e0;
+        }
+
+        [data-theme="light"] .proyecto-avance-description {
+            color: #555;
+        }
+
+        [data-theme="dark"] .proyecto-avance-description {
+            color: #c0c0c0;
+        }
+
+        [data-theme="light"] .proyecto-empty-state {
+            color: #7f8c8d;
+        }
+
+        [data-theme="dark"] .proyecto-empty-state {
+            color: #a0a0a0;
+        }
+
+        [data-theme="light"] .proyecto-score-label {
+            color: #7f8c8d;
+        }
+
+        [data-theme="dark"] .proyecto-score-label {
+            color: #a0a0a0;
+        }
+
+        [data-theme="light"] .proyecto-score-value {
+            color: #27ae60;
+        }
+
+        [data-theme="dark"] .proyecto-score-value {
+            color: #52be80;
+        }
+
+        [data-theme="light"] .proyecto-score-pending {
+            color: #7f8c8d;
+            background-color: #ecf0f1;
+        }
+
+        [data-theme="dark"] .proyecto-score-pending {
+            color: #a0a0a0;
+            background-color: #2a2a2a;
+        }
+
+        [data-theme="light"] .proyecto-card-body {
+            background-color: white;
+        }
+
+        [data-theme="dark"] .proyecto-card-body {
+            background-color: #1a1a1a;
+        }
+
+        [data-theme="light"] .proyecto-card-footer {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+        }
+
+        [data-theme="dark"] .proyecto-card-footer {
+            background-color: #2a2a2a;
+            border-color: #333333;
+        }
+
+        [data-theme="light"] .proyecto-divider {
+            border-color: #ecf0f1;
+        }
+
+        [data-theme="dark"] .proyecto-divider {
+            border-color: #333333;
+        }
+
+        [data-theme="light"] .proyecto-avance-border {
+            border-bottom-color: #ecf0f1;
+        }
+
+        [data-theme="dark"] .proyecto-avance-border {
+            border-bottom-color: #333333;
+        }
     </style>
 
     <div class="container-fluid py-5 proyecto-bg" style="min-height: 100vh;">
@@ -53,20 +145,20 @@
                         <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
                             <h5 class="mb-0"><i class="bi bi-file-text me-2"></i>Descripción del Proyecto</h5>
                         </div>
-                        <div class="card-body" style="padding: 2rem;">
-                            <p class="card-text" style="color: #2c3e50; line-height: 1.8; font-size: 1.05rem;">
+                        <div class="card-body proyecto-card-body" style="padding: 2rem;">
+                            <p class="card-text proyecto-description-text" style="line-height: 1.8; font-size: 1.05rem;">
                                 {{ $proyecto->resumen }}
                             </p>
 
-                            <hr style="border-color: #ecf0f1;">
+                            <hr class="proyecto-divider">
 
                             <div class="row mt-4">
                                 <div class="col-md-6 mb-3">
-                                    <small style="color: #7f8c8d;">Evento</small>
-                                    <p class="fw-bold" style="color: #2c3e50;">{{ $proyecto->evento->nombre }}</p>
+                                    <small class="proyecto-text-secondary">Evento</small>
+                                    <p class="fw-bold proyecto-text">{{ $proyecto->evento->nombre }}</p>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <small style="color: #7f8c8d;">Estado</small>
+                                    <small class="proyecto-text-secondary">Estado</small>
                                     <p>
                                         @php
                                             $badgeColor = match($proyecto->estado) {
@@ -99,22 +191,22 @@
                         <div class="card-header" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none;">
                             <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Avances del Proyecto</h5>
                         </div>
-                        <div class="card-body" style="padding: 0;">
+                        <div class="card-body proyecto-card-body" style="padding: 0;">
                             @forelse ($proyecto->avances as $avance)
-                                <div style="padding: 1.5rem; border-bottom: 1px solid #ecf0f1;">
+                                <div class="proyecto-avance-border" style="padding: 1.5rem; border-bottom: 1px solid;">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div>
-                                            <h6 class="fw-bold mb-2" style="color: #2c3e50;">
+                                            <h6 class="fw-bold mb-2 proyecto-avance-label">
                                                 <i class="bi bi-calendar-event me-2" style="color: #3498db;"></i>
                                                 {{ $avance->fecha->isoFormat('D MMMM YYYY') }}
                                             </h6>
-                                            <p class="mb-0" style="color: #555;">{{ $avance->descripcion }}</p>
+                                            <p class="mb-0 proyecto-avance-description">{{ $avance->descripcion }}</p>
                                         </div>
                                     </div>
                                 </div>
                             @empty
                                 <div style="padding: 2rem; text-align: center;">
-                                    <p style="color: #7f8c8d;">
+                                    <p class="proyecto-empty-state">
                                         <i class="bi bi-inbox me-2"></i>Aún no hay avances registrados
                                     </p>
                                 </div>
@@ -122,7 +214,7 @@
                         </div>
 
                         @if (auth()->check() && $proyecto->equipo->participantes->pluck('user_id')->contains(auth()->id()))
-                            <div class="card-footer text-center" style="background-color: #f8f9fa; border: none;">
+                            <div class="card-footer proyecto-card-footer text-center" style="border: none;">
                                 <button class="btn btn-sm" style="background-color: #3498db; color: white; border: none;" data-bs-toggle="modal" data-bs-target="#modalNuevoAvance">
                                     <i class="bi bi-plus-circle me-1"></i>Agregar Avance
                                 </button>
@@ -137,7 +229,7 @@
                         <div class="card-header" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; border: none;">
                             <h5 class="mb-0"><i class="bi bi-award me-2"></i>Evaluación</h5>
                         </div>
-                        <div class="card-body text-center" style="padding: 2rem;">
+                        <div class="card-body proyecto-card-body text-center" style="padding: 2rem;">
                             @if ($proyecto->calificaciones->isNotEmpty())
                                 @php
                                     $promedio = $proyecto->obtenerPromedio();
@@ -164,14 +256,14 @@
                                     @endif
                                 </div>
 
-                                <p style="color: #7f8c8d; margin-bottom: 0.5rem;">Puntuación Promedio</p>
-                                <h2 class="fw-bold" style="color: #27ae60; font-size: 3rem; margin: 0.5rem 0;">
+                                <p class="proyecto-score-label" style="margin-bottom: 0.5rem;">Puntuación Promedio</p>
+                                <h2 class="fw-bold proyecto-score-value" style="font-size: 3rem; margin: 0.5rem 0;">
                                     {{ number_format($promedio ?? 0, 1) }}
                                 </h2>
-                                <small style="color: #7f8c8d;">Evaluado por {{ $proyecto->calificaciones->count() }} juez(ces)</small>
+                                <small class="proyecto-score-label">Evaluado por {{ $proyecto->calificaciones->count() }} juez(ces)</small>
                             @else
-                                <div style="padding: 1rem; background-color: #ecf0f1; border-radius: 8px;">
-                                    <p style="color: #7f8c8d; margin: 0;">
+                                <div class="proyecto-score-pending" style="padding: 1rem; border-radius: 8px;">
+                                    <p style="margin: 0;">
                                         <i class="bi bi-hourglass-split me-2"></i>Pendiente de evaluación
                                     </p>
                                 </div>
