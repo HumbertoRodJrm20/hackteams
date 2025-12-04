@@ -82,10 +82,13 @@
 
                     {{-- Administración: visible solo para Admins --}}
                     @if(Auth::user() && Auth::user()->hasRole('Admin'))
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('eventos.crear') }}"><i class="bi bi-plus-circle me-1"></i>Crear Evento</a>
-                        </li>
-                    @endif
+    <li class="nav-item">
+        <a class="nav-link @yield('nav_solicitudes_admin')" 
+           href="{{ route('admin.solicitudes') }}">
+            <i class="bi bi-patch-check-fill me-1"></i>Solicitudes de Constancias
+        </a>
+    </li>
+@endif
 
                     {{-- Perfil: visible para todos --}}
                     <li class="nav-item">

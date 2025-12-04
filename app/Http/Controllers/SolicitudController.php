@@ -45,6 +45,6 @@ class SolicitudController extends Controller
             'estatus' => 'Pendiente',
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'Solicitud enviada correctamente');
+        return redirect()->route('dashboard')->with('success', 'Solicitud de constancia enviada correctamente.');
     }
 }

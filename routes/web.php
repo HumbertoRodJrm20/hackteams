@@ -141,4 +141,19 @@ Route::middleware(['auth', 'admin'])->group(function () {
     
     // 2. Generar y Guardar Constancia PDF (Recibe participante y evento IDs)
     Route::post('/admin/participante/{participante}/evento/{evento}/generar-constancia', [ConstanciaController::class, 'generateCertificate'])->name('constancia.generar');
+
+    // VISTA PARA ADMIN (listar solicitudes)
+Route::get('/admin/solicitudes', [App\Http\Controllers\SolicitudAdminController::class, 'index'])
+    ->middleware(['auth'])
+    ->name('admin.solicitudes');
+
+// Aprobar
+Route::post('/admin/solicitudes/{id}/aprobar', [App\Http\Controllers\SolicitudAdminController::class, 'aprobar'])
+    ->middleware(['auth'])
+    ->name('admin.solicitudes.aprobar');
+
+// Rechazar
+Route::post('/admin/solicitudes/{id}/rechazar', [App\Http\Controllers\SolicitudAdminController::class, 'rechazar'])
+    ->middleware(['auth'])
+    ->name('admin.solicitudes.rechazar');
 });
