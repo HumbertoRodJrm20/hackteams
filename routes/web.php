@@ -11,6 +11,8 @@ use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\AvanceController;
 use App\Http\Controllers\ProgresoController;
 use App\Http\Controllers\ConstanciaController; 
+use App\Http\Controllers\SolicitudController;
+
 
 // ----------------------------------------------------
 // 1. AUTENTICACIÓN (Rutas sin protección de sesión)
@@ -64,6 +66,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/eventos/{evento}', [EventoController::class, 'show'])->name('eventos.show');
     Route::post('/eventos/{evento}/join', [EventoController::class, 'join'])->name('eventos.join');
     Route::post('/eventos/{evento}/leave', [EventoController::class, 'leave'])->name('eventos.leave');
+
+    // Solicitud de constancia
+    Route::get('/constancias/solicitar', [SolicitudController::class, 'create'])->name('solicitudes.create');
+    Route::post('/constancias/solicitar', [SolicitudController::class, 'store'])->name('solicitudes.store');
 });
 
 // RUTAS SOLO PARA PARTICIPANTES

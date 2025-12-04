@@ -6,45 +6,33 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up()
-{
-    Schema::create('solicitudes_constancias', function (Blueprint $table) {
-        $table->id();
+    public function up(): void
+    {
+        Schema::create('solicitudes_constancias', function (Blueprint $table) {
+            $table->id();
 
-        $table->unsignedBigInteger('participante_id');
-        $table->unsignedBigInteger('evento_id');
+            // Relación al participante (usuario)
+            $table->unsignedBigInteger('participante_id');
 
-        $table->string('rol')->nullable();
-        $table->date('fecha_evento')->nullable();
-        $table->string('tipo'); // asistencia/participación/ponente etc.
-        $table->string('motivo')->nullable();
-        
-        $table->string('evidencia_path')->nullable();
+            // Relación al evento
+            $table->unsignedBigInteger('evento_id');
 
-        $table->text('datos_personalizados')->nullable(); // JSON o texto libre
-        $table->text('comentario')->nullable();
+            $table->string('rol');                           // Participante, Ponente, Tallerista...
+            $table->date('fecha_evento');                    // Fecha real del evento
+            $table->string('tipo');                          // Tipo de constancia
+            $table->string('motivo')->nullable();            // ¿Para qué se solicita?
+            $table->text('comentario')->nullable();          // Comentarios adicionales
+            $table->string('evidencia_path')->nullable();    // Archivo subido
+            $table->string('estatus')->default('Pendiente'); // Pendiente, Aprobado, Rechazado
 
-        $table->string('estatus')->default('pendiente'); // pendiente/aprobado/rechazado
-        $table->text('respuesta_admin')->nullable();
+            $table->timestamps();
 
-        $table->unsignedBigInteger('admin_id')->nullable();
+            // Llaves foráneas
+            $table->foreign('participante_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('evento_id')->references('id')->on('eventos')->onDelete('cascade');
+        });
+    }
 
-        $table->timestamps();
-
-        // Relaciones
-        $table->foreign('participante_id')->references('id')->on('users')->onDelete('cascade');
-        $table->foreign('evento_id')->references('id')->on('eventos')->onDelete('cascade');
-        $table->foreign('admin_id')->references('id')->on('users')->onDelete('set null');
-    });
-}
-
-
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('solicitudes_constancias');

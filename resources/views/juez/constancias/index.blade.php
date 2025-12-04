@@ -29,9 +29,10 @@
             </select>
         </div>
         <div class="col-md-6 d-flex align-items-end">
-            <a href="#" class="btn btn-outline-success w-100">
-                <i class="bi bi-send-fill me-2"></i>Solicitar Nueva Constancia
-            </a>
+            <a href="{{ route('solicitudes.create') }}" class="btn btn-outline-success w-100">
+    <i class="bi bi-send-fill me-2"></i>Solicitar Nueva Constancia
+</a>
+
         </div>
     </div>
 
