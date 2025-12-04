@@ -41,6 +41,10 @@
             transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
 
+        .eventos-container {
+            transition: background 0.3s ease !important;
+        }
+
         body {
             background-color: var(--bg-primary);
             color: var(--text-primary);
@@ -431,10 +435,12 @@
         const html = document.documentElement;
         const currentTheme = localStorage.getItem('theme') || 'light';
 
-        // Aplicar tema guardado al cargar
+        // Aplicar tema guardado al cargar - SIEMPRE establecer data-theme
+        html.setAttribute('data-theme', currentTheme);
         if (currentTheme === 'dark') {
-            html.setAttribute('data-theme', 'dark');
             updateThemeIcon('dark');
+        } else {
+            updateThemeIcon('light');
         }
 
         // Cambiar tema al hacer clic
