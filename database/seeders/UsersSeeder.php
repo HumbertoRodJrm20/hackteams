@@ -25,11 +25,8 @@ class UsersSeeder extends Seeder
         $rolJuezId = DB::table('roles')->where('nombre', 'Juez')->first()->id;
         $carreraId = DB::table('carreras')->where('nombre', 'Ingeniería en Sistemas Computacionales')->first()->id;
 
-
         // --- PREPARACIÓN: OBTENER UN EVENTO DE PRUEBA ---
-        // Asumo que EventosSeeder crea el Evento ID 1. Si no existe, esto fallará.
         $eventoDePruebaId = DB::table('eventos')->select('id')->first()->id ?? 1;
-
 
         // --- 1. Crear Usuario Administrador ---
         $adminUserId = DB::table('users')->insertGetId([
@@ -69,31 +66,28 @@ class UsersSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-// =========================================================
-// 🚀 LÓGICA DE CONSTANCIAS PARA PRUEBAS (CORREGIDA FINAL) 🚀
-// =========================================================
+        //LÓGICA DE CONSTANCIAS
+        // A. Registrar la participación en la tabla pivote 'evento_participante'
+        DB::table('evento_participante')->insert([
+            'evento_id' => $eventoDePruebaId,
+            'participante_id' => $participanteUserId, // Usamos el ID del Usuario Participante
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
-// A. Registrar la participación en la tabla pivote 'evento_participante'
-DB::table('evento_participante')->insert([
-    'evento_id' => $eventoDePruebaId,
-    'participante_id' => $participanteUserId, // Usamos el ID del Usuario Participante
-    'created_at' => now(),
-    'updated_at' => now(),
-]);
-
-// B. Crear el registro de la Constancia (simulando que el Admin ya la generó)
-DB::table('constancias')->insert([
-    'participante_id' => $participanteUserId,
-    'evento_id' => $eventoDePruebaId,
+        // B. Crear el registro de la Constancia (simulando que el Admin ya la generó)
+        DB::table('constancias')->insert([
+            'participante_id' => $participanteUserId,
+            'evento_id' => $eventoDePruebaId,
     
-    // 🛑 NOMBRES DE COLUMNA CORREGIDOS PARA LA DB:
-    'tipo' => 'asistente', // ✅ CORREGIDO
-    'archivo_path' => 'constancias/constancia-ejemplo.pdf', // ✅ CORREGIDO
-    'codigo_qr' => \Illuminate\Support\Str::uuid(), // Generamos el código QR (único)
-    
-    'created_at' => now(),
-    'updated_at' => now(),
-]);
+        //NOMBRES DE COLUMNA PARA LA DB:
+        'tipo' => 'asistente',
+        'archivo_path' => 'constancias/constancia-ejemplo.pdf',
+        'codigo_qr' => \Illuminate\Support\Str::uuid(),
+            
+        'created_at' => now(),
+        'updated_at' => now(),
+        ]);
 
         
         // Crear registro de Juez
@@ -110,6 +104,33 @@ DB::table('constancias')->insert([
             'user_id' => $juezUserId,
             'rol_id' => DB::table('roles')->where('nombre', 'Juez')->first()->id
         ]);
+
+        // Registrar juez como participante para permitir constancias
+DB::table('participantes')->insert([
+    'user_id' => $juezUserId,
+    'carrera_id' => $carreraId,
+    'matricula' => 'JUEZ123',
+    'created_at' => now(),
+    'updated_at' => now(),
+]);
+
+DB::table('evento_participante')->insert([
+    'evento_id' => $eventoDePruebaId,
+    'participante_id' => $juezUserId,
+    'created_at' => now(),
+    'updated_at' => now(),
+]);
+
+DB::table('constancias')->insert([
+    'participante_id' => $juezUserId,
+    'evento_id' => $eventoDePruebaId,
+    'tipo' => 'asistente',
+    'archivo_path' => 'constancias/constancia-ejemplo.pdf',
+    'codigo_qr' => Str::uuid(),
+    'created_at' => now(),
+    'updated_at' => now(),
+]);
+
         
     }
 }
