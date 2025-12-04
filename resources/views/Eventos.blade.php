@@ -29,6 +29,71 @@
         [data-theme="dark"] .evento-subtitle {
             color: #a0a0a0;
         }
+
+        /* Colores de texto dinámicos para cards */
+        [data-theme="light"] .evento-card-text {
+            color: #555;
+        }
+
+        [data-theme="dark"] .evento-card-text {
+            color: #c0c0c0;
+        }
+
+        [data-theme="light"] .evento-date-text {
+            color: #7f8c8d;
+            border-top-color: #ecf0f1;
+        }
+
+        [data-theme="dark"] .evento-date-text {
+            color: #a0a0a0;
+            border-top-color: #333333;
+        }
+
+        [data-theme="light"] .evento-empty-text {
+            color: #2c3e50;
+        }
+
+        [data-theme="dark"] .evento-empty-text {
+            color: #e0e0e0;
+        }
+
+        [data-theme="light"] .evento-empty-subtitle {
+            color: #7f8c8d;
+        }
+
+        [data-theme="dark"] .evento-empty-subtitle {
+            color: #a0a0a0;
+        }
+
+        /* Icon colors */
+        [data-theme="light"] .evento-icon-calendar {
+            color: #3498db;
+        }
+
+        [data-theme="dark"] .evento-icon-calendar {
+            color: #5dade2;
+        }
+
+        [data-theme="light"] .evento-icon-flag {
+            color: #e74c3c;
+        }
+
+        [data-theme="dark"] .evento-icon-flag {
+            color: #ec7063;
+        }
+
+        .evento-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .evento-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        [data-theme="dark"] .evento-card:hover {
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5) !important;
+        }
     </style>
 
     <div class="container eventos-container" style="padding-top: 2rem; padding-bottom: 2rem;">
@@ -36,7 +101,7 @@
         <div class="d-flex justify-content-between align-items-center mb-5">
             <div>
                 <h1 class="fw-bold evento-header-text" style="font-size: 2.5rem;">
-                    <i class="bi bi-event-fill me-3" style="color: #3498db;"></i>Catálogo de Eventos
+                    <i class="bi bi-event-fill me-3 evento-icon-calendar"></i>Catálogo de Eventos
                 </h1>
                 <p class="evento-subtitle" style="margin-top: 0.5rem;">Descubre y participa en los mejores eventos de innovación</p>
             </div>
@@ -63,7 +128,7 @@
         <div class="row g-4">
             @forelse ($eventos as $evento)
                 <div class="col-lg-4 col-md-6">
-                    <div class="card h-100 border-0 shadow-sm" style="border-radius: 16px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s;">
+                    <div class="card evento-card h-100 border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
                         {{-- Header con Gradient --}}
                         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; color: white;">
                             <div class="d-flex justify-content-between align-items-start mb-2">
@@ -84,19 +149,19 @@
 
                         {{-- Body --}}
                         <div class="card-body d-flex flex-column" style="padding: 2rem;">
-                            <p class="card-text" style="color: #555; line-height: 1.6; flex-grow: 1;">
+                            <p class="card-text evento-card-text" style="line-height: 1.6; flex-grow: 1;">
                                 {{ Str::limit($evento->descripcion, 100) }}
                             </p>
 
                             {{-- Fechas --}}
-                            <div class="mb-3" style="padding-top: 1rem; border-top: 1px solid #ecf0f1;">
-                                <small style="color: #7f8c8d;">
-                                    <i class="bi bi-calendar3 me-2" style="color: #3498db;"></i>
+                            <div class="mb-3 evento-date-text" style="padding-top: 1rem; border-top: 1px solid;">
+                                <small>
+                                    <i class="bi bi-calendar3 me-2 evento-icon-calendar"></i>
                                     Inicio: {{ \Carbon\Carbon::parse($evento->fecha_inicio)->isoFormat('D MMM YYYY') }}
                                 </small>
                                 <br>
-                                <small style="color: #7f8c8d;">
-                                    <i class="bi bi-flag me-2" style="color: #e74c3c;"></i>
+                                <small>
+                                    <i class="bi bi-flag me-2 evento-icon-flag"></i>
                                     Fin: {{ \Carbon\Carbon::parse($evento->fecha_fin)->isoFormat('D MMM YYYY') }}
                                 </small>
                             </div>
@@ -124,25 +189,14 @@
                 </div>
             @empty
                 <div class="col-12">
-                    <div class="card border-0 shadow-sm text-center" style="border-radius: 16px; padding: 3rem;">
+                    <div class="card evento-card border-0 shadow-sm text-center" style="border-radius: 16px; padding: 3rem;">
                         <i class="bi bi-inbox" style="font-size: 3rem; color: #bdc3c7; margin-bottom: 1rem;"></i>
-                        <h4 style="color: #2c3e50;">No hay eventos disponibles</h4>
-                        <p style="color: #7f8c8d;">Vuelve pronto para descubrir nuevos eventos</p>
+                        <h4 class="evento-empty-text">No hay eventos disponibles</h4>
+                        <p class="evento-empty-subtitle">Vuelve pronto para descubrir nuevos eventos</p>
                     </div>
                 </div>
             @endforelse
         </div>
     </div>
 </div>
-
-<style>
-    .card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
-    }
-</style>
 @endsection
