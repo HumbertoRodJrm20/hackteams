@@ -1,7 +1,7 @@
-@extends('Layout.app') {{-- Usando 'Layout' con L mayúscula --}}
+@extends('Layout.app') 
 
-@section('nav_constancias', 'active') {{-- Usamos plural para consistencia --}}
-@section('title', 'Repositorio de Constancias')
+@section('nav_constancias', 'active')
+@section('title', 'Constancias')
 
 @section('content')
 <div class="container py-4">
@@ -35,7 +35,6 @@
 
     <div class="list-group">
         
-        {{-- 🚨 CAMBIO CRÍTICO: Iteramos sobre $constancias (plural) --}}
         @forelse ($constancias as $constancia)
         <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
             
@@ -58,11 +57,9 @@
                 @if ($constancia->ruta_archivo)
                     <span class="badge bg-success me-2">Disponible</span>
                     
-                    {{-- 🚨 CORRECCIÓN: La ruta DEBE SER PLURAL 'constancias.descargar' --}}
-                    <a href="{{ route('constancias.generar', $constancia->id) }}" 
-   class="bg-blue-600 text-white px-3 py-2 rounded">
-   Descargar PDF
-</a>
+                    <a href="{{ route('constancias.generar', $constancia->id) }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-download me-1"></i>    
+                    Descargar</a>
 
                 @else
                     <span class="badge bg-warning text-dark me-2">Pendiente de firma</span>
