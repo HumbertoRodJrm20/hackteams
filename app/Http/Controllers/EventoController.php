@@ -39,7 +39,8 @@ class EventoController extends Controller
             'descripcion' => 'required|string',
             'fecha_inicio' => 'required|date|after_or_equal:today',
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-            'estado' => ['sometimes', 'string', Rule::in(['proximo', 'activo', 'finalizado'])], 
+            'estado' => ['sometimes', 'string', Rule::in(['proximo', 'activo', 'finalizado'])],
+            'max_equipos' => 'required|integer|min:1',
         ]);
 
         $evento = Evento::create($validatedData);
