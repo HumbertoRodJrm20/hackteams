@@ -14,7 +14,7 @@ class Participante extends Model
     // Asignación masiva solo para los campos que podemos tener al registrar
     protected $fillable = [
         'user_id',
-        'carrera_id', // Si usas esta FK, el modelo Carrera.php debe existir.
+        'carrera_id',
         'matricula',
     ];
 

@@ -10,9 +10,7 @@ use App\Http\Controllers\EquipoController;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\AvanceController;
 use App\Http\Controllers\ProgresoController;
-// ---> AÑADIR EL NUEVO CONTROLADOR DE CONSTANCIAS
 use App\Http\Controllers\ConstanciaController; 
-
 
 // ----------------------------------------------------
 // 1. AUTENTICACIÓN (Rutas sin protección de sesión)
@@ -40,8 +38,6 @@ Route::post('/register', [RegisterController::class, 'store'])->name('register.c
 Route::get('/forgot-password', function () {
     return view('welcome');
 })->name('password.request');
-
-
 
 // ----------------------------------------------------
 // 2. RUTAS DE APLICACIÓN (Generalmente requieren Auth middleware)
@@ -93,17 +89,14 @@ Route::middleware(['auth', 'participante'])->group(function () {
     // AVANCES
     Route::post('/avances/store', [AvanceController::class, 'store'])->name('avances.store');
 
-
     // CONSTANCIAS (Rutas del Participante)
     // 1. Vista principal de constancias (donde se ven la lista)
-Route::get('/constancia', [ConstanciaController::class, 'index'])->name('constancia.index');
+    Route::get('/constancia', [ConstanciaController::class, 'index'])->name('constancia.index');
 
     // 2. Ruta para descargar el archivo PDF (utiliza el modelo Constancia)
-// Fragmento de routes/web.php
-Route::get('/constancias/{constancia}/descargar', [ConstanciaController::class, 'downloadCertificate'])->name('constancias.descargar');
+    Route::get('/constancias/{constancia}/descargar', [ConstanciaController::class, 'downloadCertificate'])->name('constancias.descargar');
 
-Route::get('/constancias/{id}/generar', [ConstanciaController::class, 'generarPDF'])->name('constancias.generar');
-
+    Route::get('/constancias/{id}/generar', [ConstanciaController::class, 'generarPDF'])->name('constancias.generar');
 });
 
 // RUTAS SOLO PARA JUECES
@@ -116,6 +109,12 @@ Route::middleware(['auth', 'juez'])->group(function () {
     Route::get('/seguimiento-proyectos', function () {
         return view('juez.seguimientoProyectos');
     })->name('proyectos.seguimiento');
+
+    Route::get('/juez/constancias', [ConstanciaController::class, 'indexJuez'])
+        ->name('constancia.juez.index');
+
+    Route::get('/juez/constancias/{id}/generar', [ConstanciaController::class, 'generarPDFJuez'])
+        ->name('constancia.juez.generar');
 });
 
 // ----------------------------------------------------

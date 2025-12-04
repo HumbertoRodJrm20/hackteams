@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>Constancia - {{ $participante->user->name }}</title>
+    <meta charset="UTF-8">
+    <title>Constancia de Juez</title>
     <style>
         @page {
             size: A4 landscape;
@@ -63,19 +63,14 @@
             CONSTANCIA DE {{ strtoupper($tipo) }}
         </div>
 
-        <div class="body-text">
-            Se otorga la presente constancia a:
-            <p class="name">
-                {{ $participante->user->name }}
-            </p>
+    <p class="contenido">
+        Se otorga la presente constancia a:<br>
+        <strong>{{ $juez->name }}</strong><br><br>
 
-            @if ($tipo === 'ganador')
-                <p>Por haber obtenido un reconocimiento especial como **GANADOR** en el evento **"{{ $evento->nombre }}"**.</p>
-            @else
-                <p>Por su valiosa participación en el evento "{{ $evento->nombre }}".</p>
-            @endif
-            <p>Evento realizado por Innovatec del {{ $evento->fecha_inicio }} al {{ $evento->fecha_fin }}.</p>
-        </div>
+        Por su participación como <strong>Juez</strong> en el evento:<br>
+        <strong>{{ $evento->nombre }}</strong><br><br>
+
+        <p>Evento realizado por Innovatec del {{ $evento->fecha_inicio }} al {{ $evento->fecha_fin }}.</p>    </p>
 
         <div class="signature-area">
             <table style="width: 100%; margin-top: 50px;">

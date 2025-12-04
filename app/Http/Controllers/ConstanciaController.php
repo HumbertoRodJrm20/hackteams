@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str; // Para generar slugs para el nombre del archivo
+use Illuminate\Support\Str;
 use App\Models\Constancia;
 use App\Models\Evento;
 use App\Models\Participante;
-use App\Models\Equipo; // Lo necesitas para la lógica de ganador
+use App\Models\Equipo;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class ConstanciaController extends Controller
@@ -28,49 +28,46 @@ class ConstanciaController extends Controller
 
         $participante = Auth::user()->participante;
         
-        // La variable que contiene la COPIA (la colección) debe ser plural: $constancias
         if ($participante) {
             // Cargar todas las constancias generadas para este participante, incluyendo el evento asociado
-            $constancias = Constancia::where('participante_id', $participante->user_id) // 🚨 CORREGIDO: Usamos user_id si es primary key
+            $constancias = Constancia::where('participante_id', $participante->user_id)
                                      ->with('evento')
                                      ->get();
         }
 
-        // 🚨 ENVIAMOS LA COLECCIÓN PLURAL $constancias
+        //ENVIAMOS LA COLECCIÓN PLURAL $constancias
         return view('Constancia', compact('constancias'));
     }
 
-public function generarPDF($id)
-{
-    // Cargar la constancia REAL
-    $constancia = Constancia::with(['participante.user', 'evento'])
-        ->findOrFail($id);
+    public function generarPDF($id)
+    {
+        // Cargar la constancia REAL
+        $constancia = Constancia::with(['participante.user', 'evento'])
+            ->findOrFail($id);
 
-    $participante = $constancia->participante;
-    $evento = $constancia->evento;
-    $tipo = $constancia->tipo_constancia;
+        $participante = $constancia->participante;
+        $evento = $constancia->evento;
+        $tipo = $constancia->tipo_constancia;
 
-    // Generar PDF
-    $pdf = Pdf::loadView('pdf.constancia-estilo', compact('participante', 'evento', 'tipo'))
-              ->setPaper('a4', 'landscape');
+        // Generar PDF
+        $pdf = Pdf::loadView('pdf.constancia-estilo', compact('participante', 'evento', 'tipo'))
+                  ->setPaper('a4', 'landscape');
 
-    return $pdf->download("constancia-$participante->user_id.pdf");
-}
+        return $pdf->download("constancia-$participante->user_id.pdf");
+    }
 
     /**
      * Permite al usuario descargar la constancia generada (el PDF).
      */
     public function downloadCertificate(Constancia $constancia)
-{
-    $ruta = storage_path('app/public/' . $constancia->ruta_archivo);
+    {
+        $ruta = storage_path('app/public/' . $constancia->ruta_archivo);
 
-    if (!file_exists($ruta)) {
-        return abort(404, "El archivo no existe.");
-    }
-
+        if (!file_exists($ruta)) {
+            return abort(404, "El archivo no existe.");
+        }
     return response()->download($ruta);
-}
-
+    }
 
     // ====================================================================
     // 2. RUTAS DEL ADMINISTRADOR
@@ -89,7 +86,6 @@ public function generarPDF($id)
         // Obtener las constancias ya generadas para el evento
         $constanciasGeneradas = Constancia::where('evento_id', $evento->id)
                                           ->pluck('ruta_archivo', 'participante_id'); // [participante_id => ruta]
-
         return view('admin.constancia.gestion', compact('evento', 'participantes', 'constanciasGeneradas'));
     }
 
@@ -99,14 +95,9 @@ public function generarPDF($id)
     public function generateCertificate(Participante $participante, Evento $evento)
     {
         // 1. Lógica para determinar si es ganador
-        // ESTO ES CLAVE: Asumo que en la tabla 'calificaciones' o en 'equipo' puedes determinar esto.
-        // Opción 1 (Simple): Revisa si el equipo del participante es el equipo ganador del evento.
-        // Necesitarás un campo 'equipo_ganador_id' en la tabla 'eventos' o 'proyecto'.
-        $equipoGanador = $evento->equipo_ganador_id ?? null; // Si tienes este campo en eventos
+        $equipoGanador = $evento->equipo_ganador_id ?? null;
         $esGanador = ($equipoGanador && $participante->equipo_id === $equipoGanador);
         
-        // Si no tienes el campo, necesitas una lógica de consulta más compleja aquí.
-
         $tipo = $esGanador ? 'ganador' : 'participacion';
 
         // 2. Generar el PDF
@@ -140,4 +131,34 @@ public function generarPDF($id)
 
         return back()->with('success', "Constancia de {$tipo} generada para {$participante->user->name}.");
     }
+
+    public function indexJuez()
+{
+    $juez = auth()->user();
+
+    // Buscar constancias donde participante_id = juez_id
+    $constancias = \App\Models\Constancia::where('participante_id', $juez->id)->get();
+
+    return view('juez.constancias.index', compact('constancias'));
+}
+
+
+public function generarPDFJuez($id)
+{
+    $constancia = \App\Models\Constancia::where('id', $id)
+        ->where('participante_id', auth()->id())
+        ->firstOrFail();
+
+    $juez = auth()->user();
+    $evento = $constancia->evento;
+    $tipo = $constancia->tipo;
+
+    $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView(
+        'pdf.constancia-juez',
+        compact('juez', 'evento', 'tipo')
+    );
+
+    return $pdf->download("constancia-juez-$juez->id.pdf");
+}
+
 }
