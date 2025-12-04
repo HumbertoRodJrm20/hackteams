@@ -43,16 +43,20 @@ class JuezProyectoController extends Controller
 
         $proyecto->load('equipo', 'evento', 'avances', 'calificaciones');
 
-        // Obtener la calificación del juez actual (si existe)
-        $miCalificacion = $proyecto->calificaciones()
-            ->where('juez_user_id', $juez->id)
-            ->first();
+        // Obtener los criterios del evento
+        $criterios = $proyecto->evento->criterios ?? collect();
 
-        return view('juez.proyecto-detalle', compact('proyecto', 'miCalificacion'));
+        // Obtener las calificaciones del juez actual para cada criterio
+        $misCalificaciones = $proyecto->calificaciones()
+            ->where('juez_user_id', $juez->id)
+            ->get()
+            ->keyBy('criterio_id');
+
+        return view('juez.proyecto-detalle', compact('proyecto', 'criterios', 'misCalificaciones'));
     }
 
     /**
-     * Guarda la calificación del proyecto
+     * Guarda la calificación del proyecto para un criterio específico
      */
     public function guardarCalificacion(Request $request, Proyecto $proyecto)
     {
@@ -66,17 +70,26 @@ class JuezProyectoController extends Controller
         }
 
         $validated = $request->validate([
+            'criterio_id' => 'required|exists:criterio_evaluacion,id',
             'puntuacion' => 'required|numeric|min:0|max:100',
         ]);
 
         try {
             DB::beginTransaction();
 
-            // Crear o actualizar calificación del juez para este proyecto
+            // Verificar que el criterio pertenece al evento del proyecto
+            $criterio = $proyecto->evento->criterios()->find($validated['criterio_id']);
+            if (!$criterio) {
+                return redirect()->back()
+                    ->with('error', 'El criterio no pertenece a este evento');
+            }
+
+            // Crear o actualizar calificación del juez para este proyecto y criterio
             Calificacion::updateOrCreate(
                 [
                     'proyecto_id' => $proyecto->id,
                     'juez_user_id' => $juez->id,
+                    'criterio_id' => $validated['criterio_id'],
                 ],
                 [
                     'puntuacion' => $validated['puntuacion'],
