@@ -10,7 +10,9 @@ use App\Http\Controllers\EquipoController;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\AvanceController;
 use App\Http\Controllers\ProgresoController;
-use App\Http\Controllers\ConstanciaController; 
+use App\Http\Controllers\ConstanciaController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\AdminEquipoController; 
 
 // ----------------------------------------------------
 // 1. AUTENTICACIÓN (Rutas sin protección de sesión)
@@ -59,11 +61,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/perfil/configuracion', function () {
         return view('ConfiguracionPerfil');
     })->name('perfil.configuracion');
-    
-    // RUTAS DE EVENTOS (Detalles - visible para todos)
-    Route::get('/eventos/{evento}', [EventoController::class, 'show'])->name('eventos.show');
-    Route::post('/eventos/{evento}/join', [EventoController::class, 'join'])->name('eventos.join');
-    Route::post('/eventos/{evento}/leave', [EventoController::class, 'leave'])->name('eventos.leave');
 });
 
 // RUTAS SOLO PARA PARTICIPANTES
@@ -78,10 +75,9 @@ Route::middleware(['auth', 'participante'])->group(function () {
     Route::delete('/equipos/{equipo}/members/{participante}', [EquipoController::class, 'removeMember'])->name('equipos.removeMember');
     Route::put('/equipos/{equipo}/members/{participante}/role', [EquipoController::class, 'updateMemberRole'])->name('equipos.updateMemberRole');
 
-    // PROYECTOS
+    // PROYECTOS (Las rutas específicas deben ir antes de las parametrizadas)
     Route::get('/proyectos/registrar', [ProyectoController::class, 'create'])->name('proyectos.registrar');
     Route::post('/proyectos/store', [ProyectoController::class, 'store'])->name('proyectos.store');
-    Route::get('/proyectos/{id}', [ProyectoController::class, 'show'])->name('proyectos.show');
 
     // PROGRESO
     Route::get('/progreso', [ProgresoController::class, 'index'])->name('progreso.index');
@@ -128,11 +124,41 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     // Eliminar Evento (solo Admins)
     Route::delete('/eventos/{evento}', [EventoController::class, 'destroy'])->name('eventos.destroy');
-    
+
+    // GESTIÓN DE USUARIOS (ADMIN)
+    Route::get('/admin/usuarios', [UserController::class, 'index'])->name('admin.usuarios.index');
+    Route::get('/admin/usuarios/crear', [UserController::class, 'create'])->name('admin.usuarios.create');
+    Route::post('/admin/usuarios', [UserController::class, 'store'])->name('admin.usuarios.store');
+    Route::get('/admin/usuarios/{usuario}', [UserController::class, 'show'])->name('admin.usuarios.show');
+    Route::get('/admin/usuarios/{usuario}/editar', [UserController::class, 'edit'])->name('admin.usuarios.edit');
+    Route::put('/admin/usuarios/{usuario}', [UserController::class, 'update'])->name('admin.usuarios.update');
+    Route::delete('/admin/usuarios/{usuario}', [UserController::class, 'destroy'])->name('admin.usuarios.destroy');
+
+    // GESTIÓN DE EQUIPOS (ADMIN)
+    Route::get('/admin/equipos', [AdminEquipoController::class, 'index'])->name('admin.equipos.index');
+    Route::get('/admin/equipos/crear', [AdminEquipoController::class, 'create'])->name('admin.equipos.create');
+    Route::post('/admin/equipos', [AdminEquipoController::class, 'store'])->name('admin.equipos.store');
+    Route::get('/admin/equipos/{equipo}', [AdminEquipoController::class, 'show'])->name('admin.equipos.show');
+    Route::get('/admin/equipos/{equipo}/editar', [AdminEquipoController::class, 'edit'])->name('admin.equipos.edit');
+    Route::put('/admin/equipos/{equipo}', [AdminEquipoController::class, 'update'])->name('admin.equipos.update');
+    Route::delete('/admin/equipos/{equipo}', [AdminEquipoController::class, 'destroy'])->name('admin.equipos.destroy');
+    Route::delete('/admin/equipos/{equipo}/participantes/{participanteId}', [AdminEquipoController::class, 'removeParticipant'])->name('admin.equipos.removeParticipant');
+
     // CONSTANCIAS (Rutas del Administrador)
     // 1. Vista de Gestión (Admin ve la lista de participantes de un evento finalizado)
     Route::get('/admin/eventos/{evento}/constancia', [ConstanciaController::class, 'manageCertificates'])->name('constancia.gestion');
-    
+
     // 2. Generar y Guardar Constancia PDF (Recibe participante y evento IDs)
     Route::post('/admin/participante/{participante}/evento/{evento}/generar-constancia', [ConstanciaController::class, 'generateCertificate'])->name('constancia.generar');
+});
+
+// RUTAS DE EVENTOS Y PROYECTOS (Detalles - visible para todos autenticados)
+Route::middleware(['auth'])->group(function () {
+    // Proyectos
+    Route::get('/proyectos/{id}', [ProyectoController::class, 'show'])->name('proyectos.show');
+
+    // Eventos
+    Route::get('/eventos/{evento}', [EventoController::class, 'show'])->name('eventos.show');
+    Route::post('/eventos/{evento}/join', [EventoController::class, 'join'])->name('eventos.join');
+    Route::post('/eventos/{evento}/leave', [EventoController::class, 'leave'])->name('eventos.leave');
 });
