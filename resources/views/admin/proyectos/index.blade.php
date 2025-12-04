@@ -101,6 +101,11 @@
                                         <a href="{{ route('admin.proyectos.asignar-jueces', $proyecto->id) }}" class="btn btn-sm btn-outline-primary" title="Asignar Jueces">
                                             <i class="bi bi-person-plus"></i>
                                         </a>
+                                        @if($proyecto->calificaciones->isNotEmpty())
+                                            <a href="{{ route('admin.proyectos.ver-calificaciones', $proyecto->id) }}" class="btn btn-sm btn-outline-info" title="Ver Calificaciones">
+                                                <i class="bi bi-bar-chart"></i>
+                                            </a>
+                                        @endif
                                         <a href="{{ route('proyectos.show', $proyecto->id) }}" class="btn btn-sm btn-outline-secondary" title="Ver Detalles">
                                             <i class="bi bi-eye"></i>
                                         </a>
