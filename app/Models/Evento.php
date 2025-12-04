@@ -10,7 +10,7 @@ class Evento extends Model
     use SoftDeletes;
 
     protected $table = 'eventos';
-    protected $fillable = ['nombre', 'descripcion', 'fecha_inicio', 'fecha_fin', 'estado'];
+    protected $fillable = ['nombre', 'descripcion', 'fecha_inicio', 'fecha_fin', 'estado', 'max_equipos'];
 
     // Relación con participantes (N:M)
     public function participantes()
