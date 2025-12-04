@@ -45,11 +45,50 @@ class Proyecto extends Model
     }
 
     /**
-     * Calcula el promedio de calificaciones del proyecto
+     * Calcula el promedio ponderado de calificaciones del proyecto
+     * Basado en los criterios y sus ponderaciones
      */
     public function obtenerPromedio()
     {
-        return $this->calificaciones()->avg('puntuacion') ?? 0;
+        // Obtener todos los jueces que han calificado este proyecto
+        $juecesConCalificaciones = $this->calificaciones()
+            ->distinct('juez_user_id')
+            ->pluck('juez_user_id');
+
+        if ($juecesConCalificaciones->isEmpty()) {
+            return 0;
+        }
+
+        $totalPromedios = 0;
+        $cantidadJueces = 0;
+
+        // Calcular promedio ponderado para cada juez
+        foreach ($juecesConCalificaciones as $juezId) {
+            $promedioJuez = 0;
+            $ponderacionTotal = 0;
+
+            // Obtener todas las calificaciones de este juez para este proyecto
+            $calificacionesJuez = $this->calificaciones()
+                ->where('juez_user_id', $juezId)
+                ->get();
+
+            foreach ($calificacionesJuez as $calificacion) {
+                $criterio = $calificacion->criterio;
+                if ($criterio) {
+                    $promedioJuez += $calificacion->puntuacion * ($criterio->ponderacion / 100);
+                    $ponderacionTotal += $criterio->ponderacion / 100;
+                }
+            }
+
+            // Si el juez ha calificado criterios
+            if ($ponderacionTotal > 0) {
+                $totalPromedios += $promedioJuez / $ponderacionTotal;
+                $cantidadJueces++;
+            }
+        }
+
+        // Retornar el promedio de todos los jueces
+        return $cantidadJueces > 0 ? $totalPromedios / $cantidadJueces : 0;
     }
 
     /**

@@ -10,11 +10,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('proyecto_id')->constrained('proyectos')->onDelete('cascade');
             $table->foreignId('juez_user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('criterio_id')->nullable()->constrained('criterio_evaluacion')->onDelete('cascade');
+            $table->foreignId('criterio_id')->constrained('criterio_evaluacion')->onDelete('cascade');
             $table->integer('puntuacion');
             $table->timestamps();
             $table->softDeletes();
-            $table->unique(['proyecto_id', 'juez_user_id']);
+            $table->unique(['proyecto_id', 'juez_user_id', 'criterio_id']);
         });
     }
     public function down(): void
