@@ -158,6 +158,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/proyectos/{proyecto}/asignar-jueces', [AdminProyectoController::class, 'asignarJueces'])->name('admin.proyectos.asignar-jueces');
     Route::post('/admin/proyectos/{proyecto}/asignacion', [AdminProyectoController::class, 'guardarAsignacion'])->name('admin.proyectos.guardar-asignacion');
     Route::delete('/admin/proyectos/{proyecto}/jueces/{juez}', [AdminProyectoController::class, 'eliminarAsignacion'])->name('admin.proyectos.eliminar-asignacion');
+    Route::get('/admin/proyectos/{proyecto}/calificaciones', [AdminProyectoController::class, 'verCalificaciones'])->name('admin.proyectos.ver-calificaciones');
     Route::get('/admin/rankings', [AdminProyectoController::class, 'rankings'])->name('admin.rankings');
 
     // CONSTANCIAS (Rutas del Administrador)
