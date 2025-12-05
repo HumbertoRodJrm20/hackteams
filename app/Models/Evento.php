@@ -10,7 +10,16 @@ class Evento extends Model
     use SoftDeletes;
 
     protected $table = 'eventos';
+
     protected $fillable = ['nombre', 'descripcion', 'fecha_inicio', 'fecha_fin', 'estado', 'max_equipos'];
+
+    protected function casts(): array
+    {
+        return [
+            'fecha_inicio' => 'datetime',
+            'fecha_fin' => 'datetime',
+        ];
+    }
 
     // Relación con participantes (N:M)
     public function participantes()
@@ -25,10 +34,22 @@ class Evento extends Model
         return $this->hasMany(Proyecto::class, 'evento_id');
     }
 
+    // Relación con equipos (1:N)
+    public function equipos()
+    {
+        return $this->hasMany(Equipo::class, 'evento_id');
+    }
+
     // Relación con criterios de evaluación (1:N)
     public function criterios()
     {
         return $this->hasMany(CriterioEvaluacion::class, 'evento_id');
+    }
+
+    // Relación con constancias (1:N)
+    public function constancias()
+    {
+        return $this->hasMany(Constancia::class, 'evento_id');
     }
 
     // Verificar si un usuario está unido al evento
