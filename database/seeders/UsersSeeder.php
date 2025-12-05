@@ -131,6 +131,46 @@ DB::table('constancias')->insert([
     'updated_at' => now(),
 ]);
 
-        
+        // --- 4. Crear Segundo Usuario Juez ---
+        $juez2UserId = DB::table('users')->insertGetId([
+            'name' => 'Maria Rodriguez',
+            'email' => 'maria.rodriguez@test.com',
+            'password' => Hash::make('password'), // Contraseña: 'password'
+            'email_verified_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        // Asignar Rol Juez
+        DB::table('user_rol')->insert([
+            'user_id' => $juez2UserId,
+            'rol_id' => $rolJuezId
+        ]);
+
+        // Registrar segundo juez como participante para permitir constancias
+        DB::table('participantes')->insert([
+            'user_id' => $juez2UserId,
+            'carrera_id' => $carreraId,
+            'matricula' => 'JUEZ456',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('evento_participante')->insert([
+            'evento_id' => $eventoDePruebaId,
+            'participante_id' => $juez2UserId,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('constancias')->insert([
+            'participante_id' => $juez2UserId,
+            'evento_id' => $eventoDePruebaId,
+            'tipo' => 'asistente',
+            'archivo_path' => 'constancias/constancia-ejemplo.pdf',
+            'codigo_qr' => Str::uuid(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
     }
 }

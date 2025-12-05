@@ -197,6 +197,7 @@
                                     >
                                     <input
                                         type="number"
+                                        name="puntuacion"
                                         class="form-control criterio-number"
                                         data-criterio-id="{{ $criterio->id }}"
                                         min="0"
@@ -235,8 +236,12 @@
                     @else
                         @foreach($proyecto->calificaciones as $cal)
                             <div class="mb-2 pb-2 border-bottom">
-                                <div class="d-flex justify-content-between">
-                                    <strong>{{ $cal->juez->nombre }}</strong>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{{ $cal->juez->nombre }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ $cal->criterio->nombre }}</small>
+                                    </div>
                                     <span class="badge bg-success">{{ number_format($cal->puntuacion, 1) }}/100</span>
                                 </div>
                             </div>
