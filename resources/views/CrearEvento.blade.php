@@ -31,7 +31,7 @@
                     </div>
 
                     <h4 class="mb-3 text-primary">Fechas y Estado</h4>
-                    
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="fecha_inicio" class="form-label">Fecha de Inicio</label>
@@ -41,6 +41,17 @@
                         <div class="col-md-6 mb-3">
                             <label for="fecha_fin" class="form-label">Fecha de Finalización</label>
                             <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" required value="{{ old('fecha_fin') }}">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="max_equipos" class="form-label">Máximo de Equipos</label>
+                            <input type="number" class="form-control @error('max_equipos') is-invalid @enderror" id="max_equipos" name="max_equipos" required min="1" value="{{ old('max_equipos') }}" placeholder="Ej: 50">
+                            @error('max_equipos')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="form-text text-muted">Define cuántos equipos máximo pueden participar en este evento.</small>
                         </div>
                     </div>
                     

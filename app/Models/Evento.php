@@ -10,7 +10,7 @@ class Evento extends Model
     use SoftDeletes;
 
     protected $table = 'eventos';
-    protected $fillable = ['nombre', 'descripcion', 'fecha_inicio', 'fecha_fin', 'estado'];
+    protected $fillable = ['nombre', 'descripcion', 'fecha_inicio', 'fecha_fin', 'estado', 'max_equipos'];
 
     // Relación con participantes (N:M)
     public function participantes()
@@ -23,6 +23,12 @@ class Evento extends Model
     public function proyectos()
     {
         return $this->hasMany(Proyecto::class, 'evento_id');
+    }
+
+    // Relación con criterios de evaluación (1:N)
+    public function criterios()
+    {
+        return $this->hasMany(CriterioEvaluacion::class, 'evento_id');
     }
 
     // Verificar si un usuario está unido al evento
