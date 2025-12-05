@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Auth; 
 
 class LoginController extends Controller
 {
@@ -16,22 +16,29 @@ class LoginController extends Controller
         // 1. Validar las credenciales
         $credentials = $request->validate([
             // Usamos 'username' en el formulario para capturar email
-            'username' => ['required', 'string'], 
+            'username' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
-        
+
         // 2. Intentar autenticar por 'email' (asumiendo que tu columna de login es 'email')
         $authAttempt = Auth::attempt([
-            'email' => $request->username, 
+            'email' => $request->username,
             'password' => $request->password,
         ]);
 
         if ($authAttempt) {
             // Regenera la sesión (buena práctica de seguridad)
             $request->session()->regenerate();
-            
-            // Autenticación exitosa: Redirigir a la vista principal (Listado de Eventos)
-            return redirect()->route('eventos.index'); 
+
+            // Redirigir según el rol del usuario
+            $user = Auth::user();
+
+            if ($user->hasRole('Admin')) {
+                return redirect()->route('admin.dashboard');
+            }
+
+            // Para participantes y jueces, ir a eventos
+            return redirect()->route('eventos.index');
         }
 
         // 3. Fallo de autenticación
@@ -39,7 +46,7 @@ class LoginController extends Controller
             'loginError' => 'Credenciales inválidas. Por favor, verifica tu usuario y contraseña.',
         ])->redirectTo(route('login'));
     }
-    
+
     /**
      * Cierra la sesión del usuario.
      */

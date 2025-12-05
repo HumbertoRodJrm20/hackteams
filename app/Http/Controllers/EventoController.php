@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Evento;
-use Illuminate\Validation\Rule;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class EventoController extends Controller
 {
@@ -16,6 +16,7 @@ class EventoController extends Controller
     {
         // Se extraen todos los eventos, ordenados por fecha de inicio para mostrar los próximos primero
         $eventos = Evento::orderBy('fecha_inicio', 'desc')->get();
+
         return view('Eventos', compact('eventos'));
     }
 
@@ -45,7 +46,7 @@ class EventoController extends Controller
 
         $evento = Evento::create($validatedData);
 
-        return redirect()->route('eventos.index')->with('success', '¡El evento "' . $evento->nombre . '" ha sido creado con éxito!');
+        return redirect()->route('eventos.index')->with('success', '¡El evento "'.$evento->nombre.'" ha sido creado con éxito!');
     }
 
     /**
@@ -58,6 +59,35 @@ class EventoController extends Controller
     }
 
     /**
+     * Muestra el formulario para editar un evento existente.
+     */
+    public function edit(Evento $evento)
+    {
+        // Nota: Se debe proteger esta ruta con un middleware 'admin'
+        return view('EditarEvento', compact('evento'));
+    }
+
+    /**
+     * Actualiza un evento existente en la base de datos.
+     */
+    public function update(Request $request, Evento $evento)
+    {
+        // Nota: Se debe proteger esta ruta con un middleware 'admin'
+        $validatedData = $request->validate([
+            'nombre' => ['required', 'string', 'max:255', Rule::unique('eventos', 'nombre')->ignore($evento->id)],
+            'descripcion' => 'required|string',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            'estado' => ['sometimes', 'string', Rule::in(['proximo', 'activo', 'finalizado'])],
+            'max_equipos' => 'required|integer|min:1',
+        ]);
+
+        $evento->update($validatedData);
+
+        return redirect()->route('eventos.show', $evento->id)->with('success', '¡El evento "'.$evento->nombre.'" ha sido actualizado con éxito!');
+    }
+
+    /**
      * Elimina un evento de la base de datos.
      */
     public function destroy(Evento $evento)
@@ -66,7 +96,7 @@ class EventoController extends Controller
         $nombre = $evento->nombre;
         $evento->delete();
 
-        return redirect()->route('eventos.index')->with('success', 'El evento "' . $nombre . '" ha sido eliminado exitosamente.');
+        return redirect()->route('eventos.index')->with('success', 'El evento "'.$nombre.'" ha sido eliminado exitosamente.');
     }
 
     /**
@@ -77,7 +107,7 @@ class EventoController extends Controller
         $user = Auth::user();
         $participante = $user->participante;
 
-        if (!$participante) {
+        if (! $participante) {
             return redirect()->route('eventos.show', $evento->id)
                 ->with('error', 'Debes estar registrado como participante para unirte a un evento.');
         }
@@ -98,7 +128,7 @@ class EventoController extends Controller
         $evento->participantes()->attach($participante->user_id);
 
         return redirect()->route('eventos.show', $evento->id)
-            ->with('success', 'Te has unido exitosamente al evento "' . $evento->nombre . '".');
+            ->with('success', 'Te has unido exitosamente al evento "'.$evento->nombre.'".');
     }
 
     /**
@@ -109,7 +139,7 @@ class EventoController extends Controller
         $user = Auth::user();
         $participante = $user->participante;
 
-        if (!$participante) {
+        if (! $participante) {
             return redirect()->route('eventos.index')
                 ->with('error', 'Error al abandonar el evento.');
         }
@@ -117,6 +147,6 @@ class EventoController extends Controller
         $evento->participantes()->detach($participante->user_id);
 
         return redirect()->route('eventos.index')
-            ->with('success', 'Te has salido del evento "' . $evento->nombre . '".');
+            ->with('success', 'Te has salido del evento "'.$evento->nombre.'".');
     }
 }

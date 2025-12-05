@@ -1,34 +1,36 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Auth; 
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\RegisterController;
-use App\Http\Controllers\EventoController;
-use App\Http\Controllers\PerfilController;
-use App\Http\Controllers\EquipoController;
-use App\Http\Controllers\ProyectoController;
-use App\Http\Controllers\AvanceController;
-use App\Http\Controllers\ProgresoController;
-<<<<<<< HEAD
-use App\Http\Controllers\ConstanciaController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\AdminEquipoController;
 use App\Http\Controllers\AdminProyectoController;
+use App\Http\Controllers\AvanceController;
+use App\Http\Controllers\ConstanciaController;
+use App\Http\Controllers\EquipoController;
+use App\Http\Controllers\EventoController;
 use App\Http\Controllers\JuezProyectoController;
-=======
-use App\Http\Controllers\ConstanciaController; 
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PerfilController;
+use App\Http\Controllers\ProgresoController;
+use App\Http\Controllers\ProyectoController;
+use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SolicitudController;
+use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Route;
 
->>>>>>> main
-
-// ----------------------------------------------------
-// 1. AUTENTICACIÓN (Rutas sin protección de sesión)
 // ----------------------------------------------------
 
 Route::get('/', function () {
-    // Redirige la raíz al login o a eventos si está logueado
-    return Auth::check() ? redirect()->route('eventos.index') : redirect()->route('login');
+    if (!Auth::check()) {
+        return redirect()->route('login');
+    }
+
+    $user = Auth::user();
+    if ($user->hasRole('Admin')) {
+        return redirect()->route('admin.dashboard');
+    }
+
+    return redirect()->route('eventos.index');
 });
 
 // LOGIN
@@ -36,7 +38,7 @@ Route::get('/login', function () {
     return view('Login');
 })->name('login');
 Route::post('/login/auth', [LoginController::class, 'authenticate'])->name('login.auth');
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout'); 
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // REGISTRO
 Route::get('/register', function () {
@@ -44,46 +46,45 @@ Route::get('/register', function () {
 })->name('register');
 Route::post('/register', [RegisterController::class, 'store'])->name('register.create');
 
-// Recuperación de Contraseña (vista temporal)
+// Recuperación de Contraseña
 Route::get('/forgot-password', function () {
     return view('welcome');
 })->name('password.request');
 
 // ----------------------------------------------------
-// 2. RUTAS DE APLICACIÓN (Generalmente requieren Auth middleware)
+// 2. RUTAS DE APLICACIÓN (Generalmente requieren Auth)
 // ----------------------------------------------------
 
 Route::middleware(['auth'])->group(function () {
 
-    // DASHBOARD (Suele ser una redirección o el índice de eventos)
     Route::get('/dashboard', function () {
         return redirect()->route('eventos.index');
     })->name('dashboard');
 
-    // EVENTOS (Visible para todos)
+    // EVENTOS (lista)
     Route::get('/eventos', [EventoController::class, 'index'])->name('eventos.index');
 
-    // PERFIL (Visible para todos)
+    // PERFIL
     Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
     Route::post('/perfil', [PerfilController::class, 'update'])->name('perfil.update');
     Route::get('/perfil/configuracion', function () {
         return view('ConfiguracionPerfil');
     })->name('perfil.configuracion');
-<<<<<<< HEAD
-=======
-    
-    // RUTAS DE EVENTOS (Detalles - visible para todos)
+
+    // RUTAS DE EVENTOS Y PROYECTOS (DETALLES)
     Route::get('/eventos/{evento}', [EventoController::class, 'show'])->name('eventos.show');
     Route::post('/eventos/{evento}/join', [EventoController::class, 'join'])->name('eventos.join');
     Route::post('/eventos/{evento}/leave', [EventoController::class, 'leave'])->name('eventos.leave');
 
-    // Solicitud de constancia
+    // Solicitud de constancia (Rutas nuevas en main)
     Route::get('/constancias/solicitar', [SolicitudController::class, 'create'])->name('solicitudes.create');
     Route::post('/constancias/solicitar', [SolicitudController::class, 'store'])->name('solicitudes.store');
->>>>>>> main
 });
 
+// ----------------------------------------------------
 // RUTAS SOLO PARA PARTICIPANTES
+// ----------------------------------------------------
+
 Route::middleware(['auth', 'participante'])->group(function () {
 
     // EQUIPOS
@@ -95,9 +96,10 @@ Route::middleware(['auth', 'participante'])->group(function () {
     Route::delete('/equipos/{equipo}/members/{participante}', [EquipoController::class, 'removeMember'])->name('equipos.removeMember');
     Route::put('/equipos/{equipo}/members/{participante}/role', [EquipoController::class, 'updateMemberRole'])->name('equipos.updateMemberRole');
 
-    // PROYECTOS (Las rutas específicas deben ir antes de las parametrizadas)
+    // PROYECTOS
     Route::get('/proyectos/registrar', [ProyectoController::class, 'create'])->name('proyectos.registrar');
     Route::post('/proyectos/store', [ProyectoController::class, 'store'])->name('proyectos.store');
+    Route::get('/proyectos/{id}', [ProyectoController::class, 'show'])->name('proyectos.show');
 
     // PROGRESO
     Route::get('/progreso', [ProgresoController::class, 'index'])->name('progreso.index');
@@ -105,25 +107,23 @@ Route::middleware(['auth', 'participante'])->group(function () {
     // AVANCES
     Route::post('/avances/store', [AvanceController::class, 'store'])->name('avances.store');
 
-    // CONSTANCIAS (Rutas del Participante)
-    // 1. Vista principal de constancias (donde se ven la lista)
+    // CONSTANCIAS (Participante)
     Route::get('/constancia', [ConstanciaController::class, 'index'])->name('constancia.index');
-
-    // 2. Ruta para descargar el archivo PDF (utiliza el modelo Constancia)
     Route::get('/constancias/{constancia}/descargar', [ConstanciaController::class, 'downloadCertificate'])->name('constancias.descargar');
-
     Route::get('/constancias/{id}/generar', [ConstanciaController::class, 'generarPDF'])->name('constancias.generar');
 });
 
+// ----------------------------------------------------
 // RUTAS SOLO PARA JUECES
+// ----------------------------------------------------
+
 Route::middleware(['auth', 'juez'])->group(function () {
-    // PROYECTOS ASIGNADOS PARA CALIFICAR
+
     Route::get('/juez/proyectos', [JuezProyectoController::class, 'index'])->name('juez.proyectos.index');
     Route::get('/juez/proyectos/{proyecto}', [JuezProyectoController::class, 'show'])->name('juez.proyectos.show');
     Route::post('/juez/proyectos/{proyecto}/calificar', [JuezProyectoController::class, 'guardarCalificacion'])->name('juez.proyectos.calificar');
     Route::get('/juez/mis-calificaciones', [JuezProyectoController::class, 'misCalificaciones'])->name('juez.mis-calificaciones');
 
-    // EVALUACIÓN (JUECES) - LEGACY
     Route::get('/evaluacion', function () {
         return redirect()->route('juez.proyectos.index');
     })->name('proyectos.evaluacion');
@@ -132,27 +132,30 @@ Route::middleware(['auth', 'juez'])->group(function () {
         return redirect()->route('juez.mis-calificaciones');
     })->name('proyectos.seguimiento');
 
-    // CONSTANCIAS
-    Route::get('/juez/constancias', [ConstanciaController::class, 'indexJuez'])
-        ->name('constancia.juez.index');
-
-    Route::get('/juez/constancias/{id}/generar', [ConstanciaController::class, 'generarPDFJuez'])
-        ->name('constancia.juez.generar');
+    // CONSTANCIAS JUEZ
+    Route::get('/juez/constancias', [ConstanciaController::class, 'indexJuez'])->name('constancia.juez.index');
+    Route::get('/juez/constancias/{id}/generar', [ConstanciaController::class, 'generarPDFJuez'])->name('constancia.juez.generar');
 });
 
 // ----------------------------------------------------
-// 3. RUTAS DE ADMINISTRACIÓN (Requieren el middleware 'admin')
+// 3. RUTAS ADMIN
 // ----------------------------------------------------
 
 Route::middleware(['auth', 'admin'])->group(function () {
-    // Crear Evento (solo Admins) - DEBE IR ANTES DE /eventos/{evento}
-    Route::get('/eventos/crear', [EventoController::class, 'create'])->name('eventos.crear');
-    Route::post('/eventos', [EventoController::class, 'store'])->name('eventos.store');
 
-    // Eliminar Evento (solo Admins)
-    Route::delete('/eventos/{evento}', [EventoController::class, 'destroy'])->name('eventos.destroy');
+    // Dashboard Admin
+    Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/dashboard/export-pdf', [DashboardController::class, 'exportPdf'])->name('admin.dashboard.export-pdf');
+    Route::get('/admin/dashboard/export-excel', [DashboardController::class, 'exportExcel'])->name('admin.dashboard.export-excel');
 
-    // GESTIÓN DE USUARIOS (ADMIN)
+    // Eventos Admin
+    Route::get('/admin/eventos/crear', [EventoController::class, 'create'])->name('eventos.crear');
+    Route::post('/admin/eventos', [EventoController::class, 'store'])->name('eventos.store');
+    Route::get('/admin/eventos/{evento}/editar', [EventoController::class, 'edit'])->name('eventos.edit');
+    Route::put('/admin/eventos/{evento}', [EventoController::class, 'update'])->name('eventos.update');
+    Route::delete('/admin/eventos/{evento}', [EventoController::class, 'destroy'])->name('eventos.destroy');
+
+    // Usuarios Admin
     Route::get('/admin/usuarios', [UserController::class, 'index'])->name('admin.usuarios.index');
     Route::get('/admin/usuarios/crear', [UserController::class, 'create'])->name('admin.usuarios.create');
     Route::post('/admin/usuarios', [UserController::class, 'store'])->name('admin.usuarios.store');
@@ -161,7 +164,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::put('/admin/usuarios/{usuario}', [UserController::class, 'update'])->name('admin.usuarios.update');
     Route::delete('/admin/usuarios/{usuario}', [UserController::class, 'destroy'])->name('admin.usuarios.destroy');
 
-    // GESTIÓN DE EQUIPOS (ADMIN)
+    // Equipos Admin
     Route::get('/admin/equipos', [AdminEquipoController::class, 'index'])->name('admin.equipos.index');
     Route::get('/admin/equipos/crear', [AdminEquipoController::class, 'create'])->name('admin.equipos.create');
     Route::post('/admin/equipos', [AdminEquipoController::class, 'store'])->name('admin.equipos.store');
@@ -171,7 +174,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/admin/equipos/{equipo}', [AdminEquipoController::class, 'destroy'])->name('admin.equipos.destroy');
     Route::delete('/admin/equipos/{equipo}/participantes/{participanteId}', [AdminEquipoController::class, 'removeParticipant'])->name('admin.equipos.removeParticipant');
 
-    // GESTIÓN DE PROYECTOS Y ASIGNACIÓN A JUECES (ADMIN)
+    // Proyectos Admin
     Route::get('/admin/proyectos', [AdminProyectoController::class, 'index'])->name('admin.proyectos.index');
     Route::get('/admin/proyectos/{proyecto}/asignar-jueces', [AdminProyectoController::class, 'asignarJueces'])->name('admin.proyectos.asignar-jueces');
     Route::post('/admin/proyectos/{proyecto}/asignacion', [AdminProyectoController::class, 'guardarAsignacion'])->name('admin.proyectos.guardar-asignacion');
@@ -179,39 +182,12 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin/proyectos/{proyecto}/calificaciones', [AdminProyectoController::class, 'verCalificaciones'])->name('admin.proyectos.ver-calificaciones');
     Route::get('/admin/rankings', [AdminProyectoController::class, 'rankings'])->name('admin.rankings');
 
-    // CONSTANCIAS (Rutas del Administrador)
-    // 1. Vista de Gestión (Admin ve la lista de participantes de un evento finalizado)
+    // CONSTANCIAS ADMIN
     Route::get('/admin/eventos/{evento}/constancia', [ConstanciaController::class, 'manageCertificates'])->name('constancia.gestion');
-
-    // 2. Generar y Guardar Constancia PDF (Recibe participante y evento IDs)
     Route::post('/admin/participante/{participante}/evento/{evento}/generar-constancia', [ConstanciaController::class, 'generateCertificate'])->name('constancia.generar');
-<<<<<<< HEAD
-});
 
-// RUTAS DE EVENTOS Y PROYECTOS (Detalles - visible para todos autenticados)
-Route::middleware(['auth'])->group(function () {
-    // Proyectos
-    Route::get('/proyectos/{id}', [ProyectoController::class, 'show'])->name('proyectos.show');
-
-    // Eventos
-    Route::get('/eventos/{evento}', [EventoController::class, 'show'])->name('eventos.show');
-    Route::post('/eventos/{evento}/join', [EventoController::class, 'join'])->name('eventos.join');
-    Route::post('/eventos/{evento}/leave', [EventoController::class, 'leave'])->name('eventos.leave');
-=======
-
-    // VISTA PARA ADMIN (listar solicitudes)
-Route::get('/admin/solicitudes', [App\Http\Controllers\SolicitudAdminController::class, 'index'])
-    ->middleware(['auth'])
-    ->name('admin.solicitudes');
-
-// Aprobar
-Route::post('/admin/solicitudes/{id}/aprobar', [App\Http\Controllers\SolicitudAdminController::class, 'aprobar'])
-    ->middleware(['auth'])
-    ->name('admin.solicitudes.aprobar');
-
-// Rechazar
-Route::post('/admin/solicitudes/{id}/rechazar', [App\Http\Controllers\SolicitudAdminController::class, 'rechazar'])
-    ->middleware(['auth'])
-    ->name('admin.solicitudes.rechazar');
->>>>>>> main
+    // Solicitudes Admin (del main)
+    Route::get('/admin/solicitudes', [App\Http\Controllers\SolicitudAdminController::class, 'index'])->name('admin.solicitudes');
+    Route::post('/admin/solicitudes/{id}/aprobar', [App\Http\Controllers\SolicitudAdminController::class, 'aprobar'])->name('admin.solicitudes.aprobar');
+    Route::post('/admin/solicitudes/{id}/rechazar', [App\Http\Controllers\SolicitudAdminController::class, 'rechazar'])->name('admin.solicitudes.rechazar');
 });
