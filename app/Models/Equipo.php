@@ -10,7 +10,13 @@ class Equipo extends Model
     use SoftDeletes;
 
     protected $table = 'equipos';
-    protected $fillable = ['nombre', 'logo_path'];
+    protected $fillable = ['nombre', 'logo_path', 'evento_id'];
+
+    // Relación con evento (N:1)
+    public function evento()
+    {
+        return $this->belongsTo(Evento::class, 'evento_id');
+    }
 
     // Relación con participantes (N:M a través de equipo_participante)
     public function participantes()
