@@ -378,6 +378,7 @@
 
                     {{-- Administración: visible solo para Admins --}}
                     @if(Auth::user() && Auth::user()->hasRole('Admin'))
+<<<<<<< HEAD
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-gear me-1"></i>Administración
@@ -393,6 +394,15 @@
                             </ul>
                         </li>
                     @endif
+=======
+    <li class="nav-item">
+        <a class="nav-link @yield('nav_solicitudes_admin')" 
+           href="{{ route('admin.solicitudes') }}">
+            <i class="bi bi-patch-check-fill me-1"></i>Solicitudes de Constancias
+        </a>
+    </li>
+@endif
+>>>>>>> main
 
                     {{-- Perfil: visible para todos --}}
                     <li class="nav-item">

@@ -15,24 +15,20 @@ class SolicitudConstancia extends Model
         'fecha_evento',
         'tipo',
         'motivo',
-        'evidencia_path',
-        'datos_personalizados',
         'comentario',
+        'evidencia_path',
         'estatus',
-        'respuesta_admin',
-        'admin_id'
     ];
 
-    public function participante() {
+    // Relación con usuario (participante)
+    public function participante()
+    {
         return $this->belongsTo(User::class, 'participante_id');
     }
 
-    public function evento() {
+    // Relación con evento
+    public function evento()
+    {
         return $this->belongsTo(Evento::class, 'evento_id');
     }
-
-    public function admin() {
-        return $this->belongsTo(User::class, 'admin_id');
-    }
 }
-

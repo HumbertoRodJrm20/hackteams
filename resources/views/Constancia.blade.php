@@ -25,7 +25,7 @@
             </select>
         </div>
         <div class="col-md-6 d-flex align-items-end">
-            <a href="#" class="btn btn-outline-success w-100">
+            <a href="{{ route('solicitudes.create') }}" class="btn btn-outline-success w-100">
                 <i class="bi bi-send-fill me-2"></i>Solicitar Nueva Constancia
             </a>
         </div>
@@ -77,6 +77,35 @@
         @endforelse
 
     </div>
+
+    <h3 class="fw-bold mt-4">Solicitudes de Constancia</h3>
+
+<div class="list-group mb-4">
+@forelse($solicitudes as $sol)
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+
+        <div>
+            <strong>{{ $sol->evento->nombre }}</strong><br>
+            <small>Estatus: 
+                @if($sol->estatus == 'Pendiente')
+                    <span class="badge bg-warning text-dark">{{ $sol->estatus }}</span>
+                @elseif($sol->estatus == 'Aprobado')
+                    <span class="badge bg-success">{{ $sol->estatus }}</span>
+                @else
+                    <span class="badge bg-danger">{{ $sol->estatus }}</span>
+                @endif
+            </small>
+            @if($sol->estatus == 'Rechazado')
+                <br><small class="text-danger">Motivo: {{ $sol->comentario }}</small>
+            @endif
+        </div>
+
+    </li>
+@empty
+    <div class="alert alert-info">No tienes solicitudes registradas.</div>
+@endforelse
+</div>
+
 
 </div>
 @endsection
