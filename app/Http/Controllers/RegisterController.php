@@ -23,6 +23,8 @@ class RegisterController extends Controller
 
     /**
      * Procesa y almacena los datos de un nuevo usuario.
+     * IMPORTANTE: El registro público es SOLO para Participantes.
+     * Los Jueces y Admins deben ser creados por administradores en el panel de admin.
      */
     public function store(Request $request)
     {
@@ -45,8 +47,7 @@ class RegisterController extends Controller
             ]);
 
             // 3. CREACIÓN DE PARTICIPANTE (Tabla 'participantes')
-            // Se asume que 'carrera_id' es NULL al inicio (o lo pides en el formulario).
-            // Si falta el Modelo Participante, esta línea fallará.
+            // Solo los usuarios que se registran públicamente son participantes
             Participante::create([
                 'user_id' => $user->id,
                 // 'carrera_id' => $request->carrera_id ?? null,
@@ -54,27 +55,29 @@ class RegisterController extends Controller
             ]);
 
             // 4. ASIGNACIÓN DE ROL (Tabla 'user_rol')
+            // Solo asignamos rol de Participante en registro público
             $rolParticipante = Rol::where('nombre', 'Participante')->first();
 
             if (!$rolParticipante) {
                  // Si el rol no existe (porque el seeder no se ejecutó), lanzamos una excepción.
                  throw new \Exception("El rol 'Participante' no existe en la base de datos.");
             }
-            
+
+            // Asignar SOLO el rol de Participante
             $user->roles()->attach($rolParticipante->id);
-            
+
             DB::commit(); // Si todo es exitoso, confirmamos la transacción.
 
         } catch (\Exception $e) {
             DB::rollBack(); // Si algo falla (modelo, rol, DB), se revierte todo.
             // Para el debugging, puedes usar dd($e->getMessage());
-            
+
             // Lanza un error genérico para el usuario
             throw ValidationException::withMessages([
                 'registro_error' => ['No se pudo completar el registro. Por favor, contacte al administrador. (Fallo en Rol o Participante)'],
             ])->redirectTo(route('register'));
         }
-        
+
         // 5. AUTENTICACIÓN Y REDIRECCIÓN
         Auth::login($user);
 
