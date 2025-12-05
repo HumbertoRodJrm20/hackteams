@@ -10,11 +10,17 @@ use App\Http\Controllers\EquipoController;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\AvanceController;
 use App\Http\Controllers\ProgresoController;
+<<<<<<< HEAD
 use App\Http\Controllers\ConstanciaController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminEquipoController;
 use App\Http\Controllers\AdminProyectoController;
 use App\Http\Controllers\JuezProyectoController;
+=======
+use App\Http\Controllers\ConstanciaController; 
+use App\Http\Controllers\SolicitudController;
+
+>>>>>>> main
 
 // ----------------------------------------------------
 // 1. AUTENTICACIÓN (Rutas sin protección de sesión)
@@ -63,6 +69,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/perfil/configuracion', function () {
         return view('ConfiguracionPerfil');
     })->name('perfil.configuracion');
+<<<<<<< HEAD
+=======
+    
+    // RUTAS DE EVENTOS (Detalles - visible para todos)
+    Route::get('/eventos/{evento}', [EventoController::class, 'show'])->name('eventos.show');
+    Route::post('/eventos/{evento}/join', [EventoController::class, 'join'])->name('eventos.join');
+    Route::post('/eventos/{evento}/leave', [EventoController::class, 'leave'])->name('eventos.leave');
+
+    // Solicitud de constancia
+    Route::get('/constancias/solicitar', [SolicitudController::class, 'create'])->name('solicitudes.create');
+    Route::post('/constancias/solicitar', [SolicitudController::class, 'store'])->name('solicitudes.store');
+>>>>>>> main
 });
 
 // RUTAS SOLO PARA PARTICIPANTES
@@ -167,6 +185,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     // 2. Generar y Guardar Constancia PDF (Recibe participante y evento IDs)
     Route::post('/admin/participante/{participante}/evento/{evento}/generar-constancia', [ConstanciaController::class, 'generateCertificate'])->name('constancia.generar');
+<<<<<<< HEAD
 });
 
 // RUTAS DE EVENTOS Y PROYECTOS (Detalles - visible para todos autenticados)
@@ -178,4 +197,21 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/eventos/{evento}', [EventoController::class, 'show'])->name('eventos.show');
     Route::post('/eventos/{evento}/join', [EventoController::class, 'join'])->name('eventos.join');
     Route::post('/eventos/{evento}/leave', [EventoController::class, 'leave'])->name('eventos.leave');
+=======
+
+    // VISTA PARA ADMIN (listar solicitudes)
+Route::get('/admin/solicitudes', [App\Http\Controllers\SolicitudAdminController::class, 'index'])
+    ->middleware(['auth'])
+    ->name('admin.solicitudes');
+
+// Aprobar
+Route::post('/admin/solicitudes/{id}/aprobar', [App\Http\Controllers\SolicitudAdminController::class, 'aprobar'])
+    ->middleware(['auth'])
+    ->name('admin.solicitudes.aprobar');
+
+// Rechazar
+Route::post('/admin/solicitudes/{id}/rechazar', [App\Http\Controllers\SolicitudAdminController::class, 'rechazar'])
+    ->middleware(['auth'])
+    ->name('admin.solicitudes.rechazar');
+>>>>>>> main
 });

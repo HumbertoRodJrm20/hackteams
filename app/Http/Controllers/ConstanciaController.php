@@ -22,22 +22,27 @@ class ConstanciaController extends Controller
      * Muestra la vista 'Mis Constancias y Certificados' (Participante).
      */
     public function index()
-    {
-        // 1. Inicializar $constancias antes de los bloques if/else
-        $constancias = collect(); 
+{
+    $participante = Auth::user()->participante;
 
-        $participante = Auth::user()->participante;
-        
-        if ($participante) {
-            // Cargar todas las constancias generadas para este participante, incluyendo el evento asociado
-            $constancias = Constancia::where('participante_id', $participante->user_id)
-                                     ->with('evento')
-                                     ->get();
-        }
+    // Constancias generadas del participante
+    $constancias = collect();
 
-        //ENVIAMOS LA COLECCIÓN PLURAL $constancias
-        return view('Constancia', compact('constancias'));
+    if ($participante) {
+        $constancias = \App\Models\Constancia::where('participante_id', $participante->user_id)
+                            ->with('evento')
+                            ->get();
     }
+
+    // Solicitudes hechas por el participante
+    $solicitudes = \App\Models\SolicitudConstancia::where('participante_id', Auth::id())
+                    ->with('evento')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+
+    return view('Constancia', compact('constancias', 'solicitudes'));
+}
+
 
     public function generarPDF($id)
     {
