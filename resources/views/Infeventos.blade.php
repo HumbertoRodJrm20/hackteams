@@ -135,7 +135,7 @@
                     @elseif(Auth::user()->hasRole('Admin'))
                         {{-- Admin puede editar --}}
                         <div class="d-grid gap-2">
-                            <a href="{{ route('eventos.crear') }}" class="btn btn-warning btn-lg text-white">
+                            <a href="{{ route('eventos.edit', $evento->id) }}" class="btn btn-warning btn-lg text-white">
                                 <i class="bi bi-pencil-square me-2"></i>Editar Evento
                             </a>
                             <form action="{{ route('eventos.destroy', $evento->id) }}" method="POST">

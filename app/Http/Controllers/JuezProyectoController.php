@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Proyecto;
 use App\Models\Calificacion;
+use App\Models\Proyecto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -21,8 +21,8 @@ class JuezProyectoController extends Controller
         $proyectos = Proyecto::whereHas('jueces', function ($query) use ($juez) {
             $query->where('users.id', $juez->id);
         })->with('equipo', 'evento', 'calificaciones')
-          ->orderBy('created_at', 'desc')
-          ->paginate(10);
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
 
         return view('juez.proyectos-asignados', compact('proyectos'));
     }
@@ -36,7 +36,7 @@ class JuezProyectoController extends Controller
 
         // Verificar que el proyecto está asignado a este juez
         $asignado = $proyecto->jueces()->where('users.id', $juez->id)->exists();
-        if (!$asignado) {
+        if (! $asignado) {
             return redirect()->route('juez.proyectos.index')
                 ->with('error', 'No tienes permiso para ver este proyecto');
         }
@@ -64,7 +64,7 @@ class JuezProyectoController extends Controller
 
         // Verificar que el proyecto está asignado a este juez
         $asignado = $proyecto->jueces()->where('users.id', $juez->id)->exists();
-        if (!$asignado) {
+        if (! $asignado) {
             return redirect()->route('juez.proyectos.index')
                 ->with('error', 'No tienes permiso para calificar este proyecto');
         }
@@ -79,7 +79,7 @@ class JuezProyectoController extends Controller
 
             // Verificar que el criterio pertenece al evento del proyecto
             $criterio = $proyecto->evento->criterios()->find($validated['criterio_id']);
-            if (!$criterio) {
+            if (! $criterio) {
                 return redirect()->back()
                     ->with('error', 'El criterio no pertenece a este evento');
             }
@@ -102,8 +102,9 @@ class JuezProyectoController extends Controller
                 ->with('success', 'Calificación guardada correctamente');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return redirect()->back()
-                ->with('error', 'Error al guardar calificación: ' . $e->getMessage());
+                ->with('error', 'Error al guardar calificación: '.$e->getMessage());
         }
     }
 
@@ -118,7 +119,7 @@ class JuezProyectoController extends Controller
         $proyectos = Proyecto::whereHas('jueces', function ($query) use ($juez) {
             $query->where('users.id', $juez->id);
         })->with('equipo', 'evento', 'calificaciones')
-          ->get();
+            ->get();
 
         // Agrupar por evento
         $eventosPorCalificacion = $proyectos->groupBy('evento_id')->map(function ($proyectosDelEvento) {
@@ -130,9 +131,10 @@ class JuezProyectoController extends Controller
                     'titulo' => $proyecto->titulo,
                     'equipo' => $proyecto->equipo->nombre,
                     'promedio' => $proyecto->obtenerPromedio(),
+                    'puesto' => $proyecto->obtenerPuesto(),
                     'mi_calificacion' => $proyecto->calificaciones()
                         ->where('juez_user_id', Auth::id())
-                        ->first()?->puntuacion,
+                        ->avg('puntuacion'),
                     'total_calificaciones' => $proyecto->calificaciones->count(),
                 ];
             })->sortByDesc('promedio')->values();
