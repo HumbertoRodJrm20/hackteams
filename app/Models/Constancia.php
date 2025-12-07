@@ -12,6 +12,7 @@ class Constancia extends Model
         'participante_id',
         'evento_id',
         'tipo',
+        'lugar',
         'archivo_path',
         'codigo_qr',
     ];
@@ -27,7 +28,7 @@ class Constancia extends Model
     {
         return $this->attributes['archivo_path'];
     }
-    
+
     /**
      * Relación: Una constancia pertenece a un Participante.
      */

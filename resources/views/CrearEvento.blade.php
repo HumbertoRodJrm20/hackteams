@@ -13,6 +13,25 @@
                 <h1 class="fw-bold mb-0">Crear Nuevo Evento</h1>
             </div>
 
+            @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error:</strong> {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            @endif
+
+            @if ($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Errores de validación:</strong>
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            @endif
+
             <div class="card shadow-sm p-4">
                 
                 <form method="POST" action="{{ route('eventos.store') }}" enctype="multipart/form-data">
@@ -22,12 +41,18 @@
                     
                     <div class="mb-3">
                         <label for="nombre" class="form-label">Nombre del Evento</label>
-                        <input type="text" class="form-control form-control-lg" id="nombre" name="nombre" required value="{{ old('nombre') }}" placeholder="Ej: Hackatec 2026 o Innovatec Challenge">
+                        <input type="text" class="form-control form-control-lg @error('nombre') is-invalid @enderror" id="nombre" name="nombre" required value="{{ old('nombre') }}" placeholder="Ej: Hackatec 2026 o Innovatec Challenge">
+                        @error('nombre')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="mb-4">
                         <label for="descripcion" class="form-label">Descripción Detallada</label>
-                        <textarea class="form-control" id="descripcion" name="descripcion" rows="4" required placeholder="Describe el propósito, las reglas y los participantes objetivo.">{{ old('descripcion') }}</textarea>
+                        <textarea class="form-control @error('descripcion') is-invalid @enderror" id="descripcion" name="descripcion" rows="4" required placeholder="Describe el propósito, las reglas y los participantes objetivo.">{{ old('descripcion') }}</textarea>
+                        @error('descripcion')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <h4 class="mb-3 text-primary">Fechas y Estado</h4>
@@ -35,12 +60,18 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="fecha_inicio" class="form-label">Fecha de Inicio</label>
-                            <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" required value="{{ old('fecha_inicio') }}">
+                            <input type="date" class="form-control @error('fecha_inicio') is-invalid @enderror" id="fecha_inicio" name="fecha_inicio" required value="{{ old('fecha_inicio') }}">
+                            @error('fecha_inicio')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="col-md-6 mb-3">
                             <label for="fecha_fin" class="form-label">Fecha de Finalización</label>
-                            <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" required value="{{ old('fecha_fin') }}">
+                            <input type="date" class="form-control @error('fecha_fin') is-invalid @enderror" id="fecha_fin" name="fecha_fin" required value="{{ old('fecha_fin') }}">
+                            @error('fecha_fin')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
 
@@ -57,11 +88,14 @@
                     
                     <div class="mb-4">
                         <label for="estado" class="form-label">Estado Inicial</label>
-                        <select class="form-select" id="estado" name="estado" required>
-                            <option value="proximo">Próximo</option>
-                            <option value="activo">Activo</option>
-                            <option value="finalizado">Finalizado</option>
+                        <select class="form-select @error('estado') is-invalid @enderror" id="estado" name="estado">
+                            <option value="proximo" {{ old('estado') == 'proximo' ? 'selected' : '' }}>Próximo</option>
+                            <option value="activo" {{ old('estado') == 'activo' ? 'selected' : '' }}>Activo</option>
+                            <option value="finalizado" {{ old('estado') == 'finalizado' ? 'selected' : '' }}>Finalizado</option>
                         </select>
+                        @error('estado')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                         <small class="form-text text-muted">Define si el evento está en planeación, abierto a registro, o si ya terminó.</small>
                     </div>
                     
@@ -69,8 +103,11 @@
 
                     <div class="mb-4">
                         <label for="imagen" class="form-label">Subir Imagen Promocional (Banner)</label>
-                        <input class="form-control" type="file" id="imagen" name="imagen" accept="image/*">
-                        <small class="form-text text-muted">Sube una imagen atractiva para el evento (JPG, PNG).</small>
+                        <input class="form-control @error('imagen') is-invalid @enderror" type="file" id="imagen" name="imagen" accept="image/*">
+                        @error('imagen')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        <small class="form-text text-muted">Sube una imagen atractiva para el evento (JPG, PNG, máximo 2MB).</small>
                     </div>
 
                     <hr class="my-4">

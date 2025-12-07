@@ -15,6 +15,7 @@ class AdminEquipoController extends Controller
     public function index()
     {
         $equipos = Equipo::with(['participantes', 'proyectos', 'evento'])->paginate(15);
+
         return view('admin.equipos.index', compact('equipos'));
     }
 
@@ -25,6 +26,7 @@ class AdminEquipoController extends Controller
     {
         $eventos = Evento::where('estado', '!=', 'finalizado')->get();
         $participantes = Participante::with('user')->get();
+
         return view('admin.equipos.create', compact('eventos', 'participantes'));
     }
 
@@ -48,7 +50,7 @@ class AdminEquipoController extends Controller
         $equipo->participantes()->attach($validatedData['participante_lider_id'], ['es_lider' => true]);
 
         return redirect()->route('admin.equipos.index')
-            ->with('success', '¡El equipo "' . $equipo->nombre . '" ha sido creado con éxito!');
+            ->with('success', '¡El equipo "'.$equipo->nombre.'" ha sido creado con éxito!');
     }
 
     /**
@@ -57,6 +59,7 @@ class AdminEquipoController extends Controller
     public function show(Equipo $equipo)
     {
         $equipo->load(['participantes.user', 'proyectos', 'evento']);
+
         return view('admin.equipos.show', compact('equipo'));
     }
 
@@ -67,6 +70,7 @@ class AdminEquipoController extends Controller
     {
         $equipo->load('evento');
         $eventos = Evento::where('estado', '!=', 'finalizado')->get();
+
         return view('admin.equipos.edit', compact('equipo', 'eventos'));
     }
 
@@ -76,14 +80,14 @@ class AdminEquipoController extends Controller
     public function update(Request $request, Equipo $equipo)
     {
         $validatedData = $request->validate([
-            'nombre' => 'required|string|max:255|unique:equipos,nombre,' . $equipo->id,
+            'nombre' => 'required|string|max:255|unique:equipos,nombre,'.$equipo->id,
             'evento_id' => 'required|exists:eventos,id',
         ]);
 
         $equipo->update($validatedData);
 
         return redirect()->route('admin.equipos.index')
-            ->with('success', '¡El equipo "' . $equipo->nombre . '" ha sido actualizado con éxito!');
+            ->with('success', '¡El equipo "'.$equipo->nombre.'" ha sido actualizado con éxito!');
     }
 
     /**
@@ -95,7 +99,7 @@ class AdminEquipoController extends Controller
         $equipo->delete();
 
         return redirect()->route('admin.equipos.index')
-            ->with('success', 'El equipo "' . $nombre . '" ha sido eliminado exitosamente.');
+            ->with('success', 'El equipo "'.$nombre.'" ha sido eliminado exitosamente.');
     }
 
     /**

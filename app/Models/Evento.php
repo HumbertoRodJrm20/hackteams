@@ -11,7 +11,7 @@ class Evento extends Model
 
     protected $table = 'eventos';
 
-    protected $fillable = ['nombre', 'descripcion', 'fecha_inicio', 'fecha_fin', 'estado', 'max_equipos'];
+    protected $fillable = ['nombre', 'descripcion', 'fecha_inicio', 'fecha_fin', 'estado', 'max_equipos', 'imagen'];
 
     protected function casts(): array
     {

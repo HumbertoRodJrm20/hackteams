@@ -10,7 +10,9 @@ class Avance extends Model
     use SoftDeletes;
 
     protected $table = 'avances';
+
     protected $fillable = ['proyecto_id', 'descripcion', 'fecha'];
+
     protected $casts = [
         'fecha' => 'datetime',
     ];

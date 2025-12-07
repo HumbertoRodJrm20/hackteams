@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
@@ -66,7 +64,7 @@ return new class extends Migration
                 } else {
                     // Si ES Participante, asegurar que existe el record
                     $exists = DB::table('participantes')->where('user_id', $userId)->exists();
-                    if (!$exists) {
+                    if (! $exists) {
                         DB::table('participantes')->insert([
                             'user_id' => $userId,
                             'created_at' => now(),

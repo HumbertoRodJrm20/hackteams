@@ -21,6 +21,7 @@ class AgregarJuezMariaSeeder extends Seeder
 
         if ($existeJuez) {
             echo "⚠️  El usuario maria.rodriguez@test.com ya existe. No se creó duplicado.\n";
+
             return;
         }
 
@@ -37,7 +38,7 @@ class AgregarJuezMariaSeeder extends Seeder
         // Asignar Rol Juez
         DB::table('user_rol')->insert([
             'user_id' => $juezUserId,
-            'rol_id' => $rolJuezId
+            'rol_id' => $rolJuezId,
         ]);
 
         // Registrar como participante para constancias

@@ -55,12 +55,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(Participante::class, 'user_id');
     }
-    
+
     // Función de ayuda para vistas/middleware
     public function hasRole($role)
     {
         return $this->roles()->where('nombre', $role)->exists();
     }
-
-    
 }
