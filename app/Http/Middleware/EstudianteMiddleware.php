@@ -1,4 +1,5 @@
 <?php
+
 // app/Http/Middleware/EstudianteMiddleware.php
 
 namespace App\Http\Middleware;
@@ -12,7 +13,7 @@ class EstudianteMiddleware
     public function handle(Request $request, Closure $next)
     {
         // 🛑 CORRECCIÓN: Usamos hasRole('Participante') en lugar de ->role === 'estudiante'
-        if (Auth::check() && Auth::user()->hasRole('Participante')) { 
+        if (Auth::check() && Auth::user()->hasRole('Participante')) {
             return $next($request);
         }
 

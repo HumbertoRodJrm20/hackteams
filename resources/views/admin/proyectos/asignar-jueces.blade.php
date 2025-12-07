@@ -21,7 +21,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-muted small">Equipo</label>
-                            <p class="fw-bold">{{ $proyecto->equipo->nombre }}</p>
+                            <p class="fw-bold">{{ $proyecto->equipo ? $proyecto->equipo->nombre : 'Sin equipo' }}</p>
                         </div>
                     </div>
                     <div class="row">

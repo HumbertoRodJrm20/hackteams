@@ -1,12 +1,13 @@
 <?php
+
 // app/Http/Controllers/AvanceController.php
 
 namespace App\Http\Controllers;
 
+use App\Models\Avance;
+use App\Models\Proyecto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Proyecto;
-use App\Models\Avance;
 
 class AvanceController extends Controller
 {
@@ -28,7 +29,7 @@ class AvanceController extends Controller
         // Esta línea asume que ya definiste la relación en el modelo User/Participante
         $esMiembro = $proyecto->equipo->participantes->pluck('user_id')->contains($user->id);
 
-        if (!$esMiembro) {
+        if (! $esMiembro) {
             return redirect()->back()->with('error', 'No tienes permiso para registrar avances en este proyecto.');
         }
 

@@ -17,7 +17,7 @@ return new class extends Migration
     public function up(): void
     {
         // 1. Crear tabla evento_participante para la relación N:M
-        if (!Schema::hasTable('evento_participante')) {
+        if (! Schema::hasTable('evento_participante')) {
             Schema::create('evento_participante', function (Blueprint $table) {
                 $table->foreignId('evento_id')->constrained('eventos')->onDelete('cascade');
                 $table->foreignId('participante_id')->constrained('participantes', 'user_id')->onDelete('cascade');
@@ -27,7 +27,7 @@ return new class extends Migration
         }
 
         // 2. Asegurar que la tabla avances tiene la estructura correcta
-        if (!Schema::hasTable('avances')) {
+        if (! Schema::hasTable('avances')) {
             Schema::create('avances', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('proyecto_id')->constrained('proyectos')->onDelete('cascade');
@@ -39,7 +39,7 @@ return new class extends Migration
         }
 
         // 3. Asegurar que la tabla calificaciones tiene la estructura correcta
-        if (!Schema::hasTable('calificaciones')) {
+        if (! Schema::hasTable('calificaciones')) {
             Schema::create('calificaciones', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('proyecto_id')->constrained('proyectos')->onDelete('cascade');

@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Equipo;
+use App\Models\Evento;
+use App\Models\Proyecto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Evento;
-use App\Models\Equipo;
-use App\Models\Proyecto;
-use Illuminate\Support\Facades\DB;
 
 class ProyectoController extends Controller
 {
@@ -20,7 +19,7 @@ class ProyectoController extends Controller
         $participante = $user->participante;
 
         // 1. Verificar si el usuario es un participante
-        if (!$participante) {
+        if (! $participante) {
             return redirect()->route('dashboard')->with('error', 'Solo los participantes pueden registrar proyectos.');
         }
 
@@ -29,7 +28,7 @@ class ProyectoController extends Controller
             $query->where('participantes.user_id', $participante->user_id);
         })->first();
 
-        if (!$equipo) {
+        if (! $equipo) {
             return redirect()->route('equipos.index')->with('error', 'Debes estar en un equipo para registrar un proyecto.');
         }
 
@@ -53,7 +52,7 @@ class ProyectoController extends Controller
                 // Ordenamos los avances por fecha más reciente primero
                 $query->orderBy('fecha', 'desc');
             },
-            'calificaciones' // Para mostrar el puntaje promedio
+            'calificaciones', // Para mostrar el puntaje promedio
         ])->findOrFail($id); // Si no lo encuentra, Laravel lanza un 404
 
         // Opcional: Puedes agregar lógica de autorización aquí,
@@ -61,6 +60,7 @@ class ProyectoController extends Controller
 
         return view('DetalleProyecto', compact('proyecto'));
     }
+
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -73,7 +73,7 @@ class ProyectoController extends Controller
         $user = Auth::user();
         $participante = $user->participante;
 
-        if (!$participante) {
+        if (! $participante) {
             return redirect()->back()->with('error', 'Solo los participantes pueden registrar proyectos.');
         }
 
@@ -82,7 +82,7 @@ class ProyectoController extends Controller
             $query->where('participantes.user_id', $participante->user_id);
         })->first();
 
-        if (!$equipo) {
+        if (! $equipo) {
             return redirect()->back()->with('error', 'Debes estar en un equipo para registrar un proyecto.');
         }
 
@@ -93,14 +93,14 @@ class ProyectoController extends Controller
                 'titulo' => $validatedData['titulo'],
                 'resumen' => $validatedData['resumen'],
                 'link_repositorio' => $validatedData['link_repositorio'],
-                'estado' => 'pendiente' // Estado inicial
+                'estado' => 'pendiente', // Estado inicial
             ]);
 
             return redirect()->route('equipos.show', $equipo->id)
-                ->with('success', '¡El proyecto "' . $validatedData['titulo'] . '" se registró con éxito!');
+                ->with('success', '¡El proyecto "'.$validatedData['titulo'].'" se registró con éxito!');
 
         } catch (\Exception $e) {
-            return redirect()->back()->withInput()->with('error', 'Error al guardar el proyecto: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Error al guardar el proyecto: '.$e->getMessage());
         }
     }
 }

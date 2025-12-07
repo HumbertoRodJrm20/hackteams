@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
@@ -16,7 +17,7 @@ class UsersSeeder extends Seeder
 
         // Asegurarse que la tabla pivote de eventos también esté limpia.
         DB::table('evento_participante')->truncate();
-        //Asegurarse que la tabla constancias también esté limpia.
+        // Asegurarse que la tabla constancias también esté limpia.
         DB::table('constancias')->truncate();
 
         // Obtener el ID del Rol Admin (asumiendo que RolesSeeder ya se ejecutó)
@@ -40,7 +41,7 @@ class UsersSeeder extends Seeder
         // Asignar Rol Admin
         DB::table('user_rol')->insert([
             'user_id' => $adminUserId,
-            'rol_id' => $rolAdminId
+            'rol_id' => $rolAdminId,
         ]);
 
         // --- 2. Crear Usuario Participante de Prueba ---
@@ -55,7 +56,7 @@ class UsersSeeder extends Seeder
         // Asignar Rol Participante
         DB::table('user_rol')->insert([
             'user_id' => $participanteUserId,
-            'rol_id' => $rolParticipanteId
+            'rol_id' => $rolParticipanteId,
         ]);
         // Crear registro en la tabla 'participantes'
         DB::table('participantes')->insert([
@@ -66,7 +67,7 @@ class UsersSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-        //LÓGICA DE CONSTANCIAS
+        // LÓGICA DE CONSTANCIAS
         // A. Registrar la participación en la tabla pivote 'evento_participante'
         DB::table('evento_participante')->insert([
             'evento_id' => $eventoDePruebaId,
@@ -79,17 +80,16 @@ class UsersSeeder extends Seeder
         DB::table('constancias')->insert([
             'participante_id' => $participanteUserId,
             'evento_id' => $eventoDePruebaId,
-    
-        //NOMBRES DE COLUMNA PARA LA DB:
-        'tipo' => 'asistente',
-        'archivo_path' => 'constancias/constancia-ejemplo.pdf',
-        'codigo_qr' => \Illuminate\Support\Str::uuid(),
-            
-        'created_at' => now(),
-        'updated_at' => now(),
+
+            // NOMBRES DE COLUMNA PARA LA DB:
+            'tipo' => 'asistente',
+            'archivo_path' => 'constancias/constancia-ejemplo.pdf',
+            'codigo_qr' => \Illuminate\Support\Str::uuid(),
+
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
-        
         // Crear registro de Juez
         $juezUserId = DB::table('users')->insertGetId([
             'name' => 'Angel Zarate',
@@ -102,34 +102,34 @@ class UsersSeeder extends Seeder
         // Asignar Rol Juez
         DB::table('user_rol')->insert([
             'user_id' => $juezUserId,
-            'rol_id' => DB::table('roles')->where('nombre', 'Juez')->first()->id
+            'rol_id' => DB::table('roles')->where('nombre', 'Juez')->first()->id,
         ]);
 
         // Registrar juez como participante para permitir constancias
-DB::table('participantes')->insert([
-    'user_id' => $juezUserId,
-    'carrera_id' => $carreraId,
-    'matricula' => 'JUEZ123',
-    'created_at' => now(),
-    'updated_at' => now(),
-]);
+        DB::table('participantes')->insert([
+            'user_id' => $juezUserId,
+            'carrera_id' => $carreraId,
+            'matricula' => 'JUEZ123',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
-DB::table('evento_participante')->insert([
-    'evento_id' => $eventoDePruebaId,
-    'participante_id' => $juezUserId,
-    'created_at' => now(),
-    'updated_at' => now(),
-]);
+        DB::table('evento_participante')->insert([
+            'evento_id' => $eventoDePruebaId,
+            'participante_id' => $juezUserId,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
-DB::table('constancias')->insert([
-    'participante_id' => $juezUserId,
-    'evento_id' => $eventoDePruebaId,
-    'tipo' => 'asistente',
-    'archivo_path' => 'constancias/constancia-ejemplo.pdf',
-    'codigo_qr' => Str::uuid(),
-    'created_at' => now(),
-    'updated_at' => now(),
-]);
+        DB::table('constancias')->insert([
+            'participante_id' => $juezUserId,
+            'evento_id' => $eventoDePruebaId,
+            'tipo' => 'asistente',
+            'archivo_path' => 'constancias/constancia-ejemplo.pdf',
+            'codigo_qr' => Str::uuid(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         // --- 4. Crear Segundo Usuario Juez ---
         $juez2UserId = DB::table('users')->insertGetId([
@@ -143,7 +143,7 @@ DB::table('constancias')->insert([
         // Asignar Rol Juez
         DB::table('user_rol')->insert([
             'user_id' => $juez2UserId,
-            'rol_id' => $rolJuezId
+            'rol_id' => $rolJuezId,
         ]);
 
         // Registrar segundo juez como participante para permitir constancias

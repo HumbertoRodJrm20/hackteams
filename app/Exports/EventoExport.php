@@ -22,7 +22,7 @@ class EventoExport implements FromCollection, WithHeadings, WithMapping, WithSty
         $evento = Evento::with([
             'proyectos.equipo',
             'proyectos.calificaciones.criterio',
-            'criterios'
+            'criterios',
         ])
             ->where('id', $this->eventoId)
             ->first();
@@ -41,6 +41,7 @@ class EventoExport implements FromCollection, WithHeadings, WithMapping, WithSty
         // Asignar puestos
         return $proyectosOrdenados->map(function ($item, $index) {
             $item['puesto'] = $index + 1;
+
             return $item;
         });
     }

@@ -123,18 +123,37 @@
                                         </td>
                                         <td>{{ $miembro['email'] }}</td>
                                         <td>
-                                            @if($miembro['perfil'])
-                                                <span class="badge bg-info">{{ $miembro['perfil'] }}</span>
+                                            @if($isLeader && !$miembro['es_lider'])
+                                                <form action="{{ route('equipos.updateMemberRole', [$equipo->id, $miembro['id']]) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <select name="perfil_id" class="form-select form-select-sm" onchange="this.form.submit()" style="width: auto; display: inline-block;">
+                                                        <option value="">Sin rol</option>
+                                                        @foreach($perfiles as $perfil)
+                                                            <option value="{{ $perfil->id }}" {{ $miembro['perfil_id'] == $perfil->id ? 'selected' : '' }}>
+                                                                {{ $perfil->nombre }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </form>
                                             @else
-                                                <span class="text-muted small">Sin rol</span>
+                                                @if($miembro['perfil_nombre'])
+                                                    <span class="badge bg-info">{{ $miembro['perfil_nombre'] }}</span>
+                                                @else
+                                                    <span class="text-muted small">Sin rol</span>
+                                                @endif
                                             @endif
                                         </td>
                                         @if($isLeader && !$miembro['es_lider'])
                                             <td>
-                                                <button type="button" class="btn btn-sm btn-outline-danger"
-                                                        onclick="removeMember({{ $miembro['id'] }}, '{{ $miembro['nombre'] }}')">
-                                                    <i class="bi bi-trash me-1"></i>Remover
-                                                </button>
+                                                @if(!$eventoIniciado)
+                                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                                            onclick="removeMember({{ $miembro['id'] }}, '{{ $miembro['nombre'] }}')">
+                                                        <i class="bi bi-trash me-1"></i>Remover
+                                                    </button>
+                                                @else
+                                                    <span class="text-muted small"><i class="bi bi-lock me-1"></i>Bloqueado</span>
+                                                @endif
                                             </td>
                                         @endif
                                     </tr>
@@ -155,22 +174,31 @@
                     </h5>
 
                     {{-- Invitar Miembro --}}
-                    <div class="mb-4">
-                        <h6 class="fw-bold mb-3">Invitar Miembro</h6>
-                        <form action="{{ route('equipos.invite', $equipo->id) }}" method="POST">
-                            @csrf
-                            <div class="input-group">
-                                <input type="email" name="email" class="form-control form-control-sm"
-                                       placeholder="ejemplo@correo.com" required>
-                                <button class="btn btn-primary btn-sm" type="submit">
-                                    <i class="bi bi-plus-circle me-1"></i>Invitar
-                                </button>
+                    @if(!$eventoIniciado)
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">Invitar Miembro</h6>
+                            <form action="{{ route('equipos.invite', $equipo->id) }}" method="POST">
+                                @csrf
+                                <div class="input-group">
+                                    <input type="email" name="email" class="form-control form-control-sm"
+                                           placeholder="ejemplo@correo.com" required>
+                                    <button class="btn btn-primary btn-sm" type="submit">
+                                        <i class="bi bi-plus-circle me-1"></i>Invitar
+                                    </button>
+                                </div>
+                                <small class="text-muted d-block mt-2">
+                                    Ingresa el email del participante que deseas invitar
+                                </small>
+                            </form>
+                        </div>
+                    @else
+                        <div class="mb-4">
+                            <div class="alert alert-warning small mb-0">
+                                <i class="bi bi-lock me-2"></i>
+                                No puedes invitar miembros después de que el evento haya iniciado.
                             </div>
-                            <small class="text-muted d-block mt-2">
-                                Ingresa el email del participante que deseas invitar
-                            </small>
-                        </form>
-                    </div>
+                        </div>
+                    @endif
 
                     <hr>
 
@@ -191,7 +219,7 @@
                 </div>
 
                 {{-- Gestión General --}}
-                <div class="card shadow-sm p-4">
+                <div class="card shadow-sm p-4 mb-4">
                     <h5 class="mb-3 text-primary">
                         <i class="bi bi-gear me-2"></i>Gestión
                     </h5>
@@ -202,14 +230,66 @@
                         </a>
                     </div>
                 </div>
+
+                {{-- Zona de Peligro --}}
+                @if(!$eventoIniciado)
+                    <div class="card shadow-sm p-4 border-danger">
+                        <h5 class="mb-3 text-danger">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Zona de Peligro
+                        </h5>
+
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="confirmDeleteTeam()">
+                                <i class="bi bi-trash me-1"></i>Eliminar Equipo
+                            </button>
+                        </div>
+                        <small class="text-muted d-block mt-2">
+                            Esta acción eliminará permanentemente el equipo y todos sus datos.
+                        </small>
+                    </div>
+                @else
+                    <div class="card shadow-sm p-4 border-warning">
+                        <div class="alert alert-warning mb-0">
+                            <i class="bi bi-lock me-2"></i>
+                            <strong>Evento iniciado</strong><br>
+                            <small>No puedes eliminar el equipo una vez que el evento ha iniciado.</small>
+                        </div>
+                    </div>
+                @endif
             @else
-                <div class="card shadow-sm p-4">
+                <div class="card shadow-sm p-4 mb-4">
                     <div class="alert alert-info mb-0">
                         <i class="bi bi-info-circle me-2"></i>
                         <strong>Eres miembro</strong><br>
                         <small>Solo el líder del equipo puede administrar miembros.</small>
                     </div>
                 </div>
+
+                {{-- Opción para salir del equipo --}}
+                @if(!$eventoIniciado)
+                    <div class="card shadow-sm p-4">
+                        <h5 class="mb-3 text-primary">
+                            <i class="bi bi-box-arrow-right me-2"></i>Acciones
+                        </h5>
+
+                        <div class="d-grid">
+                            <button type="button" class="btn btn-outline-warning btn-sm" onclick="confirmLeaveTeam()">
+                                <i class="bi bi-box-arrow-right me-1"></i>Salir del Equipo
+                            </button>
+                        </div>
+                        <small class="text-muted d-block mt-2">
+                            Al salir, dejarás de ser miembro de este equipo.
+                        </small>
+                    </div>
+                @else
+                    <div class="card shadow-sm p-4">
+                        <div class="alert alert-warning mb-0">
+                            <i class="bi bi-lock me-2"></i>
+                            <strong>Evento iniciado</strong><br>
+                            <small>No puedes salir del equipo una vez que el evento ha iniciado.</small>
+                        </div>
+                    </div>
+                @endif
             @endif
         </div>
     </div>
@@ -239,6 +319,63 @@
     </div>
 </div>
 
+{{-- Modal para confirmar salida del equipo --}}
+<div class="modal fade" id="leaveModal" tabindex="-1" aria-labelledby="leaveModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="leaveModalLabel">Salir del Equipo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas salir del equipo <strong>{{ $equipo->nombre }}</strong>?
+                Esta acción no se puede deshacer.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form action="{{ route('equipos.leave', $equipo->id) }}" method="POST" style="display:inline;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-warning">Salir del Equipo</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- Modal para confirmar eliminación del equipo --}}
+<div class="modal fade" id="deleteTeamModal" tabindex="-1" aria-labelledby="deleteTeamModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteTeamModalLabel">Eliminar Equipo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <strong>¡Advertencia!</strong> Esta acción es irreversible.
+                </div>
+                <p>¿Estás seguro de que deseas eliminar permanentemente el equipo <strong>{{ $equipo->nombre }}</strong>?</p>
+                <p class="mb-0">Se eliminarán:</p>
+                <ul>
+                    <li>Todos los miembros del equipo</li>
+                    <li>Proyectos asociados</li>
+                    <li>Toda la información relacionada</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form action="{{ route('equipos.destroy', $equipo->id) }}" method="POST" style="display:inline;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Eliminar Equipo</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section('scripts')
 <script>
 function removeMember(memberId, memberName) {
@@ -246,6 +383,16 @@ function removeMember(memberId, memberName) {
     document.getElementById('removeForm').action = `/equipos/{{ $equipo->id }}/members/${memberId}`;
 
     const modal = new bootstrap.Modal(document.getElementById('removeModal'));
+    modal.show();
+}
+
+function confirmLeaveTeam() {
+    const modal = new bootstrap.Modal(document.getElementById('leaveModal'));
+    modal.show();
+}
+
+function confirmDeleteTeam() {
+    const modal = new bootstrap.Modal(document.getElementById('deleteTeamModal'));
     modal.show();
 }
 </script>

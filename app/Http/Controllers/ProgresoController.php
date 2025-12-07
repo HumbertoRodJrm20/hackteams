@@ -16,7 +16,7 @@ class ProgresoController extends Controller
         $participante = $user->participante;
 
         // Si el usuario no es participante, mostrar progreso vacío
-        if (!$participante) {
+        if (! $participante) {
             return view('Progreso', ['proyectos' => collect()]);
         }
 
@@ -24,8 +24,8 @@ class ProgresoController extends Controller
         $equipos = Equipo::whereHas('participantes', function ($query) use ($participante) {
             $query->where('participantes.user_id', $participante->user_id);
         })
-        ->with('proyectos.evento')
-        ->get();
+            ->with('proyectos.evento')
+            ->get();
 
         // Extraer todos los proyectos de los equipos
         $proyectos = $equipos->flatMap(function ($equipo) {

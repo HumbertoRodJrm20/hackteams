@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Calificacion;
+use App\Models\CriterioEvaluacion;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use App\Models\Calificacion; // Asegúrate de crear este modelo si no existe
-use App\Models\Proyecto;
-use App\Models\CriterioEvaluacion; // Asegúrate de que el modelo coincida con tu migración
+use Illuminate\Support\Facades\Auth; // Asegúrate de crear este modelo si no existe
+use Illuminate\Support\Facades\DB; // Asegúrate de que el modelo coincida con tu migración
 
 class CalificacionController extends Controller
 {
@@ -28,9 +27,9 @@ class CalificacionController extends Controller
         $puntajes = $validated['puntaje'];
 
         // 2. Obtener los criterios de la base de datos
-        // NOTA: Asumimos que el nombre del criterio en la DB (columna 'nombre') 
+        // NOTA: Asumimos que el nombre del criterio en la DB (columna 'nombre')
         // coincide con el slug usado en el formulario ('innovacion', 'diseno', etc.)
-        
+
         $criteriosDb = CriterioEvaluacion::whereIn('nombre', array_keys($puntajes))->get()->keyBy(function ($criterio) {
             return \Str::slug($criterio->nombre);
         });
@@ -44,14 +43,14 @@ class CalificacionController extends Controller
 
             foreach ($puntajes as $criterio_slug => $puntuacion) {
                 $criterio = $criteriosDb->get($criterio_slug);
-                
-                if (!$criterio) {
+
+                if (! $criterio) {
                     continue; // Saltar si no se encuentra el criterio por alguna razón
                 }
 
                 // 3. Guardar o Actualizar la calificación (Usando updateOrCreate)
                 // El campo 'criterio_id' en tu migración es FK, así que lo usamos.
-                
+
                 // NOTA: Tuvimos que crear el modelo Calificacion.php para que esto funcione.
                 Calificacion::updateOrCreate(
                     [
@@ -65,7 +64,7 @@ class CalificacionController extends Controller
                     ]
                 );
             }
-            
+
             DB::commit();
 
             // 4. Redirigir al seguimiento después de guardar exitosamente
@@ -73,8 +72,9 @@ class CalificacionController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+
             // Puedes registrar el error en logs: \Log::error($e);
-            return back()->with('error', 'Error al guardar las calificaciones: ' . $e->getMessage())->withInput();
+            return back()->with('error', 'Error al guardar las calificaciones: '.$e->getMessage())->withInput();
         }
     }
 }

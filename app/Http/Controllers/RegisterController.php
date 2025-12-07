@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\Participante;
 use App\Models\Rol; // <-- CRUCIAL: Asegúrate que esta línea esté descomentada.
-use App\Models\Participante; // <-- CRUCIAL: Asegúrate que esta línea esté descomentada.
+use App\Models\User; // <-- CRUCIAL: Asegúrate que esta línea esté descomentada.
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\DB; // Añadido para manejo de transacciones
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException; // Añadido para manejo de transacciones
 
 class RegisterController extends Controller
 {
@@ -18,7 +18,7 @@ class RegisterController extends Controller
      */
     public function create()
     {
-        return view('Register'); 
+        return view('Register');
     }
 
     /**
@@ -58,9 +58,9 @@ class RegisterController extends Controller
             // Solo asignamos rol de Participante en registro público
             $rolParticipante = Rol::where('nombre', 'Participante')->first();
 
-            if (!$rolParticipante) {
-                 // Si el rol no existe (porque el seeder no se ejecutó), lanzamos una excepción.
-                 throw new \Exception("El rol 'Participante' no existe en la base de datos.");
+            if (! $rolParticipante) {
+                // Si el rol no existe (porque el seeder no se ejecutó), lanzamos una excepción.
+                throw new \Exception("El rol 'Participante' no existe en la base de datos.");
             }
 
             // Asignar SOLO el rol de Participante

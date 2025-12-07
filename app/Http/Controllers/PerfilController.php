@@ -16,7 +16,7 @@ class PerfilController extends Controller
         if (Auth::check()) {
             // 2. Obtener la información completa del usuario actualmente logueado
             $user = Auth::user();
-            
+
             // 3. Pasar el objeto $user a la vista
             return view('Perfil', compact('user'));
         }
@@ -31,18 +31,18 @@ class PerfilController extends Controller
     public function update(Request $request)
     {
         // Aquí iría la lógica para validar y actualizar el nombre, email, o contraseña.
-        
+
         // Ejemplo de validación
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . Auth::id(), // Ignora el email actual
+            'email' => 'required|email|max:255|unique:users,email,'.Auth::id(), // Ignora el email actual
             // 'password' => 'nullable|string|min:8|confirmed', // Si incluyes cambio de password
         ]);
 
         $user = Auth::user();
         $user->name = $request->input('name');
         $user->email = $request->input('email');
-        
+
         // Si tienes más campos (como imagen de perfil, etc.), se actualizarían aquí.
 
         $user->save();

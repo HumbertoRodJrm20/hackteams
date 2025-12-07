@@ -18,7 +18,7 @@
                             <h2 class="fw-bold mb-2">{{ $proyecto->titulo }}</h2>
                             <p class="mb-0">
                                 <i class="bi bi-people-fill me-1"></i>
-                                <strong>Equipo:</strong> {{ $proyecto->equipo->nombre }}
+                                <strong>Equipo:</strong> {{ $proyecto->equipo ? $proyecto->equipo->nombre : 'Sin equipo' }}
                             </p>
                             <p class="mb-0">
                                 <i class="bi bi-calendar me-1"></i>

@@ -17,7 +17,7 @@ class EquipoController extends Controller
         $participante = $user->participante;
 
         // Si el usuario no es participante, mostrar equipos vacío
-        if (!$participante) {
+        if (! $participante) {
             return view('ListaEquipos', ['equipos' => collect()]);
         }
 
@@ -25,19 +25,20 @@ class EquipoController extends Controller
         $equipos = Equipo::whereHas('participantes', function ($query) use ($participante) {
             $query->where('participantes.user_id', $participante->user_id);
         })
-        ->with('participantes', 'proyectos.evento')
-        ->get()
-        ->map(function ($equipo) {
-            return [
-                'id' => $equipo->id,
-                'nombre' => $equipo->nombre,
-                'logo_path' => $equipo->logo_path,
-                'proyecto' => $equipo->proyectoActual()?->titulo ?? 'Sin proyecto',
-                'evento' => $equipo->proyectoActual()?->evento?->nombre ?? 'N/A',
-                'miembros' => $equipo->contarMiembros(),
-                'estado' => $equipo->proyectoActual()?->estado ?? 'pendiente'
-            ];
-        });
+            ->with('participantes', 'proyectos.evento', 'evento')
+            ->get()
+            ->map(function ($equipo) {
+                return [
+                    'id' => $equipo->id,
+                    'nombre' => $equipo->nombre,
+                    'logo_path' => $equipo->logo_path,
+                    'es_publico' => $equipo->es_publico,
+                    'proyecto' => $equipo->proyectoActual()?->titulo ?? 'Sin proyecto',
+                    'evento' => $equipo->evento?->nombre ?? ($equipo->proyectoActual()?->evento?->nombre ?? 'N/A'),
+                    'miembros' => $equipo->contarMiembros(),
+                    'estado' => $equipo->proyectoActual()?->estado ?? 'pendiente',
+                ];
+            });
 
         return view('ListaEquipos', ['equipos' => $equipos]);
     }
@@ -47,7 +48,13 @@ class EquipoController extends Controller
      */
     public function create()
     {
-        return view('RegistrarEquipo');
+        // Obtener eventos activos o próximos que NO hayan iniciado
+        $eventos = \App\Models\Evento::whereIn('estado', ['activo', 'proximo'])
+            ->where('fecha_inicio', '>', now())
+            ->orderBy('fecha_inicio', 'asc')
+            ->get();
+
+        return view('RegistrarEquipo', compact('eventos'));
     }
 
     /**
@@ -55,34 +62,93 @@ class EquipoController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'nombre' => 'required|string|unique:equipos|max:255',
-            'logo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
-        ]);
+        \Log::info('=== INICIO CREACIÓN DE EQUIPO ===');
+        \Log::info('Request data:', $request->all());
 
-        $equipo = new Equipo();
-        $equipo->nombre = $validated['nombre'];
-
-        if ($request->hasFile('logo_path')) {
-            $path = $request->file('logo_path')->store('equipos', 'public');
-            $equipo->logo_path = $path;
-        }
-
-        $equipo->save();
-
-        // Crear relación del usuario actual como líder del equipo
         $user = Auth::user();
         $participante = $user->participante;
 
-        if ($participante) {
-            $equipo->participantes()->attach($participante->user_id, [
-                'perfil_id' => null, // Se puede actualizar después
-                'es_lider' => true
-            ]);
+        if (! $participante) {
+            \Log::warning('Usuario no es participante');
+
+            return redirect()->back()
+                ->with('error', 'Debes estar registrado como participante para crear un equipo.');
         }
 
-        return redirect()->route('equipos.index')
-            ->with('success', 'Equipo "' . $equipo->nombre . '" creado exitosamente. Eres el líder del equipo.');
+        \Log::info('Participante ID: '.$participante->user_id);
+
+        try {
+            $validated = $request->validate([
+                'nombre' => 'required|string|unique:equipos|max:255',
+                'evento_id' => 'required|exists:eventos,id',
+                'es_publico' => 'required|boolean',
+                'logo_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            ]);
+
+            \Log::info('Validación exitosa:', $validated);
+
+            // Verificar si el evento ya inició
+            $evento = \App\Models\Evento::find($validated['evento_id']);
+            if ($evento && now()->gte($evento->fecha_inicio)) {
+                \Log::warning('El evento ya ha iniciado');
+
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'No puedes crear un equipo después de que el evento haya iniciado.');
+            }
+
+            // Verificar si el participante ya está en un equipo del mismo evento
+            if (Equipo::participanteTieneEquipoEnEvento($participante->user_id, $validated['evento_id'])) {
+                \Log::warning('Participante ya está en un equipo del mismo evento');
+
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Ya estás en un equipo de este evento. Solo puedes estar en un equipo por evento.');
+            }
+
+            $equipo = new Equipo;
+            $equipo->nombre = $validated['nombre'];
+            $equipo->evento_id = $validated['evento_id'];
+            $equipo->es_publico = $validated['es_publico'];
+
+            if ($request->hasFile('logo_path')) {
+                $path = $request->file('logo_path')->store('equipos', 'public');
+                $equipo->logo_path = $path;
+                \Log::info('Logo guardado en: '.$path);
+            }
+
+            $equipo->save();
+            \Log::info('Equipo guardado con ID: '.$equipo->id);
+
+            // Obtener el perfil "Líder de Proyecto" como rol por defecto
+            $perfilLider = \App\Models\Perfil::where('nombre', 'Líder de Proyecto')->first();
+
+            // Crear relación del usuario actual como líder del equipo con rol por defecto
+            $equipo->participantes()->attach($participante->user_id, [
+                'perfil_id' => $perfilLider?->id,
+                'es_lider' => true,
+            ]);
+            \Log::info('Participante agregado como líder con perfil: '.($perfilLider?->nombre ?? 'Sin perfil'));
+
+            $tipoEquipo = $equipo->es_publico ? 'público' : 'privado';
+            \Log::info('=== FIN CREACIÓN DE EQUIPO EXITOSA ===');
+
+            return redirect()->route('equipos.index')
+                ->with('success', "Equipo \"{$equipo->nombre}\" ({$tipoEquipo}) creado exitosamente. Eres el líder del equipo.");
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Error de validación:', $e->errors());
+
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Error al crear equipo: '.$e->getMessage());
+            \Log::error('Stack trace: '.$e->getTraceAsString());
+
+            return redirect()->back()
+                ->with('error', 'Error al crear equipo: '.$e->getMessage())
+                ->withInput();
+        }
     }
 
     /**
@@ -95,7 +161,7 @@ class EquipoController extends Controller
 
         // Verificar si el usuario es miembro del equipo
         $isMember = $equipo->participantes()->where('participantes.user_id', $participante->user_id)->exists();
-        if (!$isMember) {
+        if (! $isMember) {
             return redirect()->route('equipos.index')
                 ->with('error', 'No tienes acceso a este equipo.');
         }
@@ -106,6 +172,9 @@ class EquipoController extends Controller
             ->wherePivot('es_lider', true)
             ->exists();
 
+        // Obtener todos los perfiles disponibles
+        $perfiles = \App\Models\Perfil::all();
+
         // Obtener miembros del equipo con información completa
         $miembros = $equipo->participantes()
             ->with('user')
@@ -115,19 +184,29 @@ class EquipoController extends Controller
                     ->where('participantes.user_id', $participante->user_id)
                     ->first()
                     ->pivot;
+
+                $perfil = null;
+                if ($pivotData->perfil_id) {
+                    $perfil = \App\Models\Perfil::find($pivotData->perfil_id);
+                }
+
                 return [
                     'id' => $participante->user_id,
                     'nombre' => $participante->user->name,
                     'email' => $participante->user->email,
                     'es_lider' => $pivotData->es_lider,
-                    'perfil' => $pivotData->perfil_id // Se implementará después
+                    'perfil_id' => $pivotData->perfil_id,
+                    'perfil_nombre' => $perfil?->nombre,
                 ];
             });
 
         // Obtener proyecto del equipo
         $proyecto = $equipo->proyectoActual();
 
-        return view('DetalleEquipo', compact('equipo', 'miembros', 'isLeader', 'proyecto'));
+        // Verificar si el evento ya inició
+        $eventoIniciado = $equipo->evento && now()->gte($equipo->evento->fecha_inicio);
+
+        return view('DetalleEquipo', compact('equipo', 'miembros', 'isLeader', 'proyecto', 'perfiles', 'eventoIniciado'));
     }
 
     /**
@@ -137,14 +216,19 @@ class EquipoController extends Controller
     {
         $this->checkLeadership($equipo);
 
+        // Verificar si el evento ya inició
+        if ($equipo->evento && now()->gte($equipo->evento->fecha_inicio)) {
+            return back()->with('error', 'No puedes invitar miembros después de que el evento haya iniciado.');
+        }
+
         $validated = $request->validate([
-            'email' => 'required|email|exists:users,email'
+            'email' => 'required|email|exists:users,email',
         ]);
 
         $userToInvite = \App\Models\User::where('email', $validated['email'])->first();
         $participante = $userToInvite->participante;
 
-        if (!$participante) {
+        if (! $participante) {
             return back()->with('error', 'El usuario no está registrado como participante.');
         }
 
@@ -153,13 +237,18 @@ class EquipoController extends Controller
             return back()->with('info', 'Este participante ya está en el equipo.');
         }
 
+        // Verificar si ya está en otro equipo del mismo evento
+        if ($equipo->evento_id && Equipo::participanteTieneEquipoEnEvento($participante->user_id, $equipo->evento_id)) {
+            return back()->with('error', 'Este participante ya está en otro equipo del mismo evento. Solo puede estar en un equipo por evento.');
+        }
+
         // Agregar al equipo
         $equipo->participantes()->attach($participante->user_id, [
             'perfil_id' => null,
-            'es_lider' => false
+            'es_lider' => false,
         ]);
 
-        return back()->with('success', 'Se ha invitado a ' . $userToInvite->name . ' al equipo.');
+        return back()->with('success', 'Se ha invitado a '.$userToInvite->name.' al equipo.');
     }
 
     /**
@@ -168,6 +257,11 @@ class EquipoController extends Controller
     public function removeMember(Equipo $equipo, $participanteId)
     {
         $this->checkLeadership($equipo);
+
+        // Verificar si el evento ya inició
+        if ($equipo->evento && now()->gte($equipo->evento->fecha_inicio)) {
+            return back()->with('error', 'No puedes remover miembros después de que el evento haya iniciado.');
+        }
 
         $user = Auth::user();
 
@@ -189,16 +283,199 @@ class EquipoController extends Controller
         $this->checkLeadership($equipo);
 
         $validated = $request->validate([
-            'perfil_id' => 'nullable|exists:perfiles,id'
+            'perfil_id' => 'nullable|exists:perfiles,id',
         ]);
 
-        $equipo->participantes()
-            ->wherePivot('participante_id', $participanteId)
-            ->updateExistingPivot($participanteId, [
-                'perfil_id' => $validated['perfil_id']
-            ]);
+        $equipo->participantes()->updateExistingPivot($participanteId, [
+            'perfil_id' => $validated['perfil_id'],
+        ]);
 
-        return back()->with('success', 'El rol ha sido actualizado.');
+        $perfilNombre = $validated['perfil_id']
+            ? \App\Models\Perfil::find($validated['perfil_id'])->nombre
+            : 'Sin rol';
+
+        return back()->with('success', "El rol ha sido actualizado a: {$perfilNombre}");
+    }
+
+    /**
+     * Muestra equipos públicos disponibles para unirse.
+     */
+    public function equiposPublicos()
+    {
+        $user = Auth::user();
+        $participante = $user->participante;
+
+        if (! $participante) {
+            return view('EquiposPublicos', ['equiposPorEvento' => collect()]);
+        }
+
+        // Obtener todos los perfiles disponibles
+        $perfiles = \App\Models\Perfil::all();
+
+        // Obtener eventos activos
+        $eventos = \App\Models\Evento::whereIn('estado', ['activo', 'proximo'])
+            ->with(['equipos' => function ($query) {
+                $query->where('es_publico', true)->with('participantes.user');
+            }])
+            ->get();
+
+        $equiposPorEvento = $eventos->filter(function ($evento) {
+            return $evento->equipos->isNotEmpty();
+        })->map(function ($evento) use ($participante, $perfiles) {
+            // Verificar si el participante ya está en un equipo de este evento
+            $yaEnEquipo = Equipo::participanteTieneEquipoEnEvento($participante->user_id, $evento->id);
+
+            // Verificar si el evento ya inició
+            $eventoIniciado = now()->gte($evento->fecha_inicio);
+
+            return [
+                'evento' => $evento,
+                'eventoIniciado' => $eventoIniciado,
+                'equipos' => $evento->equipos->map(function ($equipo) use ($participante, $perfiles) {
+                    // Obtener los IDs de perfiles ya ocupados en este equipo
+                    $perfilesOcupados = \DB::table('equipo_participante')
+                        ->where('equipo_id', $equipo->id)
+                        ->whereNotNull('perfil_id')
+                        ->pluck('perfil_id')
+                        ->toArray();
+
+                    // Calcular perfiles disponibles
+                    $perfilesDisponibles = $perfiles->filter(function ($perfil) use ($perfilesOcupados) {
+                        return ! in_array($perfil->id, $perfilesOcupados);
+                    });
+
+                    return [
+                        'id' => $equipo->id,
+                        'nombre' => $equipo->nombre,
+                        'logo_path' => $equipo->logo_path,
+                        'miembros' => $equipo->contarMiembros(),
+                        'participantes' => $equipo->participantes,
+                        'yaSoyMiembro' => $equipo->participantes->contains('user_id', $participante->user_id),
+                        'perfiles_disponibles' => $perfilesDisponibles,
+                    ];
+                }),
+                'yaEnEquipo' => $yaEnEquipo,
+            ];
+        });
+
+        return view('EquiposPublicos', compact('equiposPorEvento'));
+    }
+
+    /**
+     * Permite a un participante unirse a un equipo público.
+     */
+    public function unirse(Equipo $equipo)
+    {
+        $user = Auth::user();
+        $participante = $user->participante;
+
+        if (! $participante) {
+            return redirect()->back()
+                ->with('error', 'Debes estar registrado como participante para unirte a un equipo.');
+        }
+
+        // Verificar si el evento ya inició
+        if ($equipo->evento && now()->gte($equipo->evento->fecha_inicio)) {
+            return redirect()->back()
+                ->with('error', 'No puedes unirte a un equipo después de que el evento haya iniciado.');
+        }
+
+        // Verificar que el equipo sea público
+        if (! $equipo->es_publico) {
+            return redirect()->back()
+                ->with('error', 'Este equipo es privado. Solo puedes unirte por invitación.');
+        }
+
+        // Verificar si ya está en un equipo del mismo evento
+        if (Equipo::participanteTieneEquipoEnEvento($participante->user_id, $equipo->evento_id)) {
+            return redirect()->back()
+                ->with('error', 'Ya estás en un equipo de este evento. Solo puedes estar en un equipo por evento.');
+        }
+
+        // Verificar si ya es miembro
+        if ($equipo->participantes()->where('participantes.user_id', $participante->user_id)->exists()) {
+            return redirect()->back()
+                ->with('info', 'Ya eres miembro de este equipo.');
+        }
+
+        // Agregar al equipo
+        $equipo->participantes()->attach($participante->user_id, [
+            'perfil_id' => null,
+            'es_lider' => false,
+        ]);
+
+        return redirect()->route('equipos.show', $equipo->id)
+            ->with('success', 'Te has unido exitosamente al equipo "'.$equipo->nombre.'".');
+    }
+
+    /**
+     * Permite a un miembro salirse del equipo.
+     */
+    public function leave(Equipo $equipo)
+    {
+        $user = Auth::user();
+        $participante = $user->participante;
+
+        if (! $participante) {
+            return redirect()->back()
+                ->with('error', 'Debes estar registrado como participante.');
+        }
+
+        // Verificar si el evento ya inició
+        if ($equipo->evento && now()->gte($equipo->evento->fecha_inicio)) {
+            return redirect()->back()
+                ->with('error', 'No puedes salir del equipo después de que el evento haya iniciado.');
+        }
+
+        // Verificar si es miembro del equipo
+        $isMember = $equipo->participantes()->where('participantes.user_id', $participante->user_id)->exists();
+        if (! $isMember) {
+            return redirect()->route('equipos.index')
+                ->with('error', 'No eres miembro de este equipo.');
+        }
+
+        // Verificar si es líder
+        $isLeader = $equipo->participantes()
+            ->where('participantes.user_id', $participante->user_id)
+            ->wherePivot('es_lider', true)
+            ->exists();
+
+        if ($isLeader) {
+            // Si es líder, verificar si hay otros miembros
+            $totalMiembros = $equipo->participantes()->count();
+            if ($totalMiembros > 1) {
+                return redirect()->back()
+                    ->with('error', 'Como líder, debes remover a todos los miembros antes de salir del equipo, o eliminar el equipo directamente.');
+            }
+        }
+
+        // Remover al participante del equipo
+        $equipo->participantes()->detach($participante->user_id);
+
+        return redirect()->route('equipos.index')
+            ->with('success', 'Has salido del equipo "'.$equipo->nombre.'" exitosamente.');
+    }
+
+    /**
+     * Elimina el equipo completo (solo para líderes).
+     */
+    public function destroy(Equipo $equipo)
+    {
+        $this->checkLeadership($equipo);
+
+        // Verificar si el evento ya inició
+        if ($equipo->evento && now()->gte($equipo->evento->fecha_inicio)) {
+            return redirect()->back()
+                ->with('error', 'No puedes eliminar el equipo después de que el evento haya iniciado.');
+        }
+
+        $nombreEquipo = $equipo->nombre;
+
+        // Eliminar el equipo (soft delete)
+        $equipo->delete();
+
+        return redirect()->route('equipos.index')
+            ->with('success', "El equipo \"{$nombreEquipo}\" ha sido eliminado exitosamente.");
     }
 
     /**
@@ -214,7 +491,7 @@ class EquipoController extends Controller
             ->wherePivot('es_lider', true)
             ->exists();
 
-        if (!$isLeader) {
+        if (! $isLeader) {
             abort(403, 'Solo el líder del equipo puede realizar esta acción.');
         }
     }

@@ -125,14 +125,14 @@
         <div class="container">
             {{-- Header --}}
             <div class="mb-5">
-                <a href="{{ route('equipos.index') }}" class="btn btn-sm" style="background-color: #6c757d; color: white; border: none;">
+                <a href="javascript:history.back()" class="btn btn-sm" style="background-color: #6c757d; color: white; border: none;">
                     <i class="bi bi-arrow-left me-2"></i>Volver
                 </a>
 
                 <div class="mt-4">
                     <h1 class="fw-bold proyecto-text">{{ $proyecto->titulo }}</h1>
                     <p class="lead proyecto-text-secondary">
-                        <i class="bi bi-people-fill me-2"></i>Equipo: <strong>{{ $proyecto->equipo->nombre }}</strong>
+                        <i class="bi bi-people-fill me-2"></i>Equipo: <strong>{{ $proyecto->equipo ? $proyecto->equipo->nombre : 'Sin equipo asignado' }}</strong>
                     </p>
                 </div>
             </div>
@@ -213,7 +213,7 @@
                             @endforelse
                         </div>
 
-                        @if (auth()->check() && $proyecto->equipo->participantes->pluck('user_id')->contains(auth()->id()))
+                        @if (auth()->check() && $proyecto->equipo && $proyecto->equipo->participantes->pluck('user_id')->contains(auth()->id()))
                             <div class="card-footer proyecto-card-footer text-center" style="border: none;">
                                 <button class="btn btn-sm" style="background-color: #3498db; color: white; border: none;" data-bs-toggle="modal" data-bs-target="#modalNuevoAvance">
                                     <i class="bi bi-plus-circle me-1"></i>Agregar Avance
