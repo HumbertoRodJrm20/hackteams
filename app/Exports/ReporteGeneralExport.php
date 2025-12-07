@@ -83,7 +83,7 @@ class ProyectosSheet implements FromCollection, WithHeadings, WithMapping, WithS
         $proyectos = Proyecto::with([
             'equipo',
             'evento',
-            'calificaciones.criterio'
+            'calificaciones.criterio',
         ])->get();
 
         // Pre-calcular todos los promedios

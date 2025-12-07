@@ -37,10 +37,11 @@ class CleanUserRoles extends Command
 
         if ($usersWithMultipleRoles->isEmpty()) {
             $this->info('✓ Todos los usuarios tienen solo un rol. No hay nada que limpiar.');
+
             return;
         }
 
-        $this->line('Se encontraron ' . $usersWithMultipleRoles->count() . ' usuario(s) con múltiples roles.');
+        $this->line('Se encontraron '.$usersWithMultipleRoles->count().' usuario(s) con múltiples roles.');
 
         foreach ($usersWithMultipleRoles as $record) {
             $userId = $record->user_id;
@@ -61,7 +62,7 @@ class CleanUserRoles extends Command
                 $primaryRole = 'Juez';
             }
 
-            $this->line("Usuario ID {$userId} ({$user->nombre}): Rol anterior [" . implode(', ', $roles) . "] → Nuevo rol: [{$primaryRole}]");
+            $this->line("Usuario ID {$userId} ({$user->nombre}): Rol anterior [".implode(', ', $roles)."] → Nuevo rol: [{$primaryRole}]");
 
             // Obtener el ID del rol primario
             $primaryRoleId = DB::table('roles')
@@ -85,7 +86,7 @@ class CleanUserRoles extends Command
                     DB::table('participantes')->where('user_id', $userId)->delete();
                 } else {
                     $exists = DB::table('participantes')->where('user_id', $userId)->exists();
-                    if (!$exists) {
+                    if (! $exists) {
                         DB::table('participantes')->insert([
                             'user_id' => $userId,
                             'created_at' => now(),

@@ -13,7 +13,15 @@
                 <h1 class="fw-bold mb-0">Crear Equipo</h1>
             </div>
 
-            {{-- Mensajes de error --}}
+            {{-- Mensajes de error de sesión --}}
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <strong>Error:</strong> {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+
+            {{-- Mensajes de error de validación --}}
             @if($errors->any())
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <strong>Error:</strong>
@@ -27,7 +35,7 @@
             @endif
 
             <div class="card shadow-sm p-4">
-                <form method="POST" action="{{ route('equipos.store') }}">
+                <form method="POST" action="{{ route('equipos.store') }}" enctype="multipart/form-data">
                     @csrf
 
                     {{-- Nombre del Equipo --}}
@@ -40,6 +48,59 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <small class="text-muted">Elige un nombre único y representativo</small>
+                    </div>
+
+                    {{-- Evento --}}
+                    <div class="mb-4">
+                        <label for="evento_id" class="form-label fw-bold">Evento</label>
+                        @if($eventos->isEmpty())
+                            <div class="alert alert-warning">
+                                <i class="bi bi-info-circle me-2"></i>
+                                No hay eventos disponibles para crear equipos. Los eventos disponibles ya han iniciado o no existen eventos próximos.
+                            </div>
+                            <a href="{{ route('equipos.index') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Volver a Mis Equipos
+                            </a>
+                        @else
+                            <select class="form-select form-select-lg @error('evento_id') is-invalid @enderror"
+                                    id="evento_id" name="evento_id" required>
+                                <option value="">Selecciona un evento</option>
+                                @foreach($eventos as $evento)
+                                    <option value="{{ $evento->id }}" {{ old('evento_id') == $evento->id ? 'selected' : '' }}>
+                                        {{ $evento->nombre }} - Inicia: {{ \Carbon\Carbon::parse($evento->fecha_inicio)->format('d/m/Y H:i') }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('evento_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted">Solo puedes crear equipos para eventos que no hayan iniciado</small>
+                        @endif
+                    </div>
+
+                    @if($eventos->isNotEmpty())
+                    {{-- Tipo de Equipo --}}
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Tipo de Equipo</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="es_publico" id="privado" value="0" {{ old('es_publico', '0') == '0' ? 'checked' : '' }}>
+                            <label class="form-check-label" for="privado">
+                                <strong>Privado</strong> - Solo tú puedes invitar miembros
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="es_publico" id="publico" value="1" {{ old('es_publico') == '1' ? 'checked' : '' }}>
+                            <label class="form-check-label" for="publico">
+                                <strong>Público</strong> - Otros participantes pueden solicitar unirse
+                            </label>
+                        </div>
+                        @error('es_publico')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Los equipos públicos serán visibles para otros participantes del evento
+                        </small>
                     </div>
 
                     {{-- Logo del Equipo (opcional) --}}
@@ -68,6 +129,7 @@
                             <i class="bi bi-arrow-left me-2"></i>Volver
                         </a>
                     </div>
+                    @endif
                 </form>
             </div>
 

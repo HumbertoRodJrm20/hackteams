@@ -16,7 +16,7 @@
                 <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; color: white; border-radius: 12px 12px 0 0;">
                     <h2 class="fw-bold mb-2">{{ $proyecto->titulo }}</h2>
                     <p class="mb-0">
-                        <i class="bi bi-people-fill me-1"></i><strong>Equipo:</strong> {{ $proyecto->equipo->nombre }}
+                        <i class="bi bi-people-fill me-1"></i><strong>Equipo:</strong> {{ $proyecto->equipo ? $proyecto->equipo->nombre : 'Sin equipo' }}
                     </p>
                     <p class="mb-0">
                         <i class="bi bi-calendar me-1"></i><strong>Evento:</strong> {{ $proyecto->evento->nombre }}

@@ -1,4 +1,5 @@
 <?php
+
 // app/Http/Middleware/AdminMiddleware.php
 
 namespace App\Http\Middleware;
@@ -11,7 +12,7 @@ class AdminMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login');
         }
 

@@ -203,4 +203,17 @@
         </div>
     </div>
 </div>
+
+@section('scripts')
+<script>
+    // Forzar scroll al inicio al cargar la página
+    window.addEventListener('load', function() {
+        window.scrollTo(0, 0);
+    });
+
+    // También forzar al inicio cuando se carga el DOM
+    document.addEventListener('DOMContentLoaded', function() {
+        window.scrollTo(0, 0);
+    });
+</script>
 @endsection

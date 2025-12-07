@@ -8,14 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class Rol extends Model
 {
     use HasFactory;
-    
+
     // 🛑 CRUCIAL: Nombre de la tabla de Roles
-    protected $table = 'roles'; 
+    protected $table = 'roles';
 
     protected $fillable = [
-        'nombre', 
-        'descripcion'
-    ]; 
+        'nombre',
+        'descripcion',
+    ];
 
     /**
      * Define la relación de muchos a muchos con el modelo User.

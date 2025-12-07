@@ -10,6 +10,7 @@ class Proyecto extends Model
     use SoftDeletes;
 
     protected $table = 'proyectos';
+
     protected $fillable = ['equipo_id', 'evento_id', 'titulo', 'resumen', 'link_repositorio', 'estado'];
 
     // Relación con equipo (N:1)

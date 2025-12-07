@@ -10,6 +10,7 @@ class CriterioEvaluacion extends Model
     use SoftDeletes;
 
     protected $table = 'criterio_evaluacion';
+
     protected $fillable = ['evento_id', 'nombre', 'ponderacion'];
 
     public function evento()

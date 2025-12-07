@@ -68,18 +68,23 @@ class DashboardController extends Controller
             ->get();
 
         // Calcular promedios de forma optimizada
-        $proyectosConPromedio = $proyectos->map(function ($proyecto) {
-            return [
-                'id' => $proyecto->id,
-                'titulo' => $proyecto->titulo,
-                'equipo' => $proyecto->equipo->nombre,
-                'evento' => $proyecto->evento->nombre,
-                'promedio' => $this->calcularPromedioProyecto($proyecto),
-                'evento_id' => $proyecto->evento_id,
-            ];
-        })->filter(function ($proyecto) {
-            return $proyecto['promedio'] > 0;
-        });
+        $proyectosConPromedio = $proyectos
+            ->filter(function ($proyecto) {
+                // Filtrar proyectos sin equipo o evento
+                return $proyecto->equipo !== null && $proyecto->evento !== null;
+            })
+            ->map(function ($proyecto) {
+                return [
+                    'id' => $proyecto->id,
+                    'titulo' => $proyecto->titulo,
+                    'equipo' => $proyecto->equipo->nombre,
+                    'evento' => $proyecto->evento->nombre,
+                    'promedio' => $this->calcularPromedioProyecto($proyecto),
+                    'evento_id' => $proyecto->evento_id,
+                ];
+            })->filter(function ($proyecto) {
+                return $proyecto['promedio'] > 0;
+            });
 
         // Agrupar por evento y calcular puestos
         $proyectosPorEvento = $proyectosConPromedio->groupBy('evento_id');
@@ -164,15 +169,19 @@ class DashboardController extends Controller
             // Reporte de un evento específico
             $evento = Evento::with(['proyectos.equipo', 'criterios', 'participantes'])->findOrFail($evento_id);
 
-            $proyectos = $evento->proyectos->map(function ($proyecto) {
-                return [
-                    'titulo' => $proyecto->titulo,
-                    'equipo' => $proyecto->equipo->nombre,
-                    'estado' => $proyecto->estado,
-                    'promedio' => $proyecto->obtenerPromedio(),
-                    'puesto' => $proyecto->obtenerPuesto(),
-                ];
-            })->sortBy('puesto');
+            $proyectos = $evento->proyectos
+                ->filter(function ($proyecto) {
+                    return $proyecto->equipo !== null;
+                })
+                ->map(function ($proyecto) {
+                    return [
+                        'titulo' => $proyecto->titulo,
+                        'equipo' => $proyecto->equipo->nombre,
+                        'estado' => $proyecto->estado,
+                        'promedio' => $proyecto->obtenerPromedio(),
+                        'puesto' => $proyecto->obtenerPuesto(),
+                    ];
+                })->sortBy('puesto');
 
             $data = [
                 'evento' => $evento,

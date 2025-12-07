@@ -64,21 +64,21 @@
                                     <td>
                                         <strong>{{ $proyecto->titulo }}</strong>
                                     </td>
-                                    <td>{{ $proyecto->equipo->nombre }}</td>
-                                    <td>
-                                        @php
-                                            $estadoBadge = match($proyecto->estado) {
-                                                'pendiente' => 'warning',
-                                                'en_desarrollo' => 'info',
-                                                'terminado' => 'success',
-                                                'calificado' => 'secondary',
-                                                default => 'secondary',
-                                            };
-                                        @endphp
-                                        <span class="badge bg-{{ $estadoBadge }}">
-                                            {{ ucfirst(str_replace('_', ' ', $proyecto->estado)) }}
-                                        </span>
-                                    </td>
+                                    <td>{{ $proyecto->equipo ? $proyecto->equipo->nombre : 'Sin equipo' }}</td>
+                                        <td>
+                                            @php
+                                                $estadoBadge = match($proyecto->estado) {
+                                                    'pendiente' => 'warning',
+                                                    'en_desarrollo' => 'info',
+                                                    'terminado' => 'success',
+                                                    'calificado' => 'secondary',
+                                                    default => 'secondary',
+                                                };
+                                            @endphp
+                                            <span class="badge bg-{{ $estadoBadge }}">
+                                                {{ ucfirst(str_replace('_', ' ', $proyecto->estado)) }}
+                                            </span>
+                                        </td>
                                     <td>
                                         @php
                                             $promedio = $proyecto->obtenerPromedio();
