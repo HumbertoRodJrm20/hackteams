@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,15 +13,17 @@ class CreateConstanciasTable extends Migration
             $table->id();
             $table->foreignId('participante_id')->constrained('participantes', 'user_id')->onDelete('cascade');
             $table->foreignId('evento_id')->constrained('eventos')->onDelete('cascade');
-            $table->enum('tipo', ['asistente', 'ganador', 'ponente']);
-            $table->string('archivo_path');
-            $table->string('codigo_qr')->unique();
+            $table->enum('tipo', ['participacion', 'ganador', 'ponente', 'lugar'])->default('participacion');
+            $table->integer('lugar')->nullable(); // 1, 2 o 3 para primer, segundo y tercer lugar
+            $table->string('archivo_path')->nullable();
+            $table->string('codigo_qr')->unique()->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
     }
+
     public function down(): void
     {
         Schema::dropIfExists('constancias');
     }
-};
+}

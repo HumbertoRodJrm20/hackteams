@@ -13,6 +13,7 @@ class SolicitudController extends Controller
     public function create()
     {
         $eventos = Evento::all();
+
         return view('juez.constancias.solicitar', compact('eventos'));
     }
 

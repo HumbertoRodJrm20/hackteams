@@ -33,7 +33,7 @@
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <div>
                                     <h5 class="fw-bold mb-1">{{ $proyecto->titulo }}</h5>
-                                    <small class="text-white-50">{{ $proyecto->equipo->nombre }}</small>
+                                    <small class="text-white-50">{{ $proyecto->equipo ? $proyecto->equipo->nombre : 'Sin equipo' }}</small>
                                 </div>
                                 {{-- Puesto --}}
                                 @php

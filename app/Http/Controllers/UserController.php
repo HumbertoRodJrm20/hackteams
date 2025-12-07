@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Rol;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class UserController extends Controller
@@ -14,6 +14,7 @@ class UserController extends Controller
     public function index()
     {
         $usuarios = User::with('roles')->paginate(15);
+
         return view('admin.usuarios.index', compact('usuarios'));
     }
 
@@ -23,6 +24,7 @@ class UserController extends Controller
     public function create()
     {
         $roles = Rol::all();
+
         return view('admin.usuarios.create', compact('roles'));
     }
 
@@ -56,7 +58,7 @@ class UserController extends Controller
         }
 
         return redirect()->route('admin.usuarios.index')
-            ->with('success', '¡El usuario "' . $usuario->nombre . '" ha sido creado con éxito!');
+            ->with('success', '¡El usuario "'.$usuario->nombre.'" ha sido creado con éxito!');
     }
 
     /**
@@ -66,6 +68,7 @@ class UserController extends Controller
     {
         $roles = Rol::all();
         $usuarioRol = $usuario->roles()->first();
+
         return view('admin.usuarios.edit', compact('usuario', 'roles', 'usuarioRol'));
     }
 
@@ -77,7 +80,7 @@ class UserController extends Controller
     {
         $validatedData = $request->validate([
             'nombre' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $usuario->id,
+            'email' => 'required|email|unique:users,email,'.$usuario->id,
             'password' => 'nullable|string|min:8|confirmed',
             'rol_id' => 'required|exists:roles,id',
         ]);
@@ -106,7 +109,7 @@ class UserController extends Controller
         }
 
         return redirect()->route('admin.usuarios.index')
-            ->with('success', '¡El usuario "' . $usuario->nombre . '" ha sido actualizado con éxito!');
+            ->with('success', '¡El usuario "'.$usuario->nombre.'" ha sido actualizado con éxito!');
     }
 
     /**
@@ -118,7 +121,7 @@ class UserController extends Controller
         $usuario->delete();
 
         return redirect()->route('admin.usuarios.index')
-            ->with('success', 'El usuario "' . $nombre . '" ha sido eliminado exitosamente.');
+            ->with('success', 'El usuario "'.$nombre.'" ha sido eliminado exitosamente.');
     }
 
     /**
@@ -127,6 +130,7 @@ class UserController extends Controller
     public function show(User $usuario)
     {
         $usuario->load('roles');
+
         return view('admin.usuarios.show', compact('usuario'));
     }
 }

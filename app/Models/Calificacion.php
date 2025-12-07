@@ -10,6 +10,7 @@ class Calificacion extends Model
     use SoftDeletes;
 
     protected $table = 'calificaciones';
+
     protected $fillable = [
         'proyecto_id',
         'juez_user_id',

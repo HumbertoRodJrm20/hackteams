@@ -1,9 +1,10 @@
 <?php
+
 namespace Database\Seeders;
 
+use App\Models\Proyecto;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use App\Models\Proyecto; 
 
 class DatosPruebaSeeder extends Seeder
 {
@@ -16,7 +17,7 @@ class DatosPruebaSeeder extends Seeder
         DB::table('calificaciones')->truncate();
 
         // Obtener IDs necesarios
-        $participanteId = DB::table('participantes')->first()->user_id; 
+        $participanteId = DB::table('participantes')->first()->user_id;
         $perfilLiderId = DB::table('perfiles')->where('nombre', 'Líder de Proyecto')->first()->id;
         $perfilProgId = DB::table('perfiles')->where('nombre', 'Programador Backend')->first()->id;
         $eventoId = DB::table('eventos')->first()->id;
@@ -56,7 +57,7 @@ class DatosPruebaSeeder extends Seeder
             'descripcion' => 'Se completó la estructura del backend y la conexión inicial a la base de datos.',
             'fecha' => now()->subDays(2),
         ]);
-        
+
         // --- 5. Crear Calificación de Prueba (Simulada) ---
         DB::table('calificaciones')->insert([
             'proyecto_id' => $proyectoId,

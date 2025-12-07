@@ -10,9 +10,14 @@
             <i class="bi bi-people fs-2 me-3 text-success"></i>
             <h1 class="fw-bold d-inline">Mis Equipos</h1>
         </div>
-        <a href="{{ route('equipos.registrar') }}" class="btn btn-primary btn-lg">
-            <i class="bi bi-plus-circle me-2"></i>Crear Equipo
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('equipos.publicos') }}" class="btn btn-outline-success btn-lg">
+                <i class="bi bi-search me-2"></i>Equipos Públicos
+            </a>
+            <a href="{{ route('equipos.registrar') }}" class="btn btn-primary btn-lg">
+                <i class="bi bi-plus-circle me-2"></i>Crear Equipo
+            </a>
+        </div>
     </div>
 
     {{-- Mensajes --}}
@@ -31,7 +36,7 @@
                 <div class="alert alert-info text-center" role="alert">
                     <i class="bi bi-info-circle me-2"></i>
                     <strong>Sin equipos aún</strong><br>
-                    No tienes equipos registrados. <a href="{{ route('equipos.registrar') }}">Crea uno ahora</a>
+                    No tienes equipos registrados. <a href="{{ route('equipos.registrar') }}">Crea uno ahora</a> o <a href="{{ route('equipos.publicos') }}">únete a un equipo público</a>
                 </div>
             </div>
         </div>
@@ -54,7 +59,14 @@
 
                         <div class="card-body d-flex flex-column">
                             {{-- Nombre del equipo --}}
-                            <h5 class="card-title fw-bold text-truncate">{{ $equipo['nombre'] }}</h5>
+                            <h5 class="card-title fw-bold text-truncate">
+                                {{ $equipo['nombre'] }}
+                                @if($equipo['es_publico'])
+                                    <span class="badge bg-success ms-2">Público</span>
+                                @else
+                                    <span class="badge bg-secondary ms-2">Privado</span>
+                                @endif
+                            </h5>
 
                             {{-- Información --}}
                             <ul class="list-group list-group-flush my-3 flex-grow-1">
