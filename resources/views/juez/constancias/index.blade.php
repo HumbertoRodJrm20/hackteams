@@ -14,27 +14,17 @@
         Aquí encontrarás todos los documentos oficiales que certifican tu participación, evaluación o reconocimiento en los eventos de HackTeams.
     </p>
 
-    @if($constancias->isEmpty())
-        <p>No tienes constancias disponibles aún.</p>
-    @else
-
-    {{-- Controles de filtrado y solicitud --}}
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <label for="filtroEvento" class="form-label text-muted">Filtrar por Evento:</label>
-            <select id="filtroEvento" class="form-select">
-                <option selected>Todos los Eventos</option>
-                <option>Hackatec 2025</option>
-                <option>Innovatec Challenge</option>
-            </select>
-        </div>
-        <div class="col-md-6 d-flex align-items-end">
-            <a href="{{ route('solicitudes.create') }}" class="btn btn-outline-success w-100">
-    <i class="bi bi-send-fill me-2"></i>Solicitar Nueva Constancia
-</a>
-
-        </div>
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle me-2"></i>
+        Las constancias se generan automáticamente una vez finalizado cada evento.
     </div>
+
+    @if($constancias->isEmpty())
+        <div class="alert alert-warning">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            No tienes constancias disponibles aún.
+        </div>
+    @else
 
     <hr class="my-4">
 
@@ -65,33 +55,5 @@
             @endforeach
         </div>
     @endif
-
-    <h3 class="fw-bold mt-4">Solicitudes de Constancia</h3>
-
-<div class="list-group mb-4">
-@forelse($solicitudes as $sol)
-    <li class="list-group-item d-flex justify-content-between align-items-center">
-
-        <div>
-            <strong>{{ $sol->evento->nombre }}</strong><br>
-            <small>Estatus: 
-                @if($sol->estatus == 'Pendiente')
-                    <span class="badge bg-warning text-dark">{{ $sol->estatus }}</span>
-                @elseif($sol->estatus == 'Aprobado')
-                    <span class="badge bg-success">{{ $sol->estatus }}</span>
-                @else
-                    <span class="badge bg-danger">{{ $sol->estatus }}</span>
-                @endif
-            </small>
-            @if($sol->estatus == 'Rechazado')
-                <br><small class="text-danger">Motivo: {{ $sol->comentario }}</small>
-            @endif
-        </div>
-
-    </li>
-@empty
-    <div class="alert alert-info">No tienes solicitudes registradas.</div>
-@endforelse
-</div>
 </div>
 @endsection

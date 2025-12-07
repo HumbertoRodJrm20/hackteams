@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Proyecto;
 use App\Models\Evento;
-use App\Models\User;
+use App\Models\Proyecto;
 use App\Models\Rol;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -64,8 +64,9 @@ class AdminProyectoController extends Controller
                 ->with('success', 'Jueces asignados correctamente al proyecto');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return redirect()->back()
-                ->with('error', 'Error al asignar jueces: ' . $e->getMessage());
+                ->with('error', 'Error al asignar jueces: '.$e->getMessage());
         }
     }
 
@@ -81,7 +82,7 @@ class AdminProyectoController extends Controller
                 ->with('success', 'Juez removido del proyecto');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Error al remover juez: ' . $e->getMessage());
+                ->with('error', 'Error al remover juez: '.$e->getMessage());
         }
     }
 
@@ -107,11 +108,12 @@ class AdminProyectoController extends Controller
                     'calificaciones_count' => $proyecto->calificaciones->count(),
                 ];
             })->sortByDesc('promedio')
-              ->values()
-              ->map(function ($proyecto, $index) {
-                  $proyecto['puesto'] = $index + 1;
-                  return $proyecto;
-              });
+                ->values()
+                ->map(function ($proyecto, $index) {
+                    $proyecto['puesto'] = $index + 1;
+
+                    return $proyecto;
+                });
 
             return [
                 'id' => $evento->id,
@@ -137,7 +139,7 @@ class AdminProyectoController extends Controller
         // Calcular estadísticas
         $promedio = $proyecto->obtenerPromedio();
         $puesto = $proyecto->obtenerPuesto();
-        $cantidadJueces = $calificaciones->count();
+        $cantidadJueces = $proyecto->jueces()->count(); // Contar jueces asignados, no calificaciones
 
         return view('admin.proyectos.ver-calificaciones', compact(
             'proyecto',

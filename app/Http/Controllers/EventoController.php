@@ -35,18 +35,42 @@ class EventoController extends Controller
     public function store(Request $request)
     {
         // Nota: Se debe proteger esta ruta con un middleware 'admin'
-        $validatedData = $request->validate([
-            'nombre' => 'required|string|max:255|unique:eventos,nombre',
-            'descripcion' => 'required|string',
-            'fecha_inicio' => 'required|date|after_or_equal:today',
-            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-            'estado' => ['sometimes', 'string', Rule::in(['proximo', 'activo', 'finalizado'])],
-            'max_equipos' => 'required|integer|min:1',
-        ]);
+        try {
+            $validatedData = $request->validate([
+                'nombre' => 'required|string|max:255|unique:eventos,nombre',
+                'descripcion' => 'required|string',
+                'fecha_inicio' => 'required|date',
+                'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+                'estado' => ['nullable', 'string', Rule::in(['proximo', 'activo', 'finalizado'])],
+                'max_equipos' => 'required|integer|min:1',
+                'imagen' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
+            ]);
 
-        $evento = Evento::create($validatedData);
+            // Establecer estado por defecto si no se proporciona
+            if (! isset($validatedData['estado'])) {
+                $validatedData['estado'] = 'proximo';
+            }
 
-        return redirect()->route('eventos.index')->with('success', '¡El evento "'.$evento->nombre.'" ha sido creado con éxito!');
+            // Manejar la carga de imagen si existe
+            if ($request->hasFile('imagen')) {
+                $imagenPath = $request->file('imagen')->store('eventos', 'public');
+                $validatedData['imagen'] = $imagenPath;
+            }
+
+            $evento = Evento::create($validatedData);
+
+            return redirect()->route('eventos.index')->with('success', '¡El evento "'.$evento->nombre.'" ha sido creado con éxito!');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Error al crear evento: '.$e->getMessage());
+
+            return redirect()->back()
+                ->with('error', 'Hubo un error al crear el evento: '.$e->getMessage())
+                ->withInput();
+        }
     }
 
     /**
@@ -80,7 +104,19 @@ class EventoController extends Controller
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
             'estado' => ['sometimes', 'string', Rule::in(['proximo', 'activo', 'finalizado'])],
             'max_equipos' => 'required|integer|min:1',
+            'imagen' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
         ]);
+
+        // Manejar la carga de imagen si existe
+        if ($request->hasFile('imagen')) {
+            // Eliminar imagen anterior si existe
+            if ($evento->imagen && \Storage::disk('public')->exists($evento->imagen)) {
+                \Storage::disk('public')->delete($evento->imagen);
+            }
+
+            $imagenPath = $request->file('imagen')->store('eventos', 'public');
+            $validatedData['imagen'] = $imagenPath;
+        }
 
         $evento->update($validatedData);
 

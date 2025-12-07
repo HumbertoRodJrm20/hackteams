@@ -33,13 +33,7 @@ class ConstanciaController extends Controller
                 ->get();
         }
 
-        // Solicitudes hechas por el participante
-        $solicitudes = \App\Models\SolicitudConstancia::where('participante_id', Auth::id())
-            ->with('evento')
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return view('Constancia', compact('constancias', 'solicitudes'));
+        return view('Constancia', compact('constancias'));
     }
 
     public function generarPDF($id)
@@ -51,12 +45,17 @@ class ConstanciaController extends Controller
         $participante = $constancia->participante;
         $evento = $constancia->evento;
         $tipo = $constancia->tipo_constancia;
+        $lugar = $constancia->lugar;
 
-        // Generar PDF
-        $pdf = Pdf::loadView('pdf.constancia-estilo', compact('participante', 'evento', 'tipo'))
-            ->setPaper('a4', 'landscape');
+        // Generar PDF en orientación vertical
+        $pdf = Pdf::loadView('pdf.constancia-estilo', compact('participante', 'evento', 'tipo', 'lugar'))
+            ->setPaper('a4', 'portrait');
 
-        return $pdf->download("constancia-$participante->user_id.pdf");
+        $nombreArchivo = $tipo === 'lugar' && $lugar
+            ? "constancia-lugar-{$lugar}-{$participante->user_id}.pdf"
+            : "constancia-{$tipo}-{$participante->user_id}.pdf";
+
+        return $pdf->download($nombreArchivo);
     }
 
     /**
@@ -146,13 +145,7 @@ class ConstanciaController extends Controller
             ->with('evento')
             ->get();
 
-        // Solicitudes hechas por el juez
-        $solicitudes = \App\Models\SolicitudConstancia::where('participante_id', $juez->id)
-            ->with('evento')
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return view('juez.constancias.index', compact('constancias', 'solicitudes'));
+        return view('juez.constancias.index', compact('constancias'));
     }
 
     public function generarPDFJuez($id)

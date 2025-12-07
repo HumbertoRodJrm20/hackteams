@@ -13,7 +13,6 @@ use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\ProgresoController;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\RegisterController;
-use App\Http\Controllers\SolicitudController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -21,7 +20,7 @@ use Illuminate\Support\Facades\Route;
 // ----------------------------------------------------
 
 Route::get('/', function () {
-    if (!Auth::check()) {
+    if (! Auth::check()) {
         return redirect()->route('login');
     }
 
@@ -76,9 +75,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/eventos/{evento}/join', [EventoController::class, 'join'])->name('eventos.join');
     Route::post('/eventos/{evento}/leave', [EventoController::class, 'leave'])->name('eventos.leave');
 
-    // Solicitud de constancia (Rutas nuevas en main)
-    Route::get('/constancias/solicitar', [SolicitudController::class, 'create'])->name('solicitudes.create');
-    Route::post('/constancias/solicitar', [SolicitudController::class, 'store'])->name('solicitudes.store');
+    // PROYECTOS (Ver detalles - accesible para todos los roles autenticados)
+    Route::get('/proyectos/{id}', [ProyectoController::class, 'show'])->name('proyectos.show');
 });
 
 // ----------------------------------------------------
@@ -89,17 +87,20 @@ Route::middleware(['auth', 'participante'])->group(function () {
 
     // EQUIPOS
     Route::get('/equipos', [EquipoController::class, 'index'])->name('equipos.index');
+    Route::get('/equipos/publicos', [EquipoController::class, 'equiposPublicos'])->name('equipos.publicos');
     Route::get('/equipos/registrar', [EquipoController::class, 'create'])->name('equipos.registrar');
     Route::post('/equipos/store', [EquipoController::class, 'store'])->name('equipos.store');
+    Route::post('/equipos/{equipo}/unirse', [EquipoController::class, 'unirse'])->name('equipos.unirse');
     Route::get('/equipos/{equipo}', [EquipoController::class, 'show'])->name('equipos.show');
     Route::post('/equipos/{equipo}/invite', [EquipoController::class, 'invite'])->name('equipos.invite');
     Route::delete('/equipos/{equipo}/members/{participante}', [EquipoController::class, 'removeMember'])->name('equipos.removeMember');
     Route::put('/equipos/{equipo}/members/{participante}/role', [EquipoController::class, 'updateMemberRole'])->name('equipos.updateMemberRole');
+    Route::delete('/equipos/{equipo}/leave', [EquipoController::class, 'leave'])->name('equipos.leave');
+    Route::delete('/equipos/{equipo}', [EquipoController::class, 'destroy'])->name('equipos.destroy');
 
-    // PROYECTOS
+    // PROYECTOS (Registrar - solo participantes)
     Route::get('/proyectos/registrar', [ProyectoController::class, 'create'])->name('proyectos.registrar');
     Route::post('/proyectos/store', [ProyectoController::class, 'store'])->name('proyectos.store');
-    Route::get('/proyectos/{id}', [ProyectoController::class, 'show'])->name('proyectos.show');
 
     // PROGRESO
     Route::get('/progreso', [ProgresoController::class, 'index'])->name('progreso.index');
