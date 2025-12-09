@@ -80,6 +80,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/eventos/{evento}', [EventoController::class, 'show'])->name('eventos.show');
     Route::post('/eventos/{evento}/join', [EventoController::class, 'join'])->name('eventos.join');
     Route::post('/eventos/{evento}/leave', [EventoController::class, 'leave'])->name('eventos.leave');
+    Route::get('/proyectos/{id}', [ProyectoController::class, 'show'])->name('proyectos.show');
 });
 
 // ----------------------------------------------------
@@ -113,9 +114,6 @@ Route::middleware(['auth', 'participante'])->group(function () {
     // PROYECTOS (Registrar - solo participantes)
     Route::get('/proyectos/registrar', [ProyectoController::class, 'create'])->name('proyectos.registrar');
     Route::post('/proyectos/store', [ProyectoController::class, 'store'])->name('proyectos.store');
-
-    // PROYECTOS (Ver detalles - accesible para participantes)
-    Route::get('/proyectos/{id}', [ProyectoController::class, 'show'])->name('proyectos.show');
 
     // PROGRESO
     Route::get('/progreso', [ProgresoController::class, 'index'])->name('progreso.index');

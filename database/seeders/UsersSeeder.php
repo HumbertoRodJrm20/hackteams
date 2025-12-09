@@ -157,5 +157,69 @@ class UsersSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        $participantesData = [
+            ['name' => 'Carlos Mendez', 'email' => 'carlos.mendez@test.com', 'matricula' => 'A00123456'],
+            ['name' => 'Sofia Rodriguez', 'email' => 'sofia.rodriguez@test.com', 'matricula' => 'A00123457'],
+            ['name' => 'Miguel Torres', 'email' => 'miguel.torres@test.com', 'matricula' => 'A00123458'],
+            ['name' => 'Laura Gomez', 'email' => 'laura.gomez@test.com', 'matricula' => 'A00123459'],
+            ['name' => 'Diego Martinez', 'email' => 'diego.martinez@test.com', 'matricula' => 'A00123460'],
+            ['name' => 'Ana Hernandez', 'email' => 'ana.hernandez@test.com', 'matricula' => 'A00123461'],
+            ['name' => 'Roberto Sanchez', 'email' => 'roberto.sanchez@test.com', 'matricula' => 'A00123462'],
+            ['name' => 'Patricia Lopez', 'email' => 'patricia.lopez@test.com', 'matricula' => 'A00123463'],
+            ['name' => 'Fernando Diaz', 'email' => 'fernando.diaz@test.com', 'matricula' => 'A00123464'],
+            ['name' => 'Gabriela Ramirez', 'email' => 'gabriela.ramirez@test.com', 'matricula' => 'A00123465'],
+            ['name' => 'Luis Morales', 'email' => 'luis.morales@test.com', 'matricula' => 'A00123466'],
+            ['name' => 'Carmen Flores', 'email' => 'carmen.flores@test.com', 'matricula' => 'A00123467'],
+            ['name' => 'Jorge Castro', 'email' => 'jorge.castro@test.com', 'matricula' => 'A00123468'],
+            ['name' => 'Monica Vargas', 'email' => 'monica.vargas@test.com', 'matricula' => 'A00123469'],
+            ['name' => 'Ricardo Ortiz', 'email' => 'ricardo.ortiz@test.com', 'matricula' => 'A00123470'],
+        ];
+
+        foreach ($participantesData as $participanteData) {
+            $userId = DB::table('users')->insertGetId([
+                'name' => $participanteData['name'],
+                'email' => $participanteData['email'],
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::table('user_rol')->insert([
+                'user_id' => $userId,
+                'rol_id' => $rolParticipanteId,
+            ]);
+
+            DB::table('participantes')->insert([
+                'user_id' => $userId,
+                'carrera_id' => $carreraId,
+                'matricula' => $participanteData['matricula'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $juecesData = [
+            ['name' => 'Dr. Roberto Silva', 'email' => 'roberto.silva@juez.com'],
+            ['name' => 'Dra. Ana Martinez', 'email' => 'ana.martinez@juez.com'],
+            ['name' => 'Ing. Pedro Gonzalez', 'email' => 'pedro.gonzalez@juez.com'],
+        ];
+
+        foreach ($juecesData as $juezData) {
+            $juezId = DB::table('users')->insertGetId([
+                'name' => $juezData['name'],
+                'email' => $juezData['email'],
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::table('user_rol')->insert([
+                'user_id' => $juezId,
+                'rol_id' => $rolJuezId,
+            ]);
+        }
     }
 }
