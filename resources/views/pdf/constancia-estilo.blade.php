@@ -14,149 +14,254 @@
             box-sizing: border-box;
         }
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Georgia', 'Times New Roman', serif;
             background-color: #ffffff;
         }
-        .container {
-            width: 100%;
-            border: 8px solid #0044AA;
-            padding: 35px 30px 25px 30px;
+        .certificate-wrapper {
+            border: 10px solid #1e40af;
+            border-style: double;
+            padding: 25px;
+            min-height: 260mm;
+        }
+        .inner-wrapper {
+            border: 2px solid #3b82f6;
+            padding: 30px 40px;
             text-align: center;
-            background-color: #ffffff;
         }
         .header {
             margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #1e40af;
         }
         .header img {
             width: 100px;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
         .header h1 {
-            color: #0044AA;
-            font-size: 1.6em;
-            margin: 5px 0;
+            color: #1e40af;
+            font-size: 28px;
+            margin: 0;
+            font-weight: bold;
+            letter-spacing: 4px;
+            font-family: 'Arial', sans-serif;
+        }
+        .ornament {
+            text-align: center;
+            margin: 15px 0;
+        }
+        .ornament-line {
+            display: inline-block;
+            width: 80px;
+            height: 3px;
+            background-color: #3b82f6;
+            vertical-align: middle;
+        }
+        .ornament-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background-color: #1e40af;
+            border-radius: 50%;
+            margin: 0 10px;
+            vertical-align: middle;
         }
         .title {
-            color: #0044AA;
-            font-size: 2em;
+            color: #1e3a8a;
+            font-size: 32px;
             font-weight: bold;
-            margin: 20px 0 30px 0;
+            margin: 25px 0;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 5px;
+            font-family: 'Arial', sans-serif;
         }
-        .body-text {
-            font-size: 1em;
+        .subtitle {
+            font-size: 16px;
+            color: #4b5563;
             margin-bottom: 25px;
-            line-height: 1.7;
-            color: #333;
+            font-style: italic;
+        }
+        .name-box {
+            margin: 30px auto;
+            padding: 20px 30px;
+            border-top: 3px solid #1e40af;
+            border-bottom: 3px solid #1e40af;
+            max-width: 80%;
         }
         .name {
-            font-size: 1.8em;
+            font-size: 36px;
             font-weight: bold;
-            color: #0044AA;
-            margin: 20px 0;
+            color: #1e40af;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 3px;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
         }
-        .signature-area {
-            margin-top: 50px;
+        .body-content {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #1f2937;
+            margin: 25px 0;
         }
-        .signature-table {
+        .body-content p {
+            margin: 12px 0;
+        }
+        .event-name {
+            font-weight: bold;
+            color: #1e40af;
+            font-size: 18px;
+            margin: 15px 0;
+        }
+        .badge {
+            display: inline-block;
+            padding: 8px 20px;
+            background-color: #1e40af;
+            color: white;
+            border-radius: 25px;
+            font-size: 14px;
+            margin: 10px 0;
+            font-weight: bold;
+            letter-spacing: 2px;
+            font-family: 'Arial', sans-serif;
+        }
+        .date-info {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 25px;
+        }
+        .signatures {
+            margin-top: 60px;
+        }
+        .signatures table {
             width: 100%;
-            margin-top: 40px;
+            border-collapse: collapse;
         }
-        .signature-cell {
+        .signatures td {
             width: 50%;
             text-align: center;
             padding: 0 20px;
         }
         .signature-line {
+            border-top: 2px solid #1e40af;
             width: 70%;
-            border-top: 2px solid #333;
-            display: inline-block;
-            margin: 0 auto;
+            margin: 0 auto 10px auto;
         }
         .signature-label {
-            font-size: 0.85em;
-            margin-top: 8px;
-            display: block;
-            color: #555;
+            font-size: 13px;
+            color: #374151;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'Arial', sans-serif;
         }
         .footer {
-            font-size: 0.7em;
-            color: #999;
+            font-size: 11px;
+            color: #6b7280;
             margin-top: 40px;
+            padding-top: 15px;
+            border-top: 2px solid #e5e7eb;
+            font-family: 'Arial', sans-serif;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <img src="{{ public_path('images/HackTeams_Logo.png') }}" alt="HackTeams Logo">
-            <h1>HackTeams</h1>
-        </div>
+    <div class="certificate-wrapper">
+        <div class="inner-wrapper">
+            <!-- Header -->
+            <div class="header">
+                <img src="{{ public_path('images/HackTeams_Logo.png') }}" alt="HackTeams Logo">
+                <h1>HACKTEAMS</h1>
+            </div>
 
-        <div class="title">
-            @if($tipo === 'lugar' && isset($lugar))
-                @if($lugar == 1)
-                    Constancia de Primer Lugar
-                @elseif($lugar == 2)
-                    Constancia de Segundo Lugar
-                @elseif($lugar == 3)
-                    Constancia de Tercer Lugar
+            <!-- Ornamento decorativo -->
+            <div class="ornament">
+                <span class="ornament-line"></span>
+                <span class="ornament-dot"></span>
+                <span class="ornament-line"></span>
+            </div>
+
+            <!-- Título -->
+            <div class="title">
+                @if($tipo === 'lugar' && isset($lugar))
+                    @if($lugar == 1)
+                        PRIMER LUGAR
+                    @elseif($lugar == 2)
+                        SEGUNDO LUGAR
+                    @elseif($lugar == 3)
+                        TERCER LUGAR
+                    @endif
+                @else
+                    {{ $tipo === 'ganador' ? 'RECONOCIMIENTO' : 'CONSTANCIA DE PARTICIPACIÓN' }}
                 @endif
-            @else
-                Constancia de {{ $tipo === 'ganador' ? 'Reconocimiento' : 'Participación' }}
-            @endif
-        </div>
+            </div>
 
-        <div class="body-text">
-            <p>Se otorga la presente constancia a:</p>
-            <p class="name">{{ $participante->user->name }}</p>
+            <!-- Ornamento decorativo -->
+            <div class="ornament">
+                <span class="ornament-line"></span>
+                <span class="ornament-dot"></span>
+                <span class="ornament-line"></span>
+            </div>
 
-            @if($tipo === 'lugar' && isset($lugar))
-                @if($lugar == 1)
-                    <p>Por haber obtenido el <strong>PRIMER LUGAR</strong><br>
-                    en el evento <strong>"{{ $evento->nombre }}"</strong>.</p>
-                @elseif($lugar == 2)
-                    <p>Por haber obtenido el <strong>SEGUNDO LUGAR</strong><br>
-                    en el evento <strong>"{{ $evento->nombre }}"</strong>.</p>
-                @elseif($lugar == 3)
-                    <p>Por haber obtenido el <strong>TERCER LUGAR</strong><br>
-                    en el evento <strong>"{{ $evento->nombre }}"</strong>.</p>
+            <!-- Subtítulo -->
+            <p class="subtitle">Se otorga la presente constancia a:</p>
+
+            <!-- Nombre del participante -->
+            <div class="name-box">
+                <p class="name">{{ strtoupper($participante->user->name) }}</p>
+            </div>
+
+            <!-- Contenido -->
+            <div class="body-content">
+                @if($tipo === 'lugar' && isset($lugar))
+                    <p>Por haber obtenido el</p>
+                    <span class="badge">
+                        @if($lugar == 1)
+                            PRIMER LUGAR
+                        @elseif($lugar == 2)
+                            SEGUNDO LUGAR
+                        @elseif($lugar == 3)
+                            TERCER LUGAR
+                        @endif
+                    </span>
+                    <p>en el evento</p>
+                    <p class="event-name">"{{ $evento->nombre }}"</p>
+                @elseif ($tipo === 'ganador')
+                    <p>Por haber obtenido un</p>
+                    <span class="badge">RECONOCIMIENTO ESPECIAL</span>
+                    <p>en el evento</p>
+                    <p class="event-name">"{{ $evento->nombre }}"</p>
+                @else
+                    <p>Por su destacada participación en el evento</p>
+                    <p class="event-name">"{{ $evento->nombre }}"</p>
                 @endif
-            @elseif ($tipo === 'ganador')
-                <p>Por haber obtenido un reconocimiento especial como <strong>GANADOR</strong><br>
-                en el evento <strong>"{{ $evento->nombre }}"</strong>.</p>
-            @else
-                <p>Por su valiosa participación en el evento<br>
-                <strong>"{{ $evento->nombre }}"</strong>.</p>
-            @endif
 
-            <p style="margin-top: 25px;">
-                Evento realizado del {{ \Carbon\Carbon::parse($evento->fecha_inicio)->format('d/m/Y') }}
-                al {{ \Carbon\Carbon::parse($evento->fecha_fin)->format('d/m/Y') }}.
-            </p>
-        </div>
+                <p class="date-info">
+                    Evento realizado del {{ \Carbon\Carbon::parse($evento->fecha_inicio)->format('d/m/Y') }}
+                    al {{ \Carbon\Carbon::parse($evento->fecha_fin)->format('d/m/Y') }}
+                </p>
+            </div>
 
-        <div class="signature-area">
-            <table class="signature-table">
-                <tr>
-                    <td class="signature-cell">
-                        <span class="signature-line"></span>
-                        <span class="signature-label">Director General</span>
-                    </td>
-                    <td class="signature-cell">
-                        <span class="signature-line"></span>
-                        <span class="signature-label">Coordinador del Evento</span>
-                    </td>
-                </tr>
-            </table>
-        </div>
+            <!-- Firmas -->
+            <div class="signatures">
+                <table>
+                    <tr>
+                        <td>
+                            <div class="signature-line"></div>
+                            <p class="signature-label">Director General</p>
+                        </td>
+                        <td>
+                            <div class="signature-line"></div>
+                            <p class="signature-label">Coordinador del Evento</p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
 
-        <div class="footer">
-            Folio: {{ \Illuminate\Support\Str::upper(substr(\Illuminate\Support\Str::uuid(), 0, 8)) }} |
-            Expedición: {{ \Carbon\Carbon::parse($evento->fecha_fin)->format('d/m/Y') }}
+            <!-- Footer -->
+            <div class="footer">
+                <strong>Folio:</strong> {{ \Illuminate\Support\Str::upper(substr(\Illuminate\Support\Str::uuid(), 0, 8)) }}
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                <strong>Expedición:</strong> {{ \Carbon\Carbon::parse($evento->fecha_fin)->format('d/m/Y') }}
+            </div>
         </div>
     </div>
 </body>

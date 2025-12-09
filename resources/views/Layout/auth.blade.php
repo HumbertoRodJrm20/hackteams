@@ -11,25 +11,61 @@
     <style>
         /* Estilo base para el cuerpo */
         body {
-            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
         }
-        /* Garantiza que el contenido ocupe toda la altura */
+
+        /* Garantiza que el contenido ocupe toda la altura con fondo animado */
         .auth-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh; 
-            padding: 40px 0;
-            background-color: #f8f9fa;
+            min-height: 100vh;
+            padding: 40px 20px;
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #4facfe);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            position: relative;
         }
+
+        /* Animación del gradiente */
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Patrón de puntos decorativo */
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(rgba(255, 255, 255, 0.2) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+
         /* La tarjeta de login, ahora con ancho compacto garantizado */
         .login-card {
             max-width: 450px;
             width: 100%;
             padding: 40px;
-            border-radius: 10px;
+            border-radius: 16px;
             background-color: white;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+            backdrop-filter: blur(10px);
         }
     </style>
     @yield('styles') {{-- Para estilos específicos de login/registro --}}

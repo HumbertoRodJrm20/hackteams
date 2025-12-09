@@ -9,11 +9,13 @@ use App\Http\Controllers\EquipoController;
 use App\Http\Controllers\EventoController;
 use App\Http\Controllers\JuezProyectoController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\PerfilController;
 use App\Http\Controllers\ProgresoController;
 use App\Http\Controllers\ProyectoController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VerificationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -40,15 +42,19 @@ Route::post('/login/auth', [LoginController::class, 'authenticate'])->name('logi
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // REGISTRO
-Route::get('/register', function () {
-    return view('Registrar');
-})->name('register');
+Route::get('/register', [RegisterController::class, 'create'])->name('register');
 Route::post('/register', [RegisterController::class, 'store'])->name('register.create');
 
-// Recuperación de Contraseña
-Route::get('/forgot-password', function () {
-    return view('welcome');
-})->name('password.request');
+// VERIFICACIÓN DE EMAIL
+Route::get('/verify-email', [VerificationController::class, 'show'])->name('verification.show');
+Route::post('/verify-email', [VerificationController::class, 'verify'])->name('verification.verify');
+Route::post('/verify-email/resend', [VerificationController::class, 'resend'])->name('verification.resend');
+
+// RECUPERACIÓN DE CONTRASEÑA
+Route::get('/forgot-password', [PasswordResetController::class, 'showRequestForm'])->name('password.request');
+Route::post('/forgot-password', [PasswordResetController::class, 'sendResetCode'])->name('password.email');
+Route::get('/reset-password', [PasswordResetController::class, 'showResetForm'])->name('password.reset.show');
+Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.update');
 
 // ----------------------------------------------------
 // 2. RUTAS DE APLICACIÓN (Generalmente requieren Auth)
@@ -74,9 +80,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/eventos/{evento}', [EventoController::class, 'show'])->name('eventos.show');
     Route::post('/eventos/{evento}/join', [EventoController::class, 'join'])->name('eventos.join');
     Route::post('/eventos/{evento}/leave', [EventoController::class, 'leave'])->name('eventos.leave');
-
-    // PROYECTOS (Ver detalles - accesible para todos los roles autenticados)
-    Route::get('/proyectos/{id}', [ProyectoController::class, 'show'])->name('proyectos.show');
 });
 
 // ----------------------------------------------------
@@ -90,7 +93,6 @@ Route::middleware(['auth', 'participante'])->group(function () {
     Route::get('/equipos/publicos', [EquipoController::class, 'equiposPublicos'])->name('equipos.publicos');
     Route::get('/equipos/registrar', [EquipoController::class, 'create'])->name('equipos.registrar');
     Route::post('/equipos/store', [EquipoController::class, 'store'])->name('equipos.store');
-    Route::post('/equipos/{equipo}/unirse', [EquipoController::class, 'unirse'])->name('equipos.unirse');
     Route::get('/equipos/{equipo}', [EquipoController::class, 'show'])->name('equipos.show');
     Route::post('/equipos/{equipo}/invite', [EquipoController::class, 'invite'])->name('equipos.invite');
     Route::delete('/equipos/{equipo}/members/{participante}', [EquipoController::class, 'removeMember'])->name('equipos.removeMember');
@@ -98,9 +100,22 @@ Route::middleware(['auth', 'participante'])->group(function () {
     Route::delete('/equipos/{equipo}/leave', [EquipoController::class, 'leave'])->name('equipos.leave');
     Route::delete('/equipos/{equipo}', [EquipoController::class, 'destroy'])->name('equipos.destroy');
 
+    // SOLICITUDES E INVITACIONES DE EQUIPOS
+    Route::post('/equipos/{equipo}/solicitar', [\App\Http\Controllers\SolicitudEquipoController::class, 'solicitar'])->name('equipos.solicitar');
+    Route::post('/equipos/{equipo}/invitar', [\App\Http\Controllers\SolicitudEquipoController::class, 'invitar'])->name('equipos.invitar');
+    Route::get('/equipos/mis-solicitudes', [\App\Http\Controllers\SolicitudEquipoController::class, 'misSolicitudes'])->name('equipos.solicitudes');
+    Route::get('/equipos/mis-invitaciones', [\App\Http\Controllers\SolicitudEquipoController::class, 'misInvitaciones'])->name('equipos.invitaciones');
+    Route::post('/solicitudes-equipo/{solicitud}/aceptar', [\App\Http\Controllers\SolicitudEquipoController::class, 'aceptarSolicitud'])->name('equipos.solicitudes.aceptar');
+    Route::post('/solicitudes-equipo/{solicitud}/rechazar', [\App\Http\Controllers\SolicitudEquipoController::class, 'rechazarSolicitud'])->name('equipos.solicitudes.rechazar');
+    Route::post('/invitaciones-equipo/{invitacion}/aceptar', [\App\Http\Controllers\SolicitudEquipoController::class, 'aceptarInvitacion'])->name('equipos.invitaciones.aceptar');
+    Route::post('/invitaciones-equipo/{invitacion}/rechazar', [\App\Http\Controllers\SolicitudEquipoController::class, 'rechazarInvitacion'])->name('equipos.invitaciones.rechazar');
+
     // PROYECTOS (Registrar - solo participantes)
     Route::get('/proyectos/registrar', [ProyectoController::class, 'create'])->name('proyectos.registrar');
     Route::post('/proyectos/store', [ProyectoController::class, 'store'])->name('proyectos.store');
+
+    // PROYECTOS (Ver detalles - accesible para participantes)
+    Route::get('/proyectos/{id}', [ProyectoController::class, 'show'])->name('proyectos.show');
 
     // PROGRESO
     Route::get('/progreso', [ProgresoController::class, 'index'])->name('progreso.index');

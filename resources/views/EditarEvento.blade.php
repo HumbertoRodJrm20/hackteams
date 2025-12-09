@@ -37,7 +37,7 @@
                         @enderror
                     </div>
 
-                    <h4 class="mb-3 text-primary">Fechas y Estado</h4>
+                    <h4 class="mb-3 text-primary">Fechas y Configuración</h4>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
@@ -66,19 +66,29 @@
                             @enderror
                             <small class="form-text text-muted">Define cuántos equipos máximo pueden participar en este evento.</small>
                         </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="categoria_id" class="form-label">Categoría del Evento</label>
+                            <select class="form-select @error('categoria_id') is-invalid @enderror" id="categoria_id" name="categoria_id">
+                                <option value="">Sin categoría específica</option>
+                                @foreach($categorias as $categoria)
+                                    <option value="{{ $categoria->id }}" {{ old('categoria_id', $evento->categoria_id) == $categoria->id ? 'selected' : '' }}>
+                                        {{ $categoria->nombre }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('categoria_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="form-text text-muted">Temática principal del evento (opcional).</small>
+                        </div>
                     </div>
 
-                    <div class="mb-4">
-                        <label for="estado" class="form-label">Estado del Evento</label>
-                        <select class="form-select @error('estado') is-invalid @enderror" id="estado" name="estado" required>
-                            <option value="proximo" {{ old('estado', $evento->estado) == 'proximo' ? 'selected' : '' }}>Próximo</option>
-                            <option value="activo" {{ old('estado', $evento->estado) == 'activo' ? 'selected' : '' }}>Activo</option>
-                            <option value="finalizado" {{ old('estado', $evento->estado) == 'finalizado' ? 'selected' : '' }}>Finalizado</option>
-                        </select>
-                        @error('estado')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                        <small class="form-text text-muted">Define si el evento está en planeación, abierto a registro, o si ya terminó.</small>
+                    <div class="alert alert-info mb-4">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Estado automático:</strong> El estado del evento se recalculará automáticamente según las fechas ingresadas.
+                        <br>
+                        <small>Estado actual: <strong>{{ ucfirst($evento->estado) }}</strong></small>
                     </div>
 
                     <h4 class="mb-3 text-primary">Imagen Promocional</h4>

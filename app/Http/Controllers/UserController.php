@@ -11,11 +11,33 @@ class UserController extends Controller
     /**
      * Muestra la lista de todos los usuarios.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $usuarios = User::with('roles')->paginate(15);
+        // Query base
+        $query = User::with('roles');
 
-        return view('admin.usuarios.index', compact('usuarios'));
+        // Búsqueda por nombre o email
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                  ->orWhere('email', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Filtro por rol
+        if ($request->filled('rol_id')) {
+            $query->whereHas('roles', function ($q) use ($request) {
+                $q->where('rol_id', $request->rol_id);
+            });
+        }
+
+        // Ordenar y paginar
+        $usuarios = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+
+        // Obtener roles para filtro
+        $roles = Rol::all();
+
+        return view('admin.usuarios.index', compact('usuarios', 'roles'));
     }
 
     /**

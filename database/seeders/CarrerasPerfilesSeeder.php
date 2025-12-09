@@ -9,14 +9,23 @@ class CarrerasPerfilesSeeder extends Seeder
 {
     public function run(): void
     {
+        // Desactivar temporalmente las restricciones de clave foránea
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
         DB::table('carreras')->truncate();
         DB::table('perfiles')->truncate();
 
         $carreras = [
+            ['nombre' => 'Contador Público'],
+            ['nombre' => 'Licenciatura en Administración'],
+            ['nombre' => 'Ingeniería Química'],
+            ['nombre' => 'Ingeniería Mecánica'],
+            ['nombre' => 'Ingeniería Industrial'],
             ['nombre' => 'Ingeniería en Sistemas Computacionales'],
             ['nombre' => 'Ingeniería en Gestión Empresarial'],
-            ['nombre' => 'Arquitectura'],
-            ['nombre' => 'Licenciatura en Administración'],
+            ['nombre' => 'Ingeniería Electrónica'],
+            ['nombre' => 'Ingeniería Eléctrica'],
+            ['nombre' => 'Ingeniería Civil'],
         ];
 
         $perfiles = [
@@ -29,5 +38,8 @@ class CarrerasPerfilesSeeder extends Seeder
 
         DB::table('carreras')->insert($carreras);
         DB::table('perfiles')->insert($perfiles);
+
+        // Reactivar las restricciones de clave foránea
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 }

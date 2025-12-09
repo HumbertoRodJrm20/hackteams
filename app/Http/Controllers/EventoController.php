@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Categoria;
 use App\Models\Evento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -12,10 +13,23 @@ class EventoController extends Controller
     /**
      * Muestra la lista de todos los eventos.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Se extraen todos los eventos, ordenados por fecha de inicio para mostrar los próximos primero
-        $eventos = Evento::orderBy('fecha_inicio', 'desc')->get();
+        // Query base
+        $query = Evento::query();
+
+        // Búsqueda por nombre
+        if ($request->filled('search')) {
+            $query->where('nombre', 'like', '%' . $request->search . '%');
+        }
+
+        // Filtro por estado
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        // Ordenar y paginar
+        $eventos = $query->orderBy('fecha_inicio', 'desc')->paginate(12)->withQueryString();
 
         return view('Eventos', compact('eventos'));
     }
@@ -26,7 +40,9 @@ class EventoController extends Controller
     public function create()
     {
         // Nota: Se debe proteger esta ruta con un middleware 'admin'
-        return view('CrearEvento');
+        $categorias = Categoria::all();
+
+        return view('CrearEvento', compact('categorias'));
     }
 
     /**
@@ -41,14 +57,22 @@ class EventoController extends Controller
                 'descripcion' => 'required|string',
                 'fecha_inicio' => 'required|date',
                 'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-                'estado' => ['nullable', 'string', Rule::in(['proximo', 'activo', 'finalizado'])],
                 'max_equipos' => 'required|integer|min:1',
+                'categoria_id' => 'nullable|exists:categorias,id',
                 'imagen' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
             ]);
 
-            // Establecer estado por defecto si no se proporciona
-            if (! isset($validatedData['estado'])) {
+            // Calcular estado automáticamente basándose en las fechas
+            $fechaInicio = \Carbon\Carbon::parse($validatedData['fecha_inicio']);
+            $fechaFin = \Carbon\Carbon::parse($validatedData['fecha_fin']);
+            $hoy = \Carbon\Carbon::now();
+
+            if ($hoy->lt($fechaInicio)) {
                 $validatedData['estado'] = 'proximo';
+            } elseif ($hoy->between($fechaInicio, $fechaFin)) {
+                $validatedData['estado'] = 'activo';
+            } else {
+                $validatedData['estado'] = 'finalizado';
             }
 
             // Manejar la carga de imagen si existe
@@ -88,7 +112,9 @@ class EventoController extends Controller
     public function edit(Evento $evento)
     {
         // Nota: Se debe proteger esta ruta con un middleware 'admin'
-        return view('EditarEvento', compact('evento'));
+        $categorias = Categoria::all();
+
+        return view('EditarEvento', compact('evento', 'categorias'));
     }
 
     /**
@@ -102,10 +128,23 @@ class EventoController extends Controller
             'descripcion' => 'required|string',
             'fecha_inicio' => 'required|date',
             'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-            'estado' => ['sometimes', 'string', Rule::in(['proximo', 'activo', 'finalizado'])],
             'max_equipos' => 'required|integer|min:1',
+            'categoria_id' => 'nullable|exists:categorias,id',
             'imagen' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
         ]);
+
+        // Calcular estado automáticamente basándose en las fechas
+        $fechaInicio = \Carbon\Carbon::parse($validatedData['fecha_inicio']);
+        $fechaFin = \Carbon\Carbon::parse($validatedData['fecha_fin']);
+        $hoy = \Carbon\Carbon::now();
+
+        if ($hoy->lt($fechaInicio)) {
+            $validatedData['estado'] = 'proximo';
+        } elseif ($hoy->between($fechaInicio, $fechaFin)) {
+            $validatedData['estado'] = 'activo';
+        } else {
+            $validatedData['estado'] = 'finalizado';
+        }
 
         // Manejar la carga de imagen si existe
         if ($request->hasFile('imagen')) {

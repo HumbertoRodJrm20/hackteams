@@ -13,16 +13,34 @@ class JuezProyectoController extends Controller
     /**
      * Muestra los proyectos asignados al juez actual para evaluar
      */
-    public function index()
+    public function index(Request $request)
     {
         $juez = Auth::user();
 
-        // Obtener solo los proyectos asignados a este juez
-        $proyectos = Proyecto::whereHas('jueces', function ($query) use ($juez) {
-            $query->where('users.id', $juez->id);
-        })->with('equipo', 'evento', 'calificaciones')
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        // Query base: solo proyectos asignados a este juez
+        $query = Proyecto::whereHas('jueces', function ($q) use ($juez) {
+            $q->where('users.id', $juez->id);
+        })->with('equipo', 'evento', 'calificaciones');
+
+        // Búsqueda por título del proyecto
+        if ($request->filled('search')) {
+            $query->where('titulo', 'like', '%' . $request->search . '%');
+        }
+
+        // Búsqueda por nombre de equipo
+        if ($request->filled('equipo')) {
+            $query->whereHas('equipo', function ($q) use ($request) {
+                $q->where('nombre', 'like', '%' . $request->equipo . '%');
+            });
+        }
+
+        // Filtro por estado
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        // Ordenar y paginar
+        $proyectos = $query->orderBy('created_at', 'desc')->paginate(10)->withQueryString();
 
         return view('juez.proyectos-asignados', compact('proyectos'));
     }

@@ -11,7 +11,7 @@ class Avance extends Model
 
     protected $table = 'avances';
 
-    protected $fillable = ['proyecto_id', 'descripcion', 'fecha'];
+    protected $fillable = ['proyecto_id', 'descripcion', 'fecha', 'archivo_path'];
 
     protected $casts = [
         'fecha' => 'datetime',

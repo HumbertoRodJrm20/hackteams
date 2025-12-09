@@ -12,11 +12,28 @@ class AdminEquipoController extends Controller
     /**
      * Muestra la lista de todos los equipos.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $equipos = Equipo::with(['participantes', 'proyectos', 'evento'])->paginate(15);
+        // Query base
+        $query = Equipo::with(['participantes.user', 'proyectos', 'evento']);
 
-        return view('admin.equipos.index', compact('equipos'));
+        // Búsqueda por nombre de equipo
+        if ($request->filled('search')) {
+            $query->where('nombre', 'like', '%' . $request->search . '%');
+        }
+
+        // Filtro por evento
+        if ($request->filled('evento_id')) {
+            $query->where('evento_id', $request->evento_id);
+        }
+
+        // Ordenar y paginar
+        $equipos = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+
+        // Obtener eventos para filtro
+        $eventos = Evento::orderBy('nombre')->get();
+
+        return view('admin.equipos.index', compact('equipos', 'eventos'));
     }
 
     /**
