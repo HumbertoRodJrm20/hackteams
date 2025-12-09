@@ -19,8 +19,8 @@ class UserController extends Controller
         // Búsqueda por nombre o email
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('email', 'like', '%' . $request->search . '%');
+                $q->where('name', 'like', '%'.$request->search.'%')
+                    ->orWhere('email', 'like', '%'.$request->search.'%');
             });
         }
 
@@ -32,7 +32,7 @@ class UserController extends Controller
         }
 
         // Ordenar y paginar
-        $usuarios = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+        $usuarios = $query->orderBy('created_at', 'desc')->simplePaginate(15)->withQueryString();
 
         // Obtener roles para filtro
         $roles = Rol::all();
@@ -64,7 +64,7 @@ class UserController extends Controller
         ]);
 
         $usuario = User::create([
-            'nombre' => $validatedData['nombre'],
+            'name' => $validatedData['nombre'],
             'email' => $validatedData['email'],
             'password' => bcrypt($validatedData['password']),
         ]);
@@ -80,7 +80,7 @@ class UserController extends Controller
         }
 
         return redirect()->route('admin.usuarios.index')
-            ->with('success', '¡El usuario "'.$usuario->nombre.'" ha sido creado con éxito!');
+            ->with('success', '¡El usuario "'.$usuario->name.'" ha sido creado con éxito!');
     }
 
     /**
@@ -107,7 +107,7 @@ class UserController extends Controller
             'rol_id' => 'required|exists:roles,id',
         ]);
 
-        $usuario->nombre = $validatedData['nombre'];
+        $usuario->name = $validatedData['nombre'];
         $usuario->email = $validatedData['email'];
 
         if ($validatedData['password']) {
@@ -131,7 +131,7 @@ class UserController extends Controller
         }
 
         return redirect()->route('admin.usuarios.index')
-            ->with('success', '¡El usuario "'.$usuario->nombre.'" ha sido actualizado con éxito!');
+            ->with('success', '¡El usuario "'.$usuario->name.'" ha sido actualizado con éxito!');
     }
 
     /**
@@ -139,7 +139,7 @@ class UserController extends Controller
      */
     public function destroy(User $usuario)
     {
-        $nombre = $usuario->nombre;
+        $nombre = $usuario->name;
         $usuario->delete();
 
         return redirect()->route('admin.usuarios.index')
