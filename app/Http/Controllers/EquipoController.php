@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\InvitacionEquipo;
 use App\Models\Equipo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class EquipoController extends Controller
 {
@@ -248,7 +250,17 @@ class EquipoController extends Controller
             'es_lider' => false,
         ]);
 
-        return back()->with('success', 'Se ha invitado a '.$userToInvite->name.' al equipo.');
+        // Enviar correo de invitación
+        try {
+            Mail::to($userToInvite->email)->send(
+                new InvitacionEquipo($equipo, $userToInvite, Auth::user())
+            );
+        } catch (\Exception $e) {
+            \Log::error('Error al enviar correo de invitación: ' . $e->getMessage());
+            // Continuar aunque falle el correo
+        }
+
+        return back()->with('success', 'Se ha invitado a '.$userToInvite->name.' al equipo. Se ha enviado un correo de notificación.');
     }
 
     /**
@@ -351,7 +363,7 @@ class EquipoController extends Controller
                         'miembros' => $equipo->contarMiembros(),
                         'participantes' => $equipo->participantes,
                         'yaSoyMiembro' => $equipo->participantes->contains('user_id', $participante->user_id),
-                        'perfiles_disponibles' => $perfilesDisponibles,
+                        'perfiles_disponibles' => $perfilesDisponibles->count(),
                     ];
                 }),
                 'yaEnEquipo' => $yaEnEquipo,

@@ -17,10 +17,49 @@
     {{-- Mensajes de éxito --}}
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
+            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
+
+    {{-- Formulario de Búsqueda y Filtros --}}
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ route('admin.usuarios.index') }}" class="row g-3">
+                <div class="col-md-6">
+                    <label for="search" class="form-label">
+                        <i class="bi bi-search me-1"></i>Buscar usuario
+                    </label>
+                    <input type="text" class="form-control" id="search" name="search"
+                           placeholder="Nombre o email..."
+                           value="{{ request('search') }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="rol_id" class="form-label">
+                        <i class="bi bi-person-badge me-1"></i>Rol
+                    </label>
+                    <select class="form-select" id="rol_id" name="rol_id">
+                        <option value="">Todos los roles</option>
+                        @foreach($roles as $rol)
+                            <option value="{{ $rol->id }}" {{ request('rol_id') == $rol->id ? 'selected' : '' }}>
+                                {{ $rol->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                    @if(request('search') || request('rol_id'))
+                        <a href="{{ route('admin.usuarios.index') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i>
+                        </a>
+                    @endif
+                </div>
+            </form>
+        </div>
+    </div>
 
     {{-- Tabla de Usuarios --}}
     <div class="card shadow-sm">

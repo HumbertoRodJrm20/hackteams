@@ -4,10 +4,16 @@
 
 @section('content')
 <style>
+    main {
+        margin: 0;
+        padding: 0;
+    }
+
     .dashboard-container {
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        min-height: 100vh;
-        padding: 30px;
+        min-height: calc(100vh - 56px);
+        padding: 20px;
+        margin: 0;
     }
 
     [data-theme="dark"] .dashboard-container {
