@@ -166,20 +166,17 @@
 <body>
     <div class="certificate-wrapper">
         <div class="inner-wrapper">
-            <!-- Header -->
             <div class="header">
                 <img src="{{ public_path('images/HackTeams_Logo.png') }}" alt="HackTeams Logo">
                 <h1>HACKTEAMS</h1>
             </div>
 
-            <!-- Ornamento decorativo -->
             <div class="ornament">
                 <span class="ornament-line"></span>
                 <span class="ornament-dot"></span>
                 <span class="ornament-line"></span>
             </div>
 
-            <!-- Título -->
             <div class="title">
                 @if($tipo === 'lugar' && isset($lugar))
                     @if($lugar == 1)
@@ -194,22 +191,18 @@
                 @endif
             </div>
 
-            <!-- Ornamento decorativo -->
             <div class="ornament">
                 <span class="ornament-line"></span>
                 <span class="ornament-dot"></span>
                 <span class="ornament-line"></span>
             </div>
 
-            <!-- Subtítulo -->
             <p class="subtitle">Se otorga la presente constancia a:</p>
 
-            <!-- Nombre del participante -->
             <div class="name-box">
                 <p class="name">{{ strtoupper($participante->user->name) }}</p>
             </div>
 
-            <!-- Contenido -->
             <div class="body-content">
                 @if($tipo === 'lugar' && isset($lugar))
                     <p>Por haber obtenido el</p>
@@ -240,7 +233,6 @@
                 </p>
             </div>
 
-            <!-- Firmas -->
             <div class="signatures">
                 <table>
                     <tr>
@@ -256,7 +248,6 @@
                 </table>
             </div>
 
-            <!-- Footer -->
             <div class="footer">
                 <strong>Folio:</strong> {{ \Illuminate\Support\Str::upper(substr(\Illuminate\Support\Str::uuid(), 0, 8)) }}
                 &nbsp;&nbsp;|&nbsp;&nbsp;

@@ -166,40 +166,33 @@
 <body>
     <div class="certificate-wrapper">
         <div class="inner-wrapper">
-            <!-- Header -->
             <div class="header">
                 <img src="{{ public_path('images/HackTeams_Logo.png') }}" alt="HackTeams Logo">
                 <h1>HACKTEAMS</h1>
             </div>
 
-            <!-- Ornamento decorativo -->
             <div class="ornament">
                 <span class="ornament-line"></span>
                 <span class="ornament-dot"></span>
                 <span class="ornament-line"></span>
             </div>
 
-            <!-- Título -->
             <div class="title">
                 CONSTANCIA DE {{ strtoupper($tipo) }}
             </div>
 
-            <!-- Ornamento decorativo -->
             <div class="ornament">
                 <span class="ornament-line"></span>
                 <span class="ornament-dot"></span>
                 <span class="ornament-line"></span>
             </div>
 
-            <!-- Subtítulo -->
             <p class="subtitle">Se otorga la presente constancia a:</p>
 
-            <!-- Nombre del juez -->
             <div class="name-box">
                 <p class="name">{{ strtoupper($juez->name) }}</p>
             </div>
 
-            <!-- Contenido -->
             <div class="body-content">
                 <p>Por su destacada participación como</p>
                 <span class="badge">JUEZ EVALUADOR</span>
@@ -212,7 +205,6 @@
                 </p>
             </div>
 
-            <!-- Firmas -->
             <div class="signatures">
                 <table>
                     <tr>
@@ -228,7 +220,6 @@
                 </table>
             </div>
 
-            <!-- Footer -->
             <div class="footer">
                 <strong>Folio:</strong> {{ \Illuminate\Support\Str::upper(substr(\Illuminate\Support\Str::uuid(), 0, 8)) }}
                 &nbsp;&nbsp;|&nbsp;&nbsp;

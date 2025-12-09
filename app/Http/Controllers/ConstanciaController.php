@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Constancia;
-use App\Models\Equipo;
 use App\Models\Evento;
 use App\Models\Participante;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -13,18 +12,10 @@ use Illuminate\Support\Str;
 
 class ConstanciaController extends Controller
 {
-    // ====================================================================
-    // 1. RUTAS DEL PARTICIPANTE
-    // ====================================================================
-
-    /**
-     * Muestra la vista 'Mis Constancias y Certificados' (Participante).
-     */
     public function index()
     {
         $participante = Auth::user()->participante;
 
-        // Constancias generadas del participante
         $constancias = collect();
 
         if ($participante) {
@@ -38,7 +29,6 @@ class ConstanciaController extends Controller
 
     public function generarPDF($id)
     {
-        // Cargar la constancia REAL
         $constancia = Constancia::with(['participante.user', 'evento'])
             ->findOrFail($id);
 
@@ -47,7 +37,6 @@ class ConstanciaController extends Controller
         $tipo = $constancia->tipo_constancia;
         $lugar = $constancia->lugar;
 
-        // Generar PDF en orientación vertical
         $pdf = Pdf::loadView('pdf.constancia-estilo', compact('participante', 'evento', 'tipo', 'lugar'))
             ->setPaper('a4', 'portrait');
 
@@ -58,9 +47,6 @@ class ConstanciaController extends Controller
         return $pdf->download($nombreArchivo);
     }
 
-    /**
-     * Permite al usuario descargar la constancia generada (el PDF).
-     */
     public function downloadCertificate(Constancia $constancia)
     {
         $ruta = storage_path('app/public/'.$constancia->ruta_archivo);
@@ -72,39 +58,25 @@ class ConstanciaController extends Controller
         return response()->download($ruta);
     }
 
-    // ====================================================================
-    // 2. RUTAS DEL ADMINISTRADOR
-    // ====================================================================
-
-    /**
-     * Vista de gestión de constancias para un evento específico (Admin).
-     */
     public function manageCertificates(Evento $evento)
     {
-        // Cargar todos los participantes del evento, con su equipo y rol para la vista
         $participantes = $evento->participantes()
             ->with(['user', 'equipo', 'rol'])
             ->get();
 
-        // Obtener las constancias ya generadas para el evento
         $constanciasGeneradas = Constancia::where('evento_id', $evento->id)
-            ->pluck('ruta_archivo', 'participante_id'); // [participante_id => ruta]
+            ->pluck('ruta_archivo', 'participante_id');
 
         return view('admin.constancia.gestion', compact('evento', 'participantes', 'constanciasGeneradas'));
     }
 
-    /**
-     * Genera el PDF, lo guarda y registra la Constancia en la DB (Admin).
-     */
     public function generateCertificate(Participante $participante, Evento $evento)
     {
-        // 1. Lógica para determinar si es ganador
         $equipoGanador = $evento->equipo_ganador_id ?? null;
         $esGanador = ($equipoGanador && $participante->equipo_id === $equipoGanador);
 
         $tipo = $esGanador ? 'ganador' : 'participacion';
 
-        // 2. Generar el PDF
         $data = [
             'participante' => $participante->load('user', 'rol', 'equipo'),
             'evento' => $evento,
@@ -113,17 +85,14 @@ class ConstanciaController extends Controller
 
         $pdf = Pdf::loadView('pdf.constancia', $data);
 
-        // 3. Guardar el archivo
         $participanteNameSlug = Str::slug($participante->user->name);
         $eventNameSlug = Str::slug($evento->nombre);
 
         $fileName = "constancia-{$participanteNameSlug}-{$eventNameSlug}-{$tipo}.pdf";
         $path = "constancia/{$fileName}";
 
-        // Guarda el archivo en storage/app/public/constancias/
         Storage::put("public/{$path}", $pdf->output());
 
-        // 4. Guardar o actualizar el registro en la base de datos
         Constancia::updateOrCreate(
             ['participante_id' => $participante->id, 'evento_id' => $evento->id],
             [
@@ -140,7 +109,6 @@ class ConstanciaController extends Controller
     {
         $juez = auth()->user();
 
-        // Buscar constancias donde participante_id = juez_id
         $constancias = \App\Models\Constancia::where('participante_id', $juez->id)
             ->with('evento')
             ->get();
