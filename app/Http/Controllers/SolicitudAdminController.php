@@ -8,13 +8,35 @@ use Illuminate\Http\Request;
 class SolicitudAdminController extends Controller
 {
     // Mostrar tabla
-    public function index()
+    public function index(Request $request)
     {
-        $solicitudes = SolicitudConstancia::with(['participante', 'evento'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        // Query base
+        $query = SolicitudConstancia::with(['participante', 'evento']);
 
-        return view('admin.solicitudes.index', compact('solicitudes'));
+        // Búsqueda por nombre del participante
+        if ($request->filled('search')) {
+            $query->whereHas('participante', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // Filtro por evento
+        if ($request->filled('evento_id')) {
+            $query->where('evento_id', $request->evento_id);
+        }
+
+        // Filtro por estado
+        if ($request->filled('estatus')) {
+            $query->where('estatus', $request->estatus);
+        }
+
+        // Ordenar y paginar
+        $solicitudes = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+
+        // Obtener eventos para filtro
+        $eventos = \App\Models\Evento::orderBy('nombre')->get();
+
+        return view('admin.solicitudes.index', compact('solicitudes', 'eventos'));
     }
 
     // Aprobar solicitud

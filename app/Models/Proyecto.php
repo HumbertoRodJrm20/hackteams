@@ -11,7 +11,17 @@ class Proyecto extends Model
 
     protected $table = 'proyectos';
 
-    protected $fillable = ['equipo_id', 'evento_id', 'titulo', 'resumen', 'link_repositorio', 'estado'];
+    protected $fillable = [
+        'equipo_id',
+        'evento_id',
+        'categoria_id',
+        'titulo',
+        'resumen',
+        'link_repositorio',
+        'imagen_path',
+        'documento_path',
+        'estado',
+    ];
 
     // Relación con equipo (N:1)
     public function equipo()
@@ -23,6 +33,12 @@ class Proyecto extends Model
     public function evento()
     {
         return $this->belongsTo(Evento::class, 'evento_id');
+    }
+
+    // Relación con categoría (N:1)
+    public function categoria()
+    {
+        return $this->belongsTo(Categoria::class, 'categoria_id');
     }
 
     // Relación con avances (1:N)

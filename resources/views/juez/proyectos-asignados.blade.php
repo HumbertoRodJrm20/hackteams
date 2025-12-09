@@ -15,6 +15,52 @@
         </a>
     </div>
 
+    {{-- Formulario de Búsqueda y Filtros --}}
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ route('juez.proyectos.index') }}" class="row g-3">
+                <div class="col-md-4">
+                    <label for="search" class="form-label">
+                        <i class="bi bi-search me-1"></i>Buscar proyecto
+                    </label>
+                    <input type="text" class="form-control" id="search" name="search"
+                           placeholder="Título del proyecto..."
+                           value="{{ request('search') }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="equipo" class="form-label">
+                        <i class="bi bi-people me-1"></i>Buscar equipo
+                    </label>
+                    <input type="text" class="form-control" id="equipo" name="equipo"
+                           placeholder="Nombre del equipo..."
+                           value="{{ request('equipo') }}">
+                </div>
+                <div class="col-md-3">
+                    <label for="estado" class="form-label">
+                        <i class="bi bi-flag me-1"></i>Estado
+                    </label>
+                    <select class="form-select" id="estado" name="estado">
+                        <option value="">Todos los estados</option>
+                        <option value="pendiente" {{ request('estado') == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
+                        <option value="en_desarrollo" {{ request('estado') == 'en_desarrollo' ? 'selected' : '' }}>En Desarrollo</option>
+                        <option value="terminado" {{ request('estado') == 'terminado' ? 'selected' : '' }}>Terminado</option>
+                        <option value="calificado" {{ request('estado') == 'calificado' ? 'selected' : '' }}>Calificado</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                    @if(request('search') || request('equipo') || request('estado'))
+                        <a href="{{ route('juez.proyectos.index') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i>
+                        </a>
+                    @endif
+                </div>
+            </form>
+        </div>
+    </div>
+
     @if($proyectos->isEmpty())
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center py-5">
