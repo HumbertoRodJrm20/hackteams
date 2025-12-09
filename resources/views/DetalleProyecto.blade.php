@@ -195,12 +195,19 @@
                             @forelse ($proyecto->avances as $avance)
                                 <div class="proyecto-avance-border" style="padding: 1.5rem; border-bottom: 1px solid;">
                                     <div class="d-flex justify-content-between align-items-start">
-                                        <div>
+                                        <div class="flex-grow-1">
                                             <h6 class="fw-bold mb-2 proyecto-avance-label">
                                                 <i class="bi bi-calendar-event me-2" style="color: #3498db;"></i>
                                                 {{ $avance->fecha->isoFormat('D MMMM YYYY') }}
                                             </h6>
-                                            <p class="mb-0 proyecto-avance-description">{{ $avance->descripcion }}</p>
+                                            <p class="mb-2 proyecto-avance-description">{{ $avance->descripcion }}</p>
+                                            @if($avance->archivo_path)
+                                                <a href="{{ asset('storage/' . $avance->archivo_path) }}"
+                                                   class="btn btn-sm btn-outline-primary"
+                                                   target="_blank">
+                                                    <i class="bi bi-file-pdf me-1"></i>Ver Archivo
+                                                </a>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -279,26 +286,33 @@
     <div class="modal fade" id="modalNuevoAvance" tabindex="-1" aria-labelledby="modalNuevoAvanceLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <form method="POST" action="{{ route('avances.store') }}">
+                <form method="POST" action="{{ route('avances.store') }}" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" name="proyecto_id" value="{{ $proyecto->id }}">
                     <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="modalNuevoAvanceLabel">Registrar Avance</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         <div class="mb-3">
-                            <label for="descripcion_avance" class="form-label">Descripción del Avance</label>
-                            <textarea class="form-control" id="descripcion_avance" name="descripcion" rows="3" required></textarea>
+                            <label for="descripcion_avance" class="form-label fw-bold">Descripción del Avance</label>
+                            <textarea class="form-control" id="descripcion_avance" name="descripcion" rows="3" required placeholder="Describe el progreso realizado..."></textarea>
                         </div>
                         <div class="mb-3">
-                            <label for="fecha_avance" class="form-label">Fecha del Avance</label>
+                            <label for="fecha_avance" class="form-label fw-bold">Fecha del Avance</label>
                             <input type="date" class="form-control" id="fecha_avance" name="fecha" value="{{ now()->toDateString() }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="archivo_avance" class="form-label fw-bold">Archivo de Evidencia (PDF)</label>
+                            <input type="file" class="form-control" id="archivo_avance" name="archivo" accept="application/pdf">
+                            <small class="form-text text-muted">Opcional: Sube evidencias, capturas o documentos relacionados (Máximo 10MB)</small>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Guardar Avance</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>Guardar Avance
+                        </button>
                     </div>
                 </form>
             </div>

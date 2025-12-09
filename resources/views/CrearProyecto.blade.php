@@ -24,7 +24,7 @@
                             <div class="alert alert-danger">{{ session('error') }}</div>
                         @endif
 
-                        <form method="POST" action="{{ route('proyectos.store') }}">
+                        <form method="POST" action="{{ route('proyectos.store') }}" enctype="multipart/form-data">
                             @csrf
 
                             {{-- Campo: Evento --}}
@@ -46,6 +46,28 @@
                                 @error('evento_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                            </div>
+
+                            {{-- Campo: Categoría --}}
+                            <div class="mb-3">
+                                <label for="categoria_id" class="form-label fw-bold">Categoría del Proyecto</label>
+                                <select class="form-select @error('categoria_id') is-invalid @enderror"
+                                        id="categoria_id"
+                                        name="categoria_id"
+                                        required>
+                                    <option value="" disabled selected>Selecciona una categoría...</option>
+
+                                    @foreach ($categorias as $categoria)
+                                        <option value="{{ $categoria->id }}"
+                                            {{ old('categoria_id') == $categoria->id ? 'selected' : '' }}>
+                                            <i class="bi {{ $categoria->icono }}"></i> {{ $categoria->nombre }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('categoria_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <small class="form-text text-muted">La categoría ayuda a clasificar tu proyecto</small>
                             </div>
 
                             {{-- Campo: Título del Proyecto --}}
@@ -89,6 +111,36 @@
                                 @error('link_repositorio')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                            </div>
+
+                            <h5 class="mb-3 text-primary"><i class="bi bi-paperclip me-2"></i>Archivos del Proyecto</h5>
+
+                            {{-- Campo: Imagen del Proyecto --}}
+                            <div class="mb-3">
+                                <label for="imagen" class="form-label fw-bold">Imagen del Proyecto (Screenshot, Mockup, etc.)</label>
+                                <input type="file"
+                                       class="form-control @error('imagen') is-invalid @enderror"
+                                       id="imagen"
+                                       name="imagen"
+                                       accept="image/jpeg,image/jpg,image/png,image/webp">
+                                @error('imagen')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <small class="form-text text-muted">Formatos aceptados: JPG, PNG, WEBP (Máximo 5MB)</small>
+                            </div>
+
+                            {{-- Campo: Documento/Evidencia del Proyecto --}}
+                            <div class="mb-4">
+                                <label for="documento" class="form-label fw-bold">Documento de Evidencias (PDF)</label>
+                                <input type="file"
+                                       class="form-control @error('documento') is-invalid @enderror"
+                                       id="documento"
+                                       name="documento"
+                                       accept="application/pdf">
+                                @error('documento')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                <small class="form-text text-muted">Puedes incluir presentación, manual técnico, etc. (Máximo 10MB)</small>
                             </div>
 
                             <div class="d-grid mt-4">

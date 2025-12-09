@@ -48,6 +48,7 @@
         body {
             background-color: var(--bg-primary);
             color: var(--text-primary);
+            padding-top: 56px; /* Espacio para el navbar fixed */
         }
 
         .container, .container-fluid {
@@ -325,7 +326,7 @@
 <body>
 
     
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-top sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-top fixed-top">
         <div class="container-fluid container">
 
             <a class="navbar-brand d-flex align-items-center" href="{{ route('eventos.index') }}"> 
@@ -344,7 +345,12 @@
                     {{-- Equipos: visible solo para Participantes --}}
                     @if(Auth::user() && Auth::user()->hasRole('Participante'))
                         <li class="nav-item">
-                            <a class="nav-link @yield('nav_equipos')" href="{{ route('equipos.index') }}"><i class="bi bi-people-fill me-1"></i>Equipos</a>
+                            <a class="nav-link @yield('nav_equipos')" href="{{ route('equipos.index') }}">
+                                <i class="bi bi-people-fill me-1"></i>Equipos
+                                @if(($solicitudesEquipoPendientes ?? 0) > 0 || ($invitacionesPendientes ?? 0) > 0)
+                                    <span class="badge bg-danger ms-1">{{ ($solicitudesEquipoPendientes ?? 0) + ($invitacionesPendientes ?? 0) }}</span>
+                                @endif
+                            </a>
                         </li>
                     @endif
 
@@ -381,6 +387,9 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-gear me-1"></i>Administración
+                                @if(($solicitudesConstanciaPendientes ?? 0) > 0)
+                                    <span class="badge bg-danger ms-1">{{ $solicitudesConstanciaPendientes }}</span>
+                                @endif
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="adminDropdown">
                                 <li><a class="dropdown-item" href="{{ route('admin.dashboard') }}"><i class="bi bi-bar-chart-line-fill me-2"></i>Dashboard</a></li>
@@ -390,7 +399,14 @@
                                 <li><a class="dropdown-item" href="{{ route('admin.equipos.index') }}"><i class="bi bi-people-fill me-2"></i>Gestionar Equipos</a></li>
                                 <li><a class="dropdown-item" href="{{ route('admin.proyectos.index') }}"><i class="bi bi-pencil-square me-2"></i>Proyectos y Jueces</a></li>
                                 <li><a class="dropdown-item" href="{{ route('admin.rankings') }}"><i class="bi bi-trophy me-2"></i>Rankings</a></li>
-                                <li><a class="dropdown-item" href="{{ route('admin.solicitudes') }}"><i class="bi bi-patch-check-fill me-2"></i>Solicitudes de Constancias</a></li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('admin.solicitudes') }}">
+                                        <i class="bi bi-patch-check-fill me-2"></i>Solicitudes de Constancias
+                                        @if(($solicitudesConstanciaPendientes ?? 0) > 0)
+                                            <span class="badge bg-danger ms-1">{{ $solicitudesConstanciaPendientes }}</span>
+                                        @endif
+                                    </a>
+                                </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{{ route('eventos.index') }}"><i class="bi bi-list-check me-2"></i>Ver Eventos</a></li>
                             </ul>
@@ -425,7 +441,7 @@
 
 
 
-    <main class="py-4">
+    <main>
         @yield('content') {{-- AQUÍ VA EL CONTENIDO ÚNICO DE CADA VISTA --}}
     </main>
 

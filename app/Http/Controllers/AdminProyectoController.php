@@ -14,13 +14,40 @@ class AdminProyectoController extends Controller
     /**
      * Muestra lista de eventos con sus proyectos para asignación a jueces
      */
-    public function index()
+    public function index(Request $request)
     {
-        $eventos = Evento::with(['proyectos' => function ($query) {
-            $query->with('equipo', 'calificaciones', 'jueces');
-        }])->get();
+        // Query base de proyectos
+        $query = Proyecto::with('equipo', 'evento', 'calificaciones', 'jueces');
 
-        return view('admin.proyectos.index', compact('eventos'));
+        // Búsqueda por título del proyecto
+        if ($request->filled('search')) {
+            $query->where('titulo', 'like', '%' . $request->search . '%');
+        }
+
+        // Filtro por evento
+        if ($request->filled('evento_id')) {
+            $query->where('evento_id', $request->evento_id);
+        }
+
+        // Filtro por estado
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        // Búsqueda por nombre de equipo
+        if ($request->filled('equipo')) {
+            $query->whereHas('equipo', function ($q) use ($request) {
+                $q->where('nombre', 'like', '%' . $request->equipo . '%');
+            });
+        }
+
+        // Ordenar y paginar
+        $proyectos = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+
+        // Obtener todos los eventos para el filtro
+        $eventos = Evento::orderBy('nombre')->get();
+
+        return view('admin.proyectos.index', compact('proyectos', 'eventos'));
     }
 
     /**
@@ -103,7 +130,7 @@ class AdminProyectoController extends Controller
                 return [
                     'id' => $proyecto->id,
                     'titulo' => $proyecto->titulo,
-                    'equipo' => $proyecto->equipo->nombre,
+                    'equipo' => $proyecto->equipo ? $proyecto->equipo->nombre : 'Sin equipo',
                     'promedio' => $proyecto->obtenerPromedio(),
                     'calificaciones_count' => $proyecto->calificaciones->count(),
                 ];

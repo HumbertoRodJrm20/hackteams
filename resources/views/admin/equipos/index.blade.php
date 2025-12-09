@@ -17,10 +17,49 @@
     {{-- Mensajes de éxito --}}
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
+            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
+
+    {{-- Formulario de Búsqueda y Filtros --}}
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ route('admin.equipos.index') }}" class="row g-3">
+                <div class="col-md-6">
+                    <label for="search" class="form-label">
+                        <i class="bi bi-search me-1"></i>Buscar equipo
+                    </label>
+                    <input type="text" class="form-control" id="search" name="search"
+                           placeholder="Nombre del equipo..."
+                           value="{{ request('search') }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="evento_id" class="form-label">
+                        <i class="bi bi-calendar-event me-1"></i>Evento
+                    </label>
+                    <select class="form-select" id="evento_id" name="evento_id">
+                        <option value="">Todos los eventos</option>
+                        @foreach($eventos as $evento)
+                            <option value="{{ $evento->id }}" {{ request('evento_id') == $evento->id ? 'selected' : '' }}>
+                                {{ $evento->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                    @if(request('search') || request('evento_id'))
+                        <a href="{{ route('admin.equipos.index') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i>
+                        </a>
+                    @endif
+                </div>
+            </form>
+        </div>
+    </div>
 
     {{-- Tabla de Equipos --}}
     <div class="card shadow-sm">

@@ -128,27 +128,72 @@
             </div>
         @endif
 
+        {{-- Formulario de Búsqueda y Filtros --}}
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+            <div class="card-body" style="padding: 1.5rem;">
+                <form method="GET" action="{{ route('eventos.index') }}" class="row g-3">
+                    <div class="col-md-6">
+                        <label for="search" class="form-label">
+                            <i class="bi bi-search me-1"></i>Buscar por nombre
+                        </label>
+                        <input type="text" class="form-control" id="search" name="search"
+                               placeholder="Ej: Hackathon 2024..."
+                               value="{{ request('search') }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="estado" class="form-label">
+                            <i class="bi bi-filter me-1"></i>Estado del Evento
+                        </label>
+                        <select class="form-select" id="estado" name="estado">
+                            <option value="">Todos los estados</option>
+                            <option value="proximo" {{ request('estado') == 'proximo' ? 'selected' : '' }}>Próximo</option>
+                            <option value="activo" {{ request('estado') == 'activo' ? 'selected' : '' }}>Activo</option>
+                            <option value="finalizado" {{ request('estado') == 'finalizado' ? 'selected' : '' }}>Finalizado</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary flex-grow-1">
+                            <i class="bi bi-search"></i> Buscar
+                        </button>
+                        @if(request('search') || request('estado'))
+                            <a href="{{ route('eventos.index') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i>
+                            </a>
+                        @endif
+                    </div>
+                </form>
+            </div>
+        </div>
+
         {{-- Grid de Eventos --}}
         <div class="row g-4">
             @forelse ($eventos as $evento)
                 <div class="col-lg-4 col-md-6">
                     <div class="card evento-card h-100 border-0 shadow-sm" style="border-radius: 16px; overflow: hidden;">
-                        {{-- Header con Gradient --}}
-                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; color: white;">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                @php
-                                    $badgeColor = match ($evento->estado) {
-                                        'activo' => '#e74c3c',
-                                        'proximo' => '#3498db',
-                                        default => '#95a5a6',
-                                    };
-                                @endphp
-                                <span class="badge" style="background-color: {{ $badgeColor }}; padding: 0.5rem 1rem; font-size: 0.85rem;">
-                                    {{ ucfirst($evento->estado) }}
-                                </span>
-                                <span style="font-size: 2rem;">🎯</span>
+                        {{-- Imagen Promocional --}}
+                        @if($evento->imagen)
+                            <img src="{{ asset('storage/' . $evento->imagen) }}"
+                                 alt="{{ $evento->nombre }}"
+                                 style="width: 100%; height: 200px; object-fit: cover;">
+                        @else
+                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 200px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-calendar-event" style="font-size: 5rem; color: rgba(255, 255, 255, 0.3);"></i>
                             </div>
-                            <h5 class="fw-bold mt-3 mb-0" style="font-size: 1.3rem;">{{ $evento->nombre }}</h5>
+                        @endif
+
+                        {{-- Header con badge --}}
+                        <div style="padding: 1.5rem 2rem; position: relative;">
+                            @php
+                                $badgeColor = match ($evento->estado) {
+                                    'activo' => '#e74c3c',
+                                    'proximo' => '#3498db',
+                                    default => '#95a5a6',
+                                };
+                            @endphp
+                            <span class="badge" style="background-color: {{ $badgeColor }}; padding: 0.5rem 1rem; font-size: 0.85rem; position: absolute; top: -10px; right: 2rem;">
+                                {{ ucfirst($evento->estado) }}
+                            </span>
+                            <h5 class="fw-bold mt-2 mb-0 evento-card-text" style="font-size: 1.3rem;">{{ $evento->nombre }}</h5>
                         </div>
 
                         {{-- Body --}}
@@ -201,6 +246,13 @@
                 </div>
             @endforelse
         </div>
+
+        {{-- Paginación --}}
+        @if($eventos->hasPages())
+            <div class="d-flex justify-content-center mt-5">
+                {{ $eventos->links() }}
+            </div>
+        @endif
     </div>
 </div>
 

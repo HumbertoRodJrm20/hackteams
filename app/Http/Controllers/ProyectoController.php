@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Categoria;
 use App\Models\Equipo;
 use App\Models\Evento;
 use App\Models\Proyecto;
@@ -35,8 +36,11 @@ class ProyectoController extends Controller
         // 3. Obtener eventos activos (o próximos) para seleccionar
         $eventos = Evento::whereIn('estado', ['activo', 'proximo'])->get();
 
+        // 4. Obtener todas las categorías disponibles
+        $categorias = Categoria::all();
+
         // El líder del equipo (o cualquier miembro) puede registrar el proyecto
-        return view('CrearProyecto', compact('equipo', 'eventos'));
+        return view('CrearProyecto', compact('equipo', 'eventos', 'categorias'));
     }
 
     /**
@@ -65,9 +69,12 @@ class ProyectoController extends Controller
     {
         $validatedData = $request->validate([
             'evento_id' => 'required|exists:eventos,id',
+            'categoria_id' => 'required|exists:categorias,id',
             'titulo' => 'required|string|max:255|unique:proyectos,titulo',
             'resumen' => 'required|string',
             'link_repositorio' => 'nullable|url|max:255',
+            'imagen' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:5120',
+            'documento' => 'nullable|mimes:pdf|max:10240',
         ]);
 
         $user = Auth::user();
@@ -87,12 +94,27 @@ class ProyectoController extends Controller
         }
 
         try {
+            // Manejar la subida de imagen si existe
+            $imagenPath = null;
+            if ($request->hasFile('imagen')) {
+                $imagenPath = $request->file('imagen')->store('proyectos/imagenes', 'public');
+            }
+
+            // Manejar la subida de documento si existe
+            $documentoPath = null;
+            if ($request->hasFile('documento')) {
+                $documentoPath = $request->file('documento')->store('proyectos/documentos', 'public');
+            }
+
             Proyecto::create([
                 'equipo_id' => $equipo->id,
                 'evento_id' => $validatedData['evento_id'],
+                'categoria_id' => $validatedData['categoria_id'],
                 'titulo' => $validatedData['titulo'],
                 'resumen' => $validatedData['resumen'],
                 'link_repositorio' => $validatedData['link_repositorio'],
+                'imagen_path' => $imagenPath,
+                'documento_path' => $documentoPath,
                 'estado' => 'pendiente', // Estado inicial
             ]);
 
