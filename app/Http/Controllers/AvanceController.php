@@ -20,6 +20,7 @@ class AvanceController extends Controller
             'proyecto_id' => 'required|exists:proyectos,id',
             'descripcion' => 'required|string',
             'fecha' => 'required|date',
+            'archivo' => 'nullable|mimes:pdf|max:10240',
         ]);
 
         $user = Auth::user();
@@ -33,11 +34,18 @@ class AvanceController extends Controller
             return redirect()->back()->with('error', 'No tienes permiso para registrar avances en este proyecto.');
         }
 
-        // 2. Crear el Avance
+        // 2. Manejar la subida de archivo si existe
+        $archivoPath = null;
+        if ($request->hasFile('archivo')) {
+            $archivoPath = $request->file('archivo')->store('avances/archivos', 'public');
+        }
+
+        // 3. Crear el Avance
         Avance::create([
             'proyecto_id' => $proyecto->id,
             'descripcion' => $validatedData['descripcion'],
             'fecha' => $validatedData['fecha'],
+            'archivo_path' => $archivoPath,
         ]);
 
         return redirect()->route('proyectos.show', $proyecto->id)->with('success', '¡Avance registrado con éxito!');

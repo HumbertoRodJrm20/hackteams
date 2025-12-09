@@ -112,8 +112,8 @@ class ProyectosSheet implements FromCollection, WithHeadings, WithMapping, WithS
         return [
             $proyecto->id,
             $proyecto->titulo,
-            $proyecto->equipo->nombre,
-            $proyecto->evento->nombre,
+            $proyecto->equipo ? $proyecto->equipo->nombre : 'Sin equipo',
+            $proyecto->evento ? $proyecto->evento->nombre : 'Sin evento',
             ucfirst($proyecto->estado),
             number_format($this->promediosCache[$proyecto->id] ?? 0, 2),
             $proyecto->link_repositorio ?? 'N/A',

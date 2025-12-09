@@ -17,13 +17,57 @@
     {{-- Mensajes de éxito --}}
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
+            <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
+    {{-- Formulario de Búsqueda y Filtros --}}
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ route('admin.usuarios.index') }}" class="row g-3">
+                <div class="col-md-6">
+                    <label for="search" class="form-label">
+                        <i class="bi bi-search me-1"></i>Buscar usuario
+                    </label>
+                    <input type="text" class="form-control" id="search" name="search"
+                           placeholder="Nombre o email..."
+                           value="{{ request('search') }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="rol_id" class="form-label">
+                        <i class="bi bi-person-badge me-1"></i>Rol
+                    </label>
+                    <select class="form-select" id="rol_id" name="rol_id">
+                        <option value="">Todos los roles</option>
+                        @foreach($roles as $rol)
+                            <option value="{{ $rol->id }}" {{ request('rol_id') == $rol->id ? 'selected' : '' }}>
+                                {{ $rol->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                    @if(request('search') || request('rol_id'))
+                        <a href="{{ route('admin.usuarios.index') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i>
+                        </a>
+                    @endif
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- Tabla de Usuarios --}}
     <div class="card shadow-sm">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">
+                <i class="bi bi-list-ul me-2"></i>Usuarios Registrados
+            </h5>
+        </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
@@ -39,7 +83,7 @@
                     @forelse($usuarios as $usuario)
                         <tr>
                             <td>
-                                <strong>{{ $usuario->nombre }}</strong>
+                                <strong>{{ $usuario->name }}</strong>
                             </td>
                             <td>{{ $usuario->email }}</td>
                             <td>
@@ -85,11 +129,35 @@
                 </tbody>
             </table>
         </div>
-    </div>
 
-    {{-- Paginación --}}
-    <div class="d-flex justify-content-center mt-4">
-        {{ $usuarios->links() }}
+        @if($usuarios->hasPages())
+            <div class="card-footer bg-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        @if ($usuarios->onFirstPage())
+                            <span class="btn btn-outline-secondary disabled">
+                                <i class="bi bi-chevron-left me-1"></i>Anterior
+                            </span>
+                        @else
+                            <a href="{{ $usuarios->previousPageUrl() }}" class="btn btn-outline-primary">
+                                <i class="bi bi-chevron-left me-1"></i>Anterior
+                            </a>
+                        @endif
+                    </div>
+                    <div>
+                        @if ($usuarios->hasMorePages())
+                            <a href="{{ $usuarios->nextPageUrl() }}" class="btn btn-outline-primary">
+                                Siguiente<i class="bi bi-chevron-right ms-1"></i>
+                            </a>
+                        @else
+                            <span class="btn btn-outline-secondary disabled">
+                                Siguiente<i class="bi bi-chevron-right ms-1"></i>
+                            </span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 </div>
 @endsection

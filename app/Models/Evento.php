@@ -11,7 +11,16 @@ class Evento extends Model
 
     protected $table = 'eventos';
 
-    protected $fillable = ['nombre', 'descripcion', 'fecha_inicio', 'fecha_fin', 'estado', 'max_equipos', 'imagen'];
+    protected $fillable = [
+        'nombre',
+        'descripcion',
+        'fecha_inicio',
+        'fecha_fin',
+        'estado',
+        'max_equipos',
+        'categoria_id',
+        'imagen',
+    ];
 
     protected function casts(): array
     {
@@ -19,6 +28,12 @@ class Evento extends Model
             'fecha_inicio' => 'datetime',
             'fecha_fin' => 'datetime',
         ];
+    }
+
+    // Relación con categoría (N:1)
+    public function categoria()
+    {
+        return $this->belongsTo(Categoria::class, 'categoria_id');
     }
 
     // Relación con participantes (N:M)

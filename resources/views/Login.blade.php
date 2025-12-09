@@ -7,8 +7,8 @@
 @section('content')
 <div class="card login-card">
     <div class="text-center mb-4">
-        <img src="URL_LOGO_HACKTEAMS" alt="HackTeams Logo" style="max-height: 60px;" class="mb-3">
-        <h2 class="fw-bold">Bienvenido a Innovatec</h2>
+        <img src="{{ asset('images/HackTeams_Logo.png') }}" alt="HackTeams Logo" style="max-height: 60px;" class="mb-3">
+        <h2 class="fw-bold">Bienvenido a HackTeams</h2>
         <p class="text-muted">Inicia sesión para continuar</p>
     </div>
 

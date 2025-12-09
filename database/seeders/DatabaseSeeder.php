@@ -12,19 +12,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Desactiva las claves foráneas temporalmente para permitir TRUNCATE
         Schema::disableForeignKeyConstraints();
 
-        // 1. Seeders de Catálogo (Sin dependencias complejas)
         $this->call(RolesSeeder::class);
         $this->call(CarrerasPerfilesSeeder::class);
-        $this->call(UsersSeeder::class); // Debe ir antes de Participantes
-
-        // 2. Seeder de Datos Transaccionales Iniciales
+        $this->call(CategoriasSeeder::class);
         $this->call(EventosSeeder::class);
-        $this->call(DatosPruebaSeeder::class); // Equipos, Proyectos, Calificaciones
+        $this->call(UsersSeeder::class);
+        $this->call(DatosPruebaSeeder::class);
 
-        // Reactiva las claves foráneas
         Schema::enableForeignKeyConstraints();
     }
 }

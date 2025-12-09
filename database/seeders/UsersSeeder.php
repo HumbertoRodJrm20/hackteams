@@ -11,54 +11,50 @@ class UsersSeeder extends Seeder
 {
     public function run(): void
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
         DB::table('users')->truncate();
         DB::table('user_rol')->truncate();
         DB::table('participantes')->truncate();
-
-        // Asegurarse que la tabla pivote de eventos también esté limpia.
         DB::table('evento_participante')->truncate();
-        // Asegurarse que la tabla constancias también esté limpia.
         DB::table('constancias')->truncate();
 
-        // Obtener el ID del Rol Admin (asumiendo que RolesSeeder ya se ejecutó)
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
         $rolAdminId = DB::table('roles')->where('nombre', 'Admin')->first()->id;
         $rolParticipanteId = DB::table('roles')->where('nombre', 'Participante')->first()->id;
         $rolJuezId = DB::table('roles')->where('nombre', 'Juez')->first()->id;
         $carreraId = DB::table('carreras')->where('nombre', 'Ingeniería en Sistemas Computacionales')->first()->id;
 
-        // --- PREPARACIÓN: OBTENER UN EVENTO DE PRUEBA ---
         $eventoDePruebaId = DB::table('eventos')->select('id')->first()->id ?? 1;
-
-        // --- 1. Crear Usuario Administrador ---
         $adminUserId = DB::table('users')->insertGetId([
             'name' => 'Admin Innovatec',
             'email' => 'admin@innovatec.com',
-            'password' => Hash::make('password'), // Contraseña: 'password'
+            'password' => Hash::make('password'),
             'email_verified_at' => now(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-        // Asignar Rol Admin
+
         DB::table('user_rol')->insert([
             'user_id' => $adminUserId,
             'rol_id' => $rolAdminId,
         ]);
 
-        // --- 2. Crear Usuario Participante de Prueba ---
         $participanteUserId = DB::table('users')->insertGetId([
             'name' => 'Juan Perez',
             'email' => 'juan.perez@test.com',
-            'password' => Hash::make('password'), // Contraseña: 'password'
+            'password' => Hash::make('password'),
             'email_verified_at' => now(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-        // Asignar Rol Participante
+
         DB::table('user_rol')->insert([
             'user_id' => $participanteUserId,
             'rol_id' => $rolParticipanteId,
         ]);
-        // Crear registro en la tabla 'participantes'
+
         DB::table('participantes')->insert([
             'user_id' => $participanteUserId,
             'carrera_id' => $carreraId,
@@ -67,45 +63,37 @@ class UsersSeeder extends Seeder
             'updated_at' => now(),
         ]);
 
-        // LÓGICA DE CONSTANCIAS
-        // A. Registrar la participación en la tabla pivote 'evento_participante'
         DB::table('evento_participante')->insert([
             'evento_id' => $eventoDePruebaId,
-            'participante_id' => $participanteUserId, // Usamos el ID del Usuario Participante
+            'participante_id' => $participanteUserId,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
-        // B. Crear el registro de la Constancia (simulando que el Admin ya la generó)
         DB::table('constancias')->insert([
             'participante_id' => $participanteUserId,
             'evento_id' => $eventoDePruebaId,
-
-            // NOMBRES DE COLUMNA PARA LA DB:
-            'tipo' => 'asistente',
+            'tipo' => 'participacion',
             'archivo_path' => 'constancias/constancia-ejemplo.pdf',
             'codigo_qr' => \Illuminate\Support\Str::uuid(),
-
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
-        // Crear registro de Juez
         $juezUserId = DB::table('users')->insertGetId([
             'name' => 'Angel Zarate',
             'email' => 'angelz@test.com',
-            'password' => Hash::make('password'), // Contraseña: 'password'
+            'password' => Hash::make('password'),
             'email_verified_at' => now(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-        // Asignar Rol Juez
+
         DB::table('user_rol')->insert([
             'user_id' => $juezUserId,
             'rol_id' => DB::table('roles')->where('nombre', 'Juez')->first()->id,
         ]);
 
-        // Registrar juez como participante para permitir constancias
         DB::table('participantes')->insert([
             'user_id' => $juezUserId,
             'carrera_id' => $carreraId,
@@ -124,29 +112,27 @@ class UsersSeeder extends Seeder
         DB::table('constancias')->insert([
             'participante_id' => $juezUserId,
             'evento_id' => $eventoDePruebaId,
-            'tipo' => 'asistente',
+            'tipo' => 'participacion',
             'archivo_path' => 'constancias/constancia-ejemplo.pdf',
             'codigo_qr' => Str::uuid(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
-        // --- 4. Crear Segundo Usuario Juez ---
         $juez2UserId = DB::table('users')->insertGetId([
             'name' => 'Maria Rodriguez',
             'email' => 'maria.rodriguez@test.com',
-            'password' => Hash::make('password'), // Contraseña: 'password'
+            'password' => Hash::make('password'),
             'email_verified_at' => now(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-        // Asignar Rol Juez
+
         DB::table('user_rol')->insert([
             'user_id' => $juez2UserId,
             'rol_id' => $rolJuezId,
         ]);
 
-        // Registrar segundo juez como participante para permitir constancias
         DB::table('participantes')->insert([
             'user_id' => $juez2UserId,
             'carrera_id' => $carreraId,
@@ -165,12 +151,75 @@ class UsersSeeder extends Seeder
         DB::table('constancias')->insert([
             'participante_id' => $juez2UserId,
             'evento_id' => $eventoDePruebaId,
-            'tipo' => 'asistente',
+            'tipo' => 'participacion',
             'archivo_path' => 'constancias/constancia-ejemplo.pdf',
             'codigo_qr' => Str::uuid(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
+        $participantesData = [
+            ['name' => 'Carlos Mendez', 'email' => 'carlos.mendez@test.com', 'matricula' => 'A00123456'],
+            ['name' => 'Sofia Rodriguez', 'email' => 'sofia.rodriguez@test.com', 'matricula' => 'A00123457'],
+            ['name' => 'Miguel Torres', 'email' => 'miguel.torres@test.com', 'matricula' => 'A00123458'],
+            ['name' => 'Laura Gomez', 'email' => 'laura.gomez@test.com', 'matricula' => 'A00123459'],
+            ['name' => 'Diego Martinez', 'email' => 'diego.martinez@test.com', 'matricula' => 'A00123460'],
+            ['name' => 'Ana Hernandez', 'email' => 'ana.hernandez@test.com', 'matricula' => 'A00123461'],
+            ['name' => 'Roberto Sanchez', 'email' => 'roberto.sanchez@test.com', 'matricula' => 'A00123462'],
+            ['name' => 'Patricia Lopez', 'email' => 'patricia.lopez@test.com', 'matricula' => 'A00123463'],
+            ['name' => 'Fernando Diaz', 'email' => 'fernando.diaz@test.com', 'matricula' => 'A00123464'],
+            ['name' => 'Gabriela Ramirez', 'email' => 'gabriela.ramirez@test.com', 'matricula' => 'A00123465'],
+            ['name' => 'Luis Morales', 'email' => 'luis.morales@test.com', 'matricula' => 'A00123466'],
+            ['name' => 'Carmen Flores', 'email' => 'carmen.flores@test.com', 'matricula' => 'A00123467'],
+            ['name' => 'Jorge Castro', 'email' => 'jorge.castro@test.com', 'matricula' => 'A00123468'],
+            ['name' => 'Monica Vargas', 'email' => 'monica.vargas@test.com', 'matricula' => 'A00123469'],
+            ['name' => 'Ricardo Ortiz', 'email' => 'ricardo.ortiz@test.com', 'matricula' => 'A00123470'],
+        ];
+
+        foreach ($participantesData as $participanteData) {
+            $userId = DB::table('users')->insertGetId([
+                'name' => $participanteData['name'],
+                'email' => $participanteData['email'],
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::table('user_rol')->insert([
+                'user_id' => $userId,
+                'rol_id' => $rolParticipanteId,
+            ]);
+
+            DB::table('participantes')->insert([
+                'user_id' => $userId,
+                'carrera_id' => $carreraId,
+                'matricula' => $participanteData['matricula'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $juecesData = [
+            ['name' => 'Dr. Roberto Silva', 'email' => 'roberto.silva@juez.com'],
+            ['name' => 'Dra. Ana Martinez', 'email' => 'ana.martinez@juez.com'],
+            ['name' => 'Ing. Pedro Gonzalez', 'email' => 'pedro.gonzalez@juez.com'],
+        ];
+
+        foreach ($juecesData as $juezData) {
+            $juezId = DB::table('users')->insertGetId([
+                'name' => $juezData['name'],
+                'email' => $juezData['email'],
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            DB::table('user_rol')->insert([
+                'user_id' => $juezId,
+                'rol_id' => $rolJuezId,
+            ]);
+        }
     }
 }
