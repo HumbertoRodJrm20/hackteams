@@ -9,10 +9,12 @@ class EventosSeeder extends Seeder
 {
     public function run(): void
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
         DB::table('eventos')->truncate();
         DB::table('criterio_evaluacion')->truncate();
 
-        // --- 1. Crear Eventos de Prueba ---
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         $eventoId1 = DB::table('eventos')->insertGetId([
             'nombre' => 'Hackatón IoT para el Campus',
             'descripcion' => 'Desarrollo de soluciones conectadas para optimizar los recursos universitarios.',

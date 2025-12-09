@@ -10,13 +10,15 @@ class DatosPruebaSeeder extends Seeder
 {
     public function run(): void
     {
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
         DB::table('equipos')->truncate();
         DB::table('equipo_participante')->truncate();
         DB::table('proyectos')->truncate();
         DB::table('avances')->truncate();
         DB::table('calificaciones')->truncate();
 
-        // Obtener IDs necesarios
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
         $participanteId = DB::table('participantes')->first()->user_id;
         $perfilLiderId = DB::table('perfiles')->where('nombre', 'Líder de Proyecto')->first()->id;
         $perfilProgId = DB::table('perfiles')->where('nombre', 'Programador Backend')->first()->id;
