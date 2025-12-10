@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\InvitacionEquipo;
+use App\Mail\InvitacionEquipoMail;
 use App\Models\Equipo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -244,23 +244,37 @@ class EquipoController extends Controller
             return back()->with('error', 'Este participante ya está en otro equipo del mismo evento. Solo puede estar en un equipo por evento.');
         }
 
-        // Agregar al equipo
-        $equipo->participantes()->attach($participante->user_id, [
-            'perfil_id' => null,
-            'es_lider' => false,
+        // Verificar que no tiene una invitación pendiente
+        $invitacionExistente = \App\Models\SolicitudEquipo::where('equipo_id', $equipo->id)
+            ->where('participante_id', $participante->user_id)
+            ->where('estado', 'pendiente')
+            ->where('tipo', 'invitacion')
+            ->first();
+
+        if ($invitacionExistente) {
+            return back()->with('error', 'Este participante ya tiene una invitación pendiente.');
+        }
+
+        // Crear la invitación
+        $invitacion = \App\Models\SolicitudEquipo::create([
+            'equipo_id' => $equipo->id,
+            'participante_id' => $participante->user_id,
+            'tipo' => 'invitacion',
+            'estado' => 'pendiente',
+            'mensaje' => null,
         ]);
 
         // Enviar correo de invitación
         try {
             Mail::to($userToInvite->email)->send(
-                new InvitacionEquipo($equipo, $userToInvite, Auth::user())
+                new InvitacionEquipoMail($invitacion)
             );
         } catch (\Exception $e) {
-            \Log::error('Error al enviar correo de invitación: ' . $e->getMessage());
+            \Log::error('Error al enviar correo de invitación: '.$e->getMessage());
             // Continuar aunque falle el correo
         }
 
-        return back()->with('success', 'Se ha invitado a '.$userToInvite->name.' al equipo. Se ha enviado un correo de notificación.');
+        return back()->with('success', 'Invitación enviada a '.$userToInvite->name.'. Debe aceptarla para unirse al equipo.');
     }
 
     /**

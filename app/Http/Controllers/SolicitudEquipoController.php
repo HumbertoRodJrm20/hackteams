@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Mail\InvitacionEquipoMail;
-use App\Mail\SolicitudEquipo as SolicitudEquipoMail;
 use App\Models\Equipo;
 use App\Models\Participante;
 use App\Models\SolicitudEquipo;
@@ -14,7 +13,7 @@ use Illuminate\Support\Facades\Mail;
 class SolicitudEquipoController extends Controller
 {
     /**
-     * Participante solicita unirse a un equipo público
+     * Participante se une directamente a un equipo público
      */
     public function solicitar(Request $request, Equipo $equipo)
     {
@@ -23,12 +22,12 @@ class SolicitudEquipoController extends Controller
 
         // Verificar que el participante existe
         if (! $participante) {
-            return redirect()->back()->with('error', 'Debes ser un participante para solicitar unirte a un equipo.');
+            return redirect()->back()->with('error', 'Debes ser un participante para unirte a un equipo.');
         }
 
         // Verificar que el equipo es público
         if (! $equipo->es_publico) {
-            return redirect()->back()->with('error', 'Este equipo no acepta solicitudes públicas.');
+            return redirect()->back()->with('error', 'Este equipo no acepta nuevos miembros.');
         }
 
         // Verificar que no es miembro del equipo
@@ -36,40 +35,24 @@ class SolicitudEquipoController extends Controller
             return redirect()->back()->with('error', 'Ya eres miembro de este equipo.');
         }
 
-        // Verificar que no tiene una solicitud pendiente
-        $solicitudExistente = SolicitudEquipo::where('equipo_id', $equipo->id)
-            ->where('participante_id', $participante->user_id)
-            ->where('estado', 'pendiente')
-            ->where('tipo', 'solicitud')
-            ->first();
-
-        if ($solicitudExistente) {
-            return redirect()->back()->with('error', 'Ya tienes una solicitud pendiente para este equipo.');
+        // Verificar si ya está en otro equipo del mismo evento
+        if ($equipo->evento_id && Equipo::participanteTieneEquipoEnEvento($participante->user_id, $equipo->evento_id)) {
+            return redirect()->back()->with('error', 'Ya estás en otro equipo de este evento. Solo puedes estar en un equipo por evento.');
         }
 
-        // Validar mensaje opcional
-        $request->validate([
-            'mensaje' => 'nullable|string|max:500',
-        ]);
-
-        // Crear la solicitud
-        $solicitud = SolicitudEquipo::create([
-            'equipo_id' => $equipo->id,
-            'participante_id' => $participante->user_id,
-            'tipo' => 'solicitud',
-            'estado' => 'pendiente',
-            'mensaje' => $request->mensaje,
-        ]);
-
-        // Obtener el líder del equipo
-        $lider = $equipo->participantes()->wherePivot('es_lider', true)->first();
-
-        // Enviar email al líder
-        if ($lider && $lider->user->email) {
-            Mail::to($lider->user->email)->send(new SolicitudEquipoMail($solicitud));
+        // Verificar si el evento ya inició
+        if ($equipo->evento && now()->gte($equipo->evento->fecha_inicio)) {
+            return redirect()->back()->with('error', 'No puedes unirte a un equipo después de que el evento haya iniciado.');
         }
 
-        return redirect()->back()->with('success', 'Solicitud enviada. El líder del equipo recibirá tu solicitud.');
+        // Agregar directamente al equipo
+        $equipo->participantes()->attach($participante->user_id, [
+            'perfil_id' => null,
+            'es_lider' => false,
+        ]);
+
+        return redirect()->route('equipos.show', $equipo->id)
+            ->with('success', '¡Te has unido al equipo "'.$equipo->nombre.'" exitosamente!');
     }
 
     /**

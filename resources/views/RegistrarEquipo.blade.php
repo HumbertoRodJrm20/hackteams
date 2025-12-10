@@ -91,7 +91,7 @@
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="es_publico" id="publico" value="1" {{ old('es_publico') == '1' ? 'checked' : '' }}>
                             <label class="form-check-label" for="publico">
-                                <strong>Público</strong> - Otros participantes pueden solicitar unirse
+                                <strong>Público</strong> - Otros participantes pueden unirse directamente
                             </label>
                         </div>
                         @error('es_publico')

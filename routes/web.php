@@ -80,7 +80,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/eventos/{evento}', [EventoController::class, 'show'])->name('eventos.show');
     Route::post('/eventos/{evento}/join', [EventoController::class, 'join'])->name('eventos.join');
     Route::post('/eventos/{evento}/leave', [EventoController::class, 'leave'])->name('eventos.leave');
-    Route::get('/proyectos/{id}', [ProyectoController::class, 'show'])->name('proyectos.show');
 });
 
 // ----------------------------------------------------
@@ -93,27 +92,25 @@ Route::middleware(['auth', 'participante'])->group(function () {
     Route::get('/equipos', [EquipoController::class, 'index'])->name('equipos.index');
     Route::get('/equipos/publicos', [EquipoController::class, 'equiposPublicos'])->name('equipos.publicos');
     Route::get('/equipos/registrar', [EquipoController::class, 'create'])->name('equipos.registrar');
+    Route::get('/equipos/mis-invitaciones', [\App\Http\Controllers\SolicitudEquipoController::class, 'misInvitaciones'])->name('equipos.invitaciones');
     Route::post('/equipos/store', [EquipoController::class, 'store'])->name('equipos.store');
     Route::get('/equipos/{equipo}', [EquipoController::class, 'show'])->name('equipos.show');
     Route::post('/equipos/{equipo}/invite', [EquipoController::class, 'invite'])->name('equipos.invite');
+    Route::post('/equipos/{equipo}/solicitar', [\App\Http\Controllers\SolicitudEquipoController::class, 'solicitar'])->name('equipos.solicitar');
+    Route::post('/equipos/{equipo}/invitar', [\App\Http\Controllers\SolicitudEquipoController::class, 'invitar'])->name('equipos.invitar');
     Route::delete('/equipos/{equipo}/members/{participante}', [EquipoController::class, 'removeMember'])->name('equipos.removeMember');
     Route::put('/equipos/{equipo}/members/{participante}/role', [EquipoController::class, 'updateMemberRole'])->name('equipos.updateMemberRole');
     Route::delete('/equipos/{equipo}/leave', [EquipoController::class, 'leave'])->name('equipos.leave');
     Route::delete('/equipos/{equipo}', [EquipoController::class, 'destroy'])->name('equipos.destroy');
 
-    // SOLICITUDES E INVITACIONES DE EQUIPOS
-    Route::post('/equipos/{equipo}/solicitar', [\App\Http\Controllers\SolicitudEquipoController::class, 'solicitar'])->name('equipos.solicitar');
-    Route::post('/equipos/{equipo}/invitar', [\App\Http\Controllers\SolicitudEquipoController::class, 'invitar'])->name('equipos.invitar');
-    Route::get('/equipos/mis-solicitudes', [\App\Http\Controllers\SolicitudEquipoController::class, 'misSolicitudes'])->name('equipos.solicitudes');
-    Route::get('/equipos/mis-invitaciones', [\App\Http\Controllers\SolicitudEquipoController::class, 'misInvitaciones'])->name('equipos.invitaciones');
-    Route::post('/solicitudes-equipo/{solicitud}/aceptar', [\App\Http\Controllers\SolicitudEquipoController::class, 'aceptarSolicitud'])->name('equipos.solicitudes.aceptar');
-    Route::post('/solicitudes-equipo/{solicitud}/rechazar', [\App\Http\Controllers\SolicitudEquipoController::class, 'rechazarSolicitud'])->name('equipos.solicitudes.rechazar');
+    // INVITACIONES DE EQUIPOS (solo del líder)
     Route::post('/invitaciones-equipo/{invitacion}/aceptar', [\App\Http\Controllers\SolicitudEquipoController::class, 'aceptarInvitacion'])->name('equipos.invitaciones.aceptar');
     Route::post('/invitaciones-equipo/{invitacion}/rechazar', [\App\Http\Controllers\SolicitudEquipoController::class, 'rechazarInvitacion'])->name('equipos.invitaciones.rechazar');
 
     // PROYECTOS (Registrar - solo participantes)
     Route::get('/proyectos/registrar', [ProyectoController::class, 'create'])->name('proyectos.registrar');
     Route::post('/proyectos/store', [ProyectoController::class, 'store'])->name('proyectos.store');
+    Route::get('/proyectos/{id}', [ProyectoController::class, 'show'])->name('proyectos.show');
 
     // PROGRESO
     Route::get('/progreso', [ProgresoController::class, 'index'])->name('progreso.index');
