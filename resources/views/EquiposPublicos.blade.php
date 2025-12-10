@@ -102,46 +102,15 @@
                                                 <i class="bi bi-lock-fill me-1"></i>No disponible
                                             </button>
                                         @else
-                                            <button type="button" class="btn btn-success btn-sm w-100"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#modalSolicitud{{ $equipo['id'] }}">
-                                                <i class="bi bi-envelope-plus me-1"></i>Solicitar Unirse
-                                            </button>
+                                            <form method="POST" action="{{ route('equipos.solicitar', $equipo['id']) }}" class="w-100">
+                                                @csrf
+                                                <button type="submit" class="btn btn-success btn-sm w-100"
+                                                        onclick="return confirm('¿Estás seguro de que quieres unirte a {{ $equipo['nombre'] }}?')">
+                                                    <i class="bi bi-box-arrow-in-right me-1"></i>Unirse al Equipo
+                                                </button>
+                                            </form>
                                         @endif
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {{-- Modal para solicitar unirse --}}
-                        <div class="modal fade" id="modalSolicitud{{ $equipo['id'] }}" tabindex="-1" aria-labelledby="modalSolicitudLabel{{ $equipo['id'] }}" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <form method="POST" action="{{ route('equipos.solicitar', $equipo['id']) }}">
-                                        @csrf
-                                        <div class="modal-header bg-success text-white">
-                                            <h5 class="modal-title" id="modalSolicitudLabel{{ $equipo['id'] }}">
-                                                <i class="bi bi-envelope-plus me-2"></i>Solicitar Unirse a {{ $equipo['nombre'] }}
-                                            </h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="mb-3">
-                                                <label for="mensaje{{ $equipo['id'] }}" class="form-label fw-bold">
-                                                    Mensaje para el líder (opcional)
-                                                </label>
-                                                <textarea class="form-control" id="mensaje{{ $equipo['id'] }}" name="mensaje" rows="4"
-                                                          placeholder="Cuéntale al líder por qué quieres unirte, tus habilidades, experiencia, etc."></textarea>
-                                                <small class="form-text text-muted">Este mensaje ayudará al líder a conocerte mejor.</small>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                            <button type="submit" class="btn btn-success">
-                                                <i class="bi bi-send me-1"></i>Enviar Solicitud
-                                            </button>
-                                        </div>
-                                    </form>
                                 </div>
                             </div>
                         </div>

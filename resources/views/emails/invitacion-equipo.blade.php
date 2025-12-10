@@ -77,34 +77,41 @@
         </div>
 
         <div class="content">
-            <h2>Hola, {{ $invitado->name }}!</h2>
+            <h2>Hola!</h2>
 
             <p>
-                <strong>{{ $lider->name }}</strong> te ha invitado a unirte a su equipo en HackTeams.
+                <strong>{{ $nombreLider }}</strong> te ha invitado a unirte a su equipo en HackTeams.
             </p>
 
             <div class="team-info">
-                <p><strong>Equipo:</strong> {{ $equipo->nombre }}</p>
-                @if($equipo->evento)
-                    <p><strong>Evento:</strong> {{ $equipo->evento->nombre }}</p>
-                    <p><strong>Fecha del evento:</strong> {{ \Carbon\Carbon::parse($equipo->evento->fecha_inicio)->isoFormat('D [de] MMMM [de] YYYY') }}</p>
+                <p><strong>Equipo:</strong> {{ $nombreEquipo }}</p>
+                @if($invitacion->equipo->evento)
+                    <p><strong>Evento:</strong> {{ $invitacion->equipo->evento->nombre }}</p>
+                    <p><strong>Fecha del evento:</strong> {{ \Carbon\Carbon::parse($invitacion->equipo->evento->fecha_inicio)->isoFormat('D [de] MMMM [de] YYYY') }}</p>
                 @endif
-                <p><strong>Tipo:</strong> {{ $equipo->es_publico ? 'Público' : 'Privado' }}</p>
-                <p><strong>Miembros actuales:</strong> {{ $equipo->contarMiembros() }}</p>
+                <p><strong>Tipo:</strong> {{ $invitacion->equipo->es_publico ? 'Público' : 'Privado' }}</p>
+                <p><strong>Miembros actuales:</strong> {{ $invitacion->equipo->participantes->count() }}</p>
             </div>
 
+            @if($invitacion->mensaje)
+                <div class="team-info">
+                    <strong>Mensaje del líder:</strong>
+                    <p>{{ $invitacion->mensaje }}</p>
+                </div>
+            @endif
+
             <p>
-                Ya has sido agregado al equipo. Puedes iniciar sesión en la plataforma para ver los detalles del equipo y comenzar a colaborar con tus compañeros.
+                Puedes aceptar o rechazar esta invitación desde tu panel de invitaciones.
             </p>
 
             <center>
-                <a href="{{ route('equipos.show', $equipo->id) }}" class="button">
-                    Ver Detalles del Equipo
+                <a href="{{ route('equipos.invitaciones') }}" class="button">
+                    Ver Mis Invitaciones
                 </a>
             </center>
 
             <p style="margin-top: 30px; font-size: 14px; color: #666;">
-                Si tienes alguna pregunta, no dudes en contactar con el líder del equipo o con el administrador de la plataforma.
+                Si no esperabas esta invitación, puedes ignorarla o rechazarla desde tu panel.
             </p>
         </div>
 
