@@ -187,7 +187,7 @@ class SolicitudEquipoController extends Controller
 
         // Agregar al participante al equipo
         $solicitud->equipo->participantes()->attach($solicitud->participante_id, [
-            'rol' => 'Miembro',
+            'perfil_id' => null,
             'es_lider' => false,
         ]);
 
@@ -244,7 +244,7 @@ class SolicitudEquipoController extends Controller
 
         // Agregar al participante al equipo
         $invitacion->equipo->participantes()->attach($invitacion->participante_id, [
-            'rol' => 'Miembro',
+            'perfil_id' => null,
             'es_lider' => false,
         ]);
 

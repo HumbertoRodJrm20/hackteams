@@ -329,10 +329,14 @@
     <nav class="navbar navbar-expand-lg navbar-dark navbar-top fixed-top">
         <div class="container-fluid container">
 
-            <a class="navbar-brand d-flex align-items-center" href="{{ route('eventos.index') }}"> 
+            <a class="navbar-brand d-flex align-items-center" href="{{ route('eventos.index') }}">
                 <img src="{{ asset('images/HackTeams_Logo.png') }}" alt="HackTeams" style="max-height: 30px;" class="me-2">
                 HackTeams
             </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
@@ -344,13 +348,33 @@
 
                     {{-- Equipos: visible solo para Participantes --}}
                     @if(Auth::user() && Auth::user()->hasRole('Participante'))
-                        <li class="nav-item">
-                            <a class="nav-link @yield('nav_equipos')" href="{{ route('equipos.index') }}">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle @yield('nav_equipos')" href="#" id="equiposDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-people-fill me-1"></i>Equipos
                                 @if(($solicitudesEquipoPendientes ?? 0) > 0 || ($invitacionesPendientes ?? 0) > 0)
                                     <span class="badge bg-danger ms-1">{{ ($solicitudesEquipoPendientes ?? 0) + ($invitacionesPendientes ?? 0) }}</span>
                                 @endif
                             </a>
+                            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="equiposDropdown">
+                                <li><a class="dropdown-item" href="{{ route('equipos.index') }}"><i class="bi bi-people-fill me-2"></i>Mis Equipos</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('equipos.invitaciones') }}">
+                                        <i class="bi bi-envelope-fill me-2"></i>Invitaciones
+                                        @if(($invitacionesPendientes ?? 0) > 0)
+                                            <span class="badge bg-danger ms-1">{{ $invitacionesPendientes }}</span>
+                                        @endif
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('equipos.solicitudes') }}">
+                                        <i class="bi bi-inbox-fill me-2"></i>Solicitudes
+                                        @if(($solicitudesEquipoPendientes ?? 0) > 0)
+                                            <span class="badge bg-danger ms-1">{{ $solicitudesEquipoPendientes }}</span>
+                                        @endif
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
                     @endif
 
