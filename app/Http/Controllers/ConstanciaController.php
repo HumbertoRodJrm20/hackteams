@@ -109,7 +109,16 @@ class ConstanciaController extends Controller
     {
         $juez = auth()->user();
 
-        $constancias = \App\Models\Constancia::where('participante_id', $juez->id)
+        // Buscar constancias del juez usando el campo juez_user_id
+        $constancias = \App\Models\Constancia::where('juez_user_id', $juez->id)
+            ->with('evento')
+            ->get();
+
+        // Generar constancias automáticamente para eventos finalizados
+        $this->generarConstanciasJuezAutomaticas($juez);
+
+        // Recargar constancias después de generar las nuevas
+        $constancias = \App\Models\Constancia::where('juez_user_id', $juez->id)
             ->with('evento')
             ->get();
 
@@ -119,7 +128,7 @@ class ConstanciaController extends Controller
     public function generarPDFJuez($id)
     {
         $constancia = \App\Models\Constancia::where('id', $id)
-            ->where('participante_id', auth()->id())
+            ->where('juez_user_id', auth()->id())
             ->firstOrFail();
 
         $juez = auth()->user();
@@ -132,5 +141,38 @@ class ConstanciaController extends Controller
         );
 
         return $pdf->download("constancia-juez-$juez->id.pdf");
+    }
+
+    /**
+     * Genera automáticamente constancias para jueces que evaluaron proyectos en eventos finalizados
+     */
+    private function generarConstanciasJuezAutomaticas($juez)
+    {
+        // Obtener todos los eventos en los que el juez evaluó proyectos
+        $eventosDelJuez = Evento::whereHas('proyectos.jueces', function ($query) use ($juez) {
+            $query->where('juez_user_id', $juez->id);
+        })
+            ->where('fecha_fin', '<', now()) // Solo eventos finalizados
+            ->get();
+
+        foreach ($eventosDelJuez as $evento) {
+            // Verificar si ya existe una constancia para este juez en este evento
+            $constanciaExistente = Constancia::where('juez_user_id', $juez->id)
+                ->where('evento_id', $evento->id)
+                ->first();
+
+            if (! $constanciaExistente) {
+                // Generar la constancia automáticamente
+                Constancia::create([
+                    'juez_user_id' => $juez->id,
+                    'participante_id' => null,
+                    'evento_id' => $evento->id,
+                    'tipo' => 'participacion', // Tipo de constancia para jueces
+                    'lugar' => null,
+                    'archivo_path' => null,
+                    'codigo_qr' => null,
+                ]);
+            }
+        }
     }
 }

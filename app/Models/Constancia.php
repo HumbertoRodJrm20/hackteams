@@ -10,6 +10,7 @@ class Constancia extends Model
 
     protected $fillable = [
         'participante_id',
+        'juez_user_id',
         'evento_id',
         'tipo',
         'lugar',
@@ -43,5 +44,13 @@ class Constancia extends Model
     public function evento()
     {
         return $this->belongsTo(Evento::class, 'evento_id');
+    }
+
+    /**
+     * Relación: Una constancia puede pertenecer a un Juez (User).
+     */
+    public function juez()
+    {
+        return $this->belongsTo(User::class, 'juez_user_id');
     }
 }
